@@ -1,7 +1,8 @@
 package main
 
 import (
-	"alc/handler/public"
+	"alc/handler/page"
+	"alc/handler/store"
 	"alc/handler/util"
 	"log"
 	"net/http"
@@ -18,7 +19,9 @@ func main() {
 	}
 
 	// Initialize handlers
-	ph := public.Handler{}
+	// TODO: Create Initializers
+	ph := page.Handler{}
+	sh := store.Handler{}
 
 	// Middleware
 	e.Use(middleware.Logger())
@@ -33,6 +36,13 @@ func main() {
 
 	// Page routes
 	e.GET("/", ph.HandleIndexShow)
+	e.GET("/nosotros", ph.HandleNosotrosShow)
+	e.GET("/descargas", ph.HandleDescargasShow)
+	e.GET("/galeria", ph.HandleGaleriaShow)
+	e.GET("/contacto", ph.HandleContactoShow)
+
+	// Store routes
+	e.GET("/servicio", sh.HandleIndexShow)
 
 	// Error handler
 	e.HTTPErrorHandler = util.HTTPErrorHandler

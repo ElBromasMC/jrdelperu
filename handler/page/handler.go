@@ -1,3 +1,3 @@
-package public
+package page
 
 type Handler struct{}
