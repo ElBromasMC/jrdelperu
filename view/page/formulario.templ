@@ -1,29 +1,73 @@
 package page 
 
 templ Form() {
-	<form action="">
-		<div class="grid p-6 border border-black rounded-3xl">
-			<div>
-				<div>Envianos un mensaje</div>
-				<div>
-					<input type="text" placeholder="Nombre Completo o Nombre de Empresa" name="" id=""/>
+	<form
+		class="flex flex-col gap-6 p-4 border border-black rounded-3xl lg:flex-row"
+		autocomplete="off"
+	>
+		<div class="grid gap-6 lg:grid-cols-4 lg:grid-rows-2">
+			<div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:col-span-3 lg:order-1">
+				<div class="font-semibold text-lg lg:text-xl">Envíanos un mensaje</div>
+				<div class="flex-1">
+					<input
+						class="w-full px-4 py-2 border border-black rounded-3xl placeholder:text-center"
+						type="text"
+						placeholder="Nombre Completo o de Empresa"
+						name=""
+						id=""
+					/>
 				</div>
 			</div>
-			<div>
-				<input type="text" placeholder="DNI / RUC / C. EXTRANJERÍA" name="" id=""/>
+			<div class="self-start flex gap-3 lg:order-3">
+				<select class="w-20 border border-gray-400 text-center rounded-3xl" name="DocumentType" required="">
+					<option value="DNI">DNI</option>
+					<option value="RUC">RUC</option>
+					<option value="CARNET">C. EXTRANJERÍA</option>
+					<option value="OTROS">OTROS</option>
+				</select>
+				<input
+					class="w-full px-4 py-2 border border-black rounded-3xl placeholder:text-center"
+					type="text"
+					placeholder="Nro. Documento"
+					name=""
+					id=""
+				/>
 			</div>
-			<div>
-				<input type="text" placeholder="Celular" name="" id=""/>
+			<div class="lg:order-4">
+				<input
+					class="w-full px-4 py-2 border border-black rounded-3xl placeholder:text-center"
+					type="text"
+					placeholder="Su Celular"
+					name=""
+					id=""
+				/>
 			</div>
-			<div>
-				<input type="text" placeholder="Su correo" name="" id=""/>
+			<div class="lg:order-5">
+				<input
+					class="w-full px-4 py-2 border border-black rounded-3xl placeholder:text-center"
+					type="text"
+					placeholder="Su correo"
+					name=""
+					id=""
+				/>
 			</div>
-			<div>
-				<textarea placeholder="Tu consulta" name="" id=""></textarea>
+			<div class="row-span-2 lg:order-2">
+				<textarea
+					class="w-full px-4 py-2 border border-black rounded-3xl resize-none placeholder:text-center"
+					rows="5"
+					placeholder="Tu consulta"
+					name=""
+					id=""
+				></textarea>
 			</div>
-			<div>
-				<button type="submit">Enviar</button>
-			</div>
+		</div>
+		<div class="self-center lg:order-6">
+			<button
+				class="px-4 py-2 font-semibold bg-[#50e244]"
+				type="submit"
+			>
+				Enviar
+			</button>
 		</div>
 	</form>
 }
