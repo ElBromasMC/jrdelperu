@@ -10,7 +10,7 @@ templ Galeria() {
 				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
 					<div class="grid grid-cols-[repeat(auto-fit,minmax(18rem,1fr))] gap-16 justify-items-center">
 						for n, i := range []string{"vidrios.webp", "aluminios.webp", "pvc.webp", "placeholder.webp", "placeholder.webp", "placeholder.webp"} {
-							<div class="border border-black max-w-80" onclick="handleImageFullscreen(event)">
+							<div class="border border-black w-full max-w-80" onclick="handleImageFullscreen(event)">
 								<div class="flex justify-center items-center img-div bg-black">
 									<div class="w-full max-w-full max-h-full aspect-[5/4] lg:w-auto lg:h-full">
 										<img class="object-cover w-full h-full" src={ "/static/img/" + i } alt="placeholder"/>
