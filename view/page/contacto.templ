@@ -4,6 +4,55 @@ import "alc/view/layout"
 
 templ Contacto() {
 	@layout.BasePage("Contacto") {
-		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]"></main>
+		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
+			<section>
+				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+					<div class="grid gap-12 lg:grid-cols-3 items-center">
+						<div class="space-y-6">
+							<h2 class="font-semibold text-2xl uppercase">Contáctenos</h2>
+							<div>
+								<p>CORPORACIÓN JR. DEL PERU S.A.C</p>
+								<p>Lima - Perú</p>
+								<p>Carabayllo</p>
+							</div>
+							<div>
+								<p>+51 9455111283</p>
+								<p>info@jrdelperu.com</p>
+							</div>
+							<div>
+								<p>Horario de atención</p>
+								<p>Lunes a Sábado entre 8:00 am. - 19:00 pm.</p>
+							</div>
+						</div>
+						<!-- Map -->
+						<div class="flex justify-center items-center">
+							<iframe
+								class="w-full aspect-square max-w-96"
+								src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d975.1277676481702!2d-76.9556838!3d-12.1455691!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105b88c590ad1d9%3A0x3178b0b72e2b9241!2sCa.%20las%20Magnolias%2C%20Villa%20Mar%C3%ADa%20del%20Triunfo%2015811!5e0!3m2!1ses-419!2spe!4v1725853415306!5m2!1ses-419!2spe"
+								style="border:0;"
+								allowfullscreen=""
+								loading="lazy"
+								referrerpolicy="no-referrer-when-downgrade"
+							></iframe>
+						</div>
+						<!-- Social media -->
+						<div>
+							<div class="grid grid-cols-2 justify-items-center gap-y-6 text-center font-semibold text-lg">
+								<a class="block w-28 p-3 border border-black hover:text-black" href="#">Facebook</a>
+								<a class="block w-28 p-3 border border-black hover:text-black" href="#">Instagram</a>
+								<a class="block w-28 p-3 border border-black hover:text-black" href="#">Youtube</a>
+								<a class="block w-28 p-3 border border-black hover:text-black" href="#">Tik Tok</a>
+								<a class="block w-28 p-3 border border-black hover:text-black" href="#">Linkedin</a>
+								<a class="block w-28 p-3 border border-black hover:text-black" href="#">X</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<!-- Formulario -->
+			<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+				@Form()
+			</div>
+		</main>
 	}
 }
