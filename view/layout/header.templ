@@ -82,14 +82,71 @@ templ Header() {
 				</div>
 			</div>
 			<div class="relative">
-				<div class="flex justify-center items-center absolute inset-y-0 right-0 px-3 h-full aspect-square rounded-l-full bg-white">
+				<div
+                    id="logo-container"
+                    class="flex justify-center items-center absolute inset-y-0 right-0 px-3 h-full aspect-square rounded-l-full bg-white overflow-hidden"
+                    data-static-src="/static/img/logo.webp"
+                    data-animated-src="/static/img/logo.gif"
+                >
 					<img
 						class="w-full aspect-square"
 						src="/static/img/logo.webp"
 						alt="Logo"
 					/>
+					<img
+						class="hidden w-full object-contain"
+						src="/static/img/logo.gif"
+						alt="Logo animado"
+					/>
 				</div>
 			</div>
+            <script>
+                const logoContainer = document.querySelector("#logo-container");
+                const animationTime = 10000;
+
+                const createStaticLogo = () => {
+                    const img = new Image();
+                    img.src = logoContainer.getAttribute("data-static-src");
+                    img.classList.add("w-full");
+                    img.classList.add("aspect-square");
+                    return img;
+                };
+
+                const createAnimatedLogo = () => {
+                    const img = new Image();
+                    img.src = logoContainer.getAttribute("data-animated-src");
+                    img.classList.add("w-full");
+                    img.classList.add("object-contain");
+                    return img;
+                };
+
+                const staticImg = createStaticLogo();
+                const animatedImg = createAnimatedLogo();
+
+                animatedImg.addEventListener("load", () => {
+                    logoContainer.replaceChildren(animatedImg);
+                    setTimeout(() => {
+                        logoContainer.replaceChildren(staticImg);
+                        animatedImg.remove();
+                    }, animationTime);
+
+                    let lock = false;
+                    const reanimate = () => {
+                        if (!lock) {
+                            lock = true;
+                            const animatedImg = createAnimatedLogo();
+                            logoContainer.replaceChildren(animatedImg);
+                            setTimeout(() => {
+                                lock = false;
+                                logoContainer.replaceChildren(staticImg);
+                                animatedImg.remove();
+                            }, animationTime);
+                        }
+                    };
+                    logoContainer.addEventListener("mouseenter", reanimate);
+                    logoContainer.addEventListener("click", reanimate);
+                });
+            </script>
 		</div>
 	</header>
 }
