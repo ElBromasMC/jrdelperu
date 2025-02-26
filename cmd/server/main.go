@@ -43,6 +43,9 @@ func main() {
 
 	// Store routes
 	e.GET("/servicio", sh.HandleIndexShow)
+	e.GET("/servicio/vidrios", sh.HandleVidrioIndexShow)
+	e.GET("/servicio/aluminios", sh.HandleAluminioIndexShow)
+	e.GET("/servicio/upvc", sh.HandleUpvcIndexShow)
 
 	// Error handler
 	e.HTTPErrorHandler = util.HTTPErrorHandler

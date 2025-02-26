@@ -83,11 +83,11 @@ templ Header() {
 			</div>
 			<div class="relative">
 				<div
-                    id="logo-container"
-                    class="flex justify-center items-center absolute inset-y-0 right-0 px-3 h-full aspect-square rounded-l-full bg-white overflow-hidden"
-                    data-static-src="/static/img/logo.webp"
-                    data-animated-src="/static/img/logo.gif"
-                >
+					id="logo-container"
+					class="flex justify-center items-center absolute inset-y-0 right-0 px-3 h-full aspect-square rounded-l-full bg-white overflow-hidden"
+					data-static-src="/static/img/logo.webp"
+					data-animated-src="/static/img/logo.gif"
+				>
 					<img
 						class="w-full aspect-square"
 						src="/static/img/logo.webp"
@@ -100,7 +100,7 @@ templ Header() {
 					/>
 				</div>
 			</div>
-            <script>
+			<script>
                 const logoContainer = document.querySelector("#logo-container");
                 const animationTime = 10000;
 
@@ -123,23 +123,25 @@ templ Header() {
                 const staticImg = createStaticLogo();
                 const animatedImg = createAnimatedLogo();
 
+                let lock;
                 animatedImg.addEventListener("load", () => {
+                    lock = true;
                     logoContainer.replaceChildren(animatedImg);
                     setTimeout(() => {
                         logoContainer.replaceChildren(staticImg);
                         animatedImg.remove();
+                        lock = false;
                     }, animationTime);
 
-                    let lock = false;
                     const reanimate = () => {
                         if (!lock) {
                             lock = true;
                             const animatedImg = createAnimatedLogo();
                             logoContainer.replaceChildren(animatedImg);
                             setTimeout(() => {
-                                lock = false;
                                 logoContainer.replaceChildren(staticImg);
                                 animatedImg.remove();
+                                lock = false;
                             }, animationTime);
                         }
                     };
