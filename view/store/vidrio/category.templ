@@ -1,0 +1,111 @@
+package vidrio
+
+import (
+	"alc/config"
+	"alc/model/store"
+	"alc/view/layout"
+	"alc/view/page"
+	"path"
+)
+
+templ Category(cat store.Category, is []store.Item, fs []store.CategoryFeature) {
+	@layout.BasePage(cat.Name) {
+		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
+			<section>
+				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+					<div class="space-y-16">
+						<h2 class="text-center font-bold text-4xl">
+							<a
+								class="text-apple hover:text-livid"
+								href="/servicio/vidrios"
+							>
+								Vidrios
+							</a>
+							<span>/</span>
+							<span>
+								{ cat.Name }
+							</span>
+						</h2>
+						<div class="flex flex-col items-center gap-9 lg:flex-row lg:items-start">
+							<div class="space-y-3">
+								<div class="border border-black w-full aspect-square max-w-80">
+									<div class="h-4/5">
+										<img
+											class="object-cover w-full h-full"
+											alt={ cat.Slug }
+											if cat.Img.Id != 0 {
+												src={ path.Join(config.IMAGES_PATH, cat.Img.Filename) }
+											} else {
+												src="/static/img/placeholder.webp"
+											}
+										/>
+									</div>
+									<div class="flex justify-center items-center h-1/5 border-t border-black">
+										<div class="text-center font-semibold text-2xl">
+											{ cat.Name }
+										</div>
+									</div>
+								</div>
+								<a class="block w-full py-2 bg-cloud text-center hover:bg-livid hover:text-white">
+									Catálogo de Vidrios
+									<br/>
+									Descargar PDF
+								</a>
+								<a class="block w-full py-2 border border-black font-bold bg-white text-center">
+									Certificados
+									<br/>
+									de calidad
+								</a>
+							</div>
+							<div class="flex-1 space-y-6">
+								{ cat.LongDescription }
+							</div>
+						</div>
+						<div class="flex justify-center">
+							<table class="table-auto border-collapse border border-black max-w-2xl">
+								<caption class="border border-black font-bold uppercase bg-livid text-white">{ cat.Name }</caption>
+								<thead>
+									<tr>
+										<th class="border border-black bg-cloud">Grosor (mm)</th>
+										<th class="border border-black bg-cloud">Aplicaciones Comunes</th>
+									</tr>
+								</thead>
+								<tbody>
+									for _, i := range is {
+										<tr>
+											<td class="border border-black font-semibold bg-cloud">{ i.Name }</td>
+											<td class="border border-black">{ i.Description }</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+						<div class="flex justify-center">
+							<table class="table-auto border-collapse border border-black max-w-2xl">
+								<caption class="border border-black font-bold uppercase bg-livid text-white">{ cat.Name }</caption>
+								<thead>
+									<tr>
+										<th class="border border-black bg-cloud">Características</th>
+										<th class="border border-black bg-cloud">Detalles</th>
+									</tr>
+								</thead>
+								<tbody>
+									for _, f := range fs {
+										<tr>
+											<td class="border border-black">{ f.Name }</td>
+											<td class="border border-black">{ f.Description }</td>
+										</tr>
+									}
+								</tbody>
+							</table>
+						</div>
+					</div>
+				</div>
+			</section>
+			<!-- Formulario -->
+			<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+				@page.Form()
+			</div>
+		</main>
+	}
+}

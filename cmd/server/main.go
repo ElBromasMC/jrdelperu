@@ -43,9 +43,17 @@ func main() {
 
 	// Store routes
 	e.GET("/servicio", sh.HandleIndexShow)
+
 	e.GET("/servicio/vidrios", sh.HandleVidrioIndexShow)
+	e.GET("/servicio/vidrios/:catSlug", sh.HandleVidrioCategoryShow)
+
 	e.GET("/servicio/aluminios", sh.HandleAluminioIndexShow)
-	e.GET("/servicio/upvc", sh.HandleUpvcIndexShow)
+	e.GET("/servicio/aluminios/:catSlug", sh.HandleAluminioCategoryShow)
+	e.GET("/servicio/aluminios/:catSlug/:itemSlug", sh.HandleAluminioItemShow)
+
+	e.GET("/servicio/upvc", sh.HandleUPVCIndexShow)
+	e.GET("/servicio/upvc/:catSlug", sh.HandleUPVCCategoryShow)
+	e.GET("/servicio/upvc/:catSlug/:itemSlug", sh.HandleUPVCItemShow)
 
 	// Error handler
 	e.HTTPErrorHandler = util.HTTPErrorHandler

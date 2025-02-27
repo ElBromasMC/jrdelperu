@@ -1,11 +1,68 @@
 package aluminio
 
-import "alc/view/layout"
+import (
+	"alc/config"
+	"alc/model/store"
+	"alc/view/layout"
+	"alc/view/page"
+	"fmt"
+	"path"
+)
 
-templ Index() {
+templ Index(cats []store.Category) {
 	@layout.BasePage("Aluminios") {
 		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
-			Hello from aluminios!
+			<section>
+				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+					<div class="space-y-16">
+						<h2 class="text-center font-bold text-4xl">
+							Aluminios
+						</h2>
+						<div class="flex flex-row justify-center flex-wrap gap-x-24 gap-y-16 mt-12">
+							for _, cat := range cats {
+								<a
+									class="border border-black w-full max-w-96"
+									href={ templ.SafeURL(fmt.Sprintf("/servicio/aluminios/%s", cat.Slug)) }
+								>
+									<div class="w-full aspect-[5/4]">
+										<img
+											class="object-cover w-full h-full"
+											if cat.Img.Id != 0 {
+												src={ path.Join(config.IMAGES_PATH, cat.Img.Filename) }
+											} else {
+												src="/static/img/placeholder.webp"
+											}
+										/>
+									</div>
+									<div class="flex justify-center items-center py-3 border-t border-black">
+										<div class="text-center font-semibold text-2xl">
+											{ cat.Name }
+										</div>
+									</div>
+								</a>
+							}
+						</div>
+						<div class="flex flex-col items-center">
+							<div class="max-w-72 w-full space-y-3">
+								<a class="w-full block py-2 bg-cloud text-center hover:bg-livid hover:text-white">
+									Catálogo de Aluminios
+									<br/>
+									Descargar PDF
+								</a>
+								<a class="w-full block py-2 border border-black font-bold bg-white text-center">
+									Certificados
+									<br/>
+									de calidad
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<!-- Formulario -->
+			<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+				@page.Form()
+			</div>
 		</main>
 	}
 }

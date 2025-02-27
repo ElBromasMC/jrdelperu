@@ -1,9 +1,12 @@
 package config
 
-import "alc/model/store"
+import (
+	"alc/model/image"
+	"alc/model/store"
+)
 
 var (
-	vidrioCategories []store.Category = []store.Category{
+	VidrioCategories []store.Category = []store.Category{
 		{
 			Id:   1,
 			Type: store.VidrioType,
@@ -35,49 +38,49 @@ como arenado, esmerilado, serigrafiado y mateado al ácido.`,
 		},
 	}
 
-	monoliticoFeatures []store.CategoryFeature = []store.CategoryFeature{
+	MonoliticoFeatures []store.CategoryFeature = []store.CategoryFeature{
 		{
 			Id:          1,
-			Category:    vidrioCategories[0],
+			Category:    VidrioCategories[0],
 			Name:        "Tipo de Vidrio",
 			Description: "Vidrio monolítico (vidrio float o recocido)",
 		},
 		{
 			Id:          1,
-			Category:    vidrioCategories[0],
+			Category:    VidrioCategories[0],
 			Name:        "Resistencia Mecánica",
 			Description: "Resistencia a flexión: 20-30 MPa",
 		},
 		{
 			Id:          1,
-			Category:    vidrioCategories[0],
+			Category:    VidrioCategories[0],
 			Name:        "Resistencia Térmica",
 			Description: "Resistencia a choque térmico: 40-50°C",
 		},
 	}
 
-	monoliticoItems []store.Item = []store.Item{
+	MonoliticoItems []store.Item = []store.Item{
 		{
 			Id:          1,
-			Category:    vidrioCategories[0],
+			Category:    VidrioCategories[0],
 			Name:        "2 - 3 mm",
 			Description: "Espejos decorativos, muebles con vidrio, cuadros y marcos.",
 		},
 		{
 			Id:          2,
-			Category:    vidrioCategories[0],
+			Category:    VidrioCategories[0],
 			Name:        "4 - 5 mm",
 			Description: "Ventanas pequeñas, divisiones interiores, mamparas de baño, vitrinas.",
 		},
 		{
 			Id:          3,
-			Category:    vidrioCategories[0],
+			Category:    VidrioCategories[0],
 			Name:        "6 - 8 mm",
 			Description: "Ventanas medianas, puertas de vidrio, barras de cocina, escalones.",
 		},
 	}
 
-	aluminioCategories []store.Category = []store.Category{
+	AluminioCategories []store.Category = []store.Category{
 		{
 			Id:          1,
 			Type:        store.AluminioType,
@@ -101,10 +104,10 @@ como arenado, esmerilado, serigrafiado y mateado al ácido.`,
 		},
 	}
 
-	fachadasItems []store.Item = []store.Item{
+	FachadasItems []store.Item = []store.Item{
 		{
 			Id:       1,
-			Category: aluminioCategories[0],
+			Category: AluminioCategories[0],
 			Name:     "Sistema Estándar",
 			LongDescription: `Estas fachadas utilizan sistemas estándar de aluminio disponibles comercialmente, diseñados
 para edificaciones pequeñas o medianas sin requerimientos constructivos complejos.
@@ -112,16 +115,80 @@ Son ligeras, con montantes y travesaños, y adecuadas para edificios de hasta 10
 Como muro cortina, se instalan frente a los forjados y quedan suspendidas ("Glass Skin").
 Pueden usar vidrios laminados para control acústico o templados de hasta 10 mm en diversos
 colores.`,
+			Slug: "sistema-estandar",
 		},
 		{
 			Id:       2,
-			Category: aluminioCategories[0],
+			Category: AluminioCategories[0],
 			Name:     "Sistema Stick",
+			Slug:     "sistema-stick",
 		},
 		{
 			Id:       3,
-			Category: aluminioCategories[0],
+			Category: AluminioCategories[0],
 			Name:     "Sistema Frame",
+			Slug:     "sistema-frame",
+		},
+	}
+
+	UPVCCategories []store.Category = []store.Category{
+		{
+			Id:          1,
+			Type:        store.UPVCType,
+			Name:        "Lumina 60 Ventanas Articuladas",
+			Description: "",
+			Slug:        "lumina-60-ventanas-articuladas",
+		},
+		{
+			Id:          2,
+			Type:        store.UPVCType,
+			Name:        "Lumina 104 Puertas",
+			Description: "",
+			Slug:        "lumina-104-puertas",
+		},
+		{
+			Id:          3,
+			Type:        store.UPVCType,
+			Name:        "Natura 66 Ventanas Correderas",
+			Description: "",
+			Slug:        "natura-66-ventanas-correderas",
+		},
+	}
+
+	LuminaItems []store.Item = []store.Item{
+		{
+			Id:       1,
+			Category: UPVCCategories[0],
+			Name:     "Proyectante",
+			LongDescription: `La Ventana Proyectante de Perfil uPVC es ideal para oficinas y edificaciones que requieren alta
+eficiencia térmica y acústica. Su apertura hacia el exterior mediante brazos de extensión
+permite una ventilación controlada sin corrientes de aire y evita la entrada de agua en caso
+de lluvia.`,
+			Slug: "proyectante",
+		},
+		{
+			Id:       2,
+			Category: UPVCCategories[0],
+			Name:     "Batiente",
+			Slug:     "batiente",
+		},
+		{
+			Id:       3,
+			Category: UPVCCategories[0],
+			Name:     "Oscilobatiente",
+			Slug:     "oscilobatiente",
+		},
+	}
+
+	Imgs []image.Image = []image.Image{
+		{
+			Id: 0,
+		},
+		{
+			Id: 0,
+		},
+		{
+			Id: 0,
 		},
 	}
 )
