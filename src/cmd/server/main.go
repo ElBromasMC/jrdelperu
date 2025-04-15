@@ -59,9 +59,5 @@ func main() {
 	e.HTTPErrorHandler = util.HTTPErrorHandler
 
 	// Start server
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	log.Fatalln(e.Start(":" + port))
+	log.Fatalln(e.Start(":8080"))
 }

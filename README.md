@@ -6,34 +6,37 @@ Jrdelperu website
 
 ### Prerequisites
 
-* Docker
+* Podman
+* Podman compose
 
 ### .env file example
 
 ```shell
-USER_UID="1000" # It must match your current user UID
-ENV="development"
-PORT="8080"
 REL="1"
 ```
 
 ### Live reload
 
 ```shell
-$ bin/live.sh
+bin/live-dev
 ```
 
 ## Production environment
 
 ### Prerequisites
 
-* [Traefik](https://doc.traefik.io/traefik/getting-started/quick-start/)
+* Docker
 
 ### Docker compose .env file example
 
 ```shell
 WEBSERVER_HOSTNAME=domain.tld
-ENV=production
-PORT=8080
 REL=1
 ```
+
+### Run
+
+```shell
+bin/up-prod
+```
+
