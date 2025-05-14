@@ -13,7 +13,8 @@ RUN addgroup -g 1000 runner \
 USER runner
 
 # Install run-time and compile-time local dependencies
-RUN go install github.com/a-h/templ/cmd/templ@latest
+RUN go install github.com/a-h/templ/cmd/templ@latest \
+    && go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
 
 # Create required folders and change to source directory
 RUN mkdir /home/runner/src
