@@ -1,0 +1,606 @@
+package view
+
+import "fmt"
+
+templ Index() {
+	@BasePage("Corporación JR Del Perú") {
+		<main>
+			<div>
+				<my-carousel class="h-[calc(100dvh-8rem)] lg:h-[calc(100dvh-9.5rem)] border-b border-black">
+					<div>
+						<img class="relative object-cover w-full h-full opacity-10" src="/static/img/electronic.png" alt="Fondo"/>
+						<section class="absolute max-w-7xl mx-auto inset-x-0 inset-y-0 px-4 py-16">
+							<div class="h-full grid items-center gap-6 lg:grid-cols-5">
+								<div class="space-y-6 lg:space-y-9 lg:col-span-3">
+									<h2 class="text-4xl uppercase font-bold lg:text-5xl">Promoción</h2>
+									<hr class="w-24 border border-t-[3px] border-logored lg:w-48"/>
+									<p class="text-lg lg:text-2xl">
+										Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus ullamcorper,
+										dui id molestie pharetra, urna nulla faucibus quam, ac finibus dui diam sagittis
+										ante. Proin nibh ipsum, tempus vel neque sed, euismod gravida risus. Nam at enim neque.
+										Proin ullamcorper congue nulla, eu bibendum sem feugiat vel.
+									</p>
+									<svg class="relative w-16 h-16 -left-5 text-logored" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+										<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 14-4-4m4 4 4-4"></path>
+									</svg>
+								</div>
+								<div class="hidden relative -top-10 lg:col-span-2 lg:block">
+									<img src="/static/img/dentist.png" alt="Test"/>
+								</div>
+							</div>
+						</section>
+					</div>
+				</my-carousel>
+				<!-- Servicios -->
+				<section id="servicios">
+					<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+						<h2 class="text-center font-semibold text-3xl uppercase">
+							Bienvenidos ... Nuestros Servicios y Productos
+						</h2>
+						<div class="flex flex-row justify-center flex-wrap gap-12 mt-12 lg:flex-row lg:gap-16 lg:mt-16">
+							<a class="border border-black w-full aspect-square max-w-80" href="/servicio/vidrios">
+								<div class="h-4/5">
+									<img class="object-cover w-full h-full" src="/static/img/vidrios.webp" alt="vidrios"/>
+								</div>
+								<div class="flex justify-center items-center h-1/5 border-t border-black">
+									<div class="text-center font-semibold text-2xl">
+										VIDRIOS
+									</div>
+								</div>
+							</a>
+							<a class="border border-black w-full aspect-square max-w-80" href="/servicio/aluminios">
+								<div class="h-4/5">
+									<img class="object-cover w-full h-full" src="/static/img/aluminios.webp" alt="vidrios"/>
+								</div>
+								<div class="flex justify-center items-center h-1/5 border-t border-black">
+									<div class="text-center font-semibold text-2xl">
+										ALUMINIOS
+									</div>
+								</div>
+							</a>
+							<a class="border border-black w-full aspect-square max-w-80" href="/servicio/upvc">
+								<div class="h-4/5">
+									<img class="object-cover w-full h-full" src="/static/img/pvc.webp" alt="vidrios"/>
+								</div>
+								<div class="flex justify-center items-center h-1/5 border-t border-black">
+									<div class="text-center font-semibold text-2xl">
+										U PVC
+									</div>
+								</div>
+							</a>
+						</div>
+					</div>
+				</section>
+				<!-- La empresa -->
+				<section id="nosotros">
+					<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+						<div class="flex flex-col items-center gap-12 lg:text-lg lg:flex-row lg:gap-16">
+							<div class="flex-1">
+								<p>
+									En Corporación JR del Perú S.A.C., nos especializamos en desarrollar y suministrar
+									soluciones integrales para la industria de la construcción. Con una sólida
+									trayectoria en el sector, ofrecemos sistemas en vidrio, aluminio y uPVC, diseñados
+									para optimizar procesos, mejorar la eficiencia y garantizar la calidad en cada proyecto.
+								</p>
+								<br/>
+								<p>
+									Encuentra con nosotros: 
+								</p>
+								<br/>
+								<ul>
+									<li>📌 Detalles técnicos actualizados para una planificación precisa.</li>
+									<li>📂 Fichas técnicas completas con información detallada.</li>
+									<li>🏗 Asesoría especializada para proyectos en los sectores público y privado.</li>
+								</ul>
+							</div>
+							<div>
+								<div class="w-full max-w-[30rem] aspect-[12/7]">
+									<img
+										class="object-cover w-full h-full"
+										src="/static/img/placeholder.webp"
+										alt="La empresa"
+									/>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="bg-cloud">
+						<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+							<div class="flex flex-col items-center gap-12 lg:flex-row lg:gap-16">
+								<div class="grid grid-cols-7 gap-5 items-center max-w-96">
+									<div class="col-span-3 aspect-square">
+										<img
+											class="object-cover w-full h-full"
+											src="/static/img/placeholder.webp"
+											alt="La empresa"
+										/>
+									</div>
+									<div class="col-span-4">
+										<h3 class="font-bold">Experiencia y confianza:</h3>
+										<p>
+											Contamos con un equipo
+											altamente calificado y años
+											de trayectoria en la
+											industria de la construcción.
+										</p>
+									</div>
+								</div>
+								<div class="grid grid-cols-7 gap-5 items-center max-w-96">
+									<div class="col-span-3 aspect-square">
+										<img
+											class="object-cover w-full h-full"
+											src="/static/img/placeholder.webp"
+											alt="La empresa"
+										/>
+									</div>
+									<div class="col-span-4">
+										<h3 class="font-bold">Calidad y precisión:</h3>
+										<p>
+											Ofrecemos vidrios, aluminio
+											y uPVC con los más altos
+											estándares para garantizar
+											durabilidad y eficiencia.
+										</p>
+									</div>
+								</div>
+								<div class="grid grid-cols-7 gap-5 items-center max-w-96">
+									<div class="col-span-3 aspect-square">
+										<img
+											class="object-cover w-full h-full"
+											src="/static/img/placeholder.webp"
+											alt="La empresa"
+										/>
+									</div>
+									<div class="col-span-4">
+										<h3 class="font-bold">Atención integral:</h3>
+										<p>
+											Brindamos asesoría,
+											manufactura e instalación
+											con un servicio
+											personalizado y eficiente.
+										</p>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</section>
+				<section id="galeria">
+					<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+						<h2 class="text-center font-semibold text-3xl uppercase">
+							Obras realizadas por JR DEL PERÚ
+						</h2>
+						<div class="flex flex-row justify-center flex-wrap gap-12 mt-12 lg:flex-row lg:mt-16">
+							<div class="border border-black aspect-video max-w-96">
+								<img class="object-cover w-full h-full" src="/static/img/placeholder.webp" alt="vidrios"/>
+							</div>
+							<div class="border border-black aspect-video max-w-96">
+								<img class="object-cover w-full h-full" src="/static/img/placeholder.webp" alt="vidrios"/>
+							</div>
+							<div class="border border-black aspect-video max-w-96">
+								<img class="object-cover w-full h-full" src="/static/img/placeholder.webp" alt="vidrios"/>
+							</div>
+						</div>
+					</div>
+				</section>
+				<!-- Formulario -->
+				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+					@Form()
+				</div>
+			</div>
+		</main>
+	}
+}
+
+templ Contacto() {
+	@BasePage("Contacto") {
+		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
+			<section>
+				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+					<div class="grid gap-12 lg:grid-cols-3 items-center">
+						<div class="space-y-6">
+							<h2 class="font-semibold text-2xl uppercase">Contáctenos</h2>
+							<div>
+								<p>CORPORACIÓN JR. DEL PERU S.A.C</p>
+								<p>Lima - Perú</p>
+								<p>Carabayllo</p>
+							</div>
+							<div>
+								<p>+51 948846618</p>
+								<p>info@jrdelperu.com</p>
+							</div>
+							<div>
+								<p>Horario de atención</p>
+								<p>Lunes a Sábado entre 8:00 am. - 19:00 pm.</p>
+							</div>
+						</div>
+						<!-- Map -->
+						<div class="flex justify-center items-center">
+							<iframe
+								class="w-full aspect-square max-w-96"
+								src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3905.825990645811!2d-76.9755228!3d-11.777299699999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105d9237779507b%3A0x90f4574d7d5e7d6a!2sSan%20Francisco%20Etapa%2010!5e0!3m2!1ses-419!2spe!4v1740676060539!5m2!1ses-419!2spe"
+								style="border:0;"
+								allowfullscreen=""
+								loading="lazy"
+								referrerpolicy="no-referrer-when-downgrade"
+							></iframe>
+						</div>
+						<!-- Social media -->
+						<div>
+							<div class="grid grid-cols-2 justify-items-center gap-y-6 text-center font-semibold text-lg">
+								<a
+									class="block w-28 p-3 border border-black hover:text-black"
+									href="https://www.facebook.com/JRdelPeru.pe"
+									target="_blank"
+								>
+									Facebook
+								</a>
+								<a
+									class="block w-28 p-3 border border-black hover:text-black"
+									href="https://www.instagram.com/jrdelperu/"
+									target="_blank"
+								>
+									Instagram
+								</a>
+								<a
+									class="block w-28 p-3 border border-black hover:text-black"
+									href="#"
+									target="_blank"
+								>
+									Youtube
+								</a>
+								<a
+									class="block w-28 p-3 border border-black hover:text-black"
+									href="https://www.tiktok.com/@jr.delperu"
+									target="_blank"
+								>
+									Tik Tok
+								</a>
+								<a
+									class="block w-28 p-3 border border-black hover:text-black"
+									href="#"
+									target="_blank"
+								>
+									Linkedin
+								</a>
+								<a
+									class="block w-28 p-3 border border-black hover:text-black"
+									href="https://x.com/JrdelperuJ"
+									target="_blank"
+								>
+									X
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<!-- Formulario -->
+			<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+				@Form()
+			</div>
+		</main>
+	}
+}
+
+templ Descargas() {
+	@BasePage("Descargas") {
+		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
+			<section id="descargas">
+				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+					<div class="grid text-center gap-9 lg:grid-cols-3 lg:grid-rows-2">
+						<div class="space-y-6">
+							<h2 class="font-semibold text-xl">Vidrios</h2>
+							<div class="space-y-2">
+								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
+									Catálogo de Vidrio
+									<br/>
+									Descargar PDF
+								</a>
+							</div>
+						</div>
+						<div class="space-y-6 lg:row-span-2">
+							<h2 class="font-semibold text-xl">Aluminio</h2>
+							<div class="space-y-2">
+								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
+									Catálogo de Aluminio
+									<br/>
+									Descargar PDF
+								</a>
+								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
+									Aluminio / Sistema de Fachadas Ligeras
+									<br/>
+									Descargar PDF
+								</a>
+								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
+									Aluminio / Sistema de Carpintería Técnica
+									<br/>
+									Descargar PDF
+								</a>
+								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
+									Aluminio / Sistema de Carpintería Perimetral
+									<br/>
+									Descargar PDF
+								</a>
+								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
+									Aluminio / Sistema de Carpintería Practicable
+									<br/>
+									Descargar PDF
+								</a>
+							</div>
+						</div>
+						<div class="space-y-6 lg:row-span-2">
+							<h2 class="font-semibold text-xl">uPVC</h2>
+							<div class="space-y-2">
+								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
+									Catálogo de uPVC
+									<br/>
+									Descargar PDF
+								</a>
+								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
+									uPVC / Lumina 60 Ventanas Articuladas
+									<br/>
+									Descargar PDF
+								</a>
+								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
+									uPVC / Lumina 104 Puerta
+									<br/>
+									Descargar PDF
+								</a>
+								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
+									uPVC / Natura 66 Ventanas Correderas
+									<br/>
+									Descargar PDF
+								</a>
+								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
+									uPVC / Natura 92 Mamparas Correderas
+									<br/>
+									Descargar PDF
+								</a>
+							</div>
+						</div>
+						<div class="space-y-6">
+							<h2 class="font-semibold text-xl">La Empresa</h2>
+							<div class="space-y-2">
+								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
+									Brochure Corporación JR Del Perú S.A.C.
+									<br/>
+									Descargar PDF
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<!-- Formulario -->
+			<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+				@Form()
+			</div>
+		</main>
+	}
+}
+
+templ Galeria() {
+	@BasePage("Galería") {
+		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
+			<section>
+				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+					<div class="grid grid-cols-[repeat(auto-fit,minmax(18rem,1fr))] gap-16 justify-items-center">
+						for n, i := range []string{"vidrios.webp", "aluminios.webp", "pvc.webp", "placeholder.webp", "placeholder.webp", "placeholder.webp"} {
+							<div class="border border-black w-full max-w-80" onclick="handleImageFullscreen(event)">
+								<div class="flex justify-center items-center img-div bg-black">
+									<div class="w-full max-w-full max-h-full aspect-[5/4] lg:w-auto lg:h-full">
+										<img class="object-cover w-full h-full" src={ "/static/img/" + i } alt="placeholder"/>
+									</div>
+								</div>
+								<div class="flex justify-center items-center py-3 border-t border-black">
+									<div class="text-center font-semibold text-2xl">
+										{ fmt.Sprintf("IMAGEN %d", n+1) }
+									</div>
+								</div>
+							</div>
+						}
+					</div>
+					<script>
+						function handleImageFullscreen(event) {
+							const el = event.currentTarget;
+							const mydiv = el.querySelector(".img-div");
+							if (document.fullscreenElement) {
+								document.exitFullscreen();
+							} else {
+								mydiv.requestFullscreen();
+							}
+						}
+					</script>
+				</div>
+			</section>
+			<!-- Formulario -->
+			<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+				@Form()
+			</div>
+		</main>
+	}
+}
+
+templ Nosotros() {
+	@BasePage("La empresa") {
+		<main>
+			<section id="nosotros">
+				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+					<div class="space-y-16">
+						<div class="flex flex-col items-center gap-9 lg:flex-row">
+							<div>
+								<div class="w-full max-w-[36rem] aspect-video">
+									<img
+										class="object-cover w-full h-full"
+										src="/static/img/placeholder.webp"
+										alt="La empresa"
+									/>
+								</div>
+							</div>
+							<div class="flex-1 space-y-6">
+								<p>
+									CORPORACIÓN JR. DEL PERÚ S.A.C. es una empresa especializada en el suministro de bienes y
+									servicios para la industria de la construcción, tanto en el sector público como privado.
+									Nos enfocamos en la comercialización de vidrio, aluminio y uPVC, ofreciendo además mano de
+									obra altamente calificada para su transformación y fabricación, garantizando un producto
+									final de alta calidad y precisión para su instalación en obra.
+								</p>
+								<p>
+									Asimismo, estamos firmemente comprometidos con la sostenibilidad y el respeto por el medio
+									ambiente, implementando un riguroso plan de calidad empresarial que garantiza prácticas
+									responsables y alineadas con las normativas ambientales vigentes.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section class="bg-cloud">
+				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+					<div class="space-y-16">
+						<div class="space-y-4">
+							<h2 class="text-center font-semibold text-xl uppercase">Misión</h2>
+							<div class="p-4 border border-black rounded-3xl">
+								<p>
+									Ofrecer la mejor calidad en el suministro, elaboración y transformación del vidrio, aluminio y uPVC en sus diferentes
+									formas de presentación, para todo tipo de construcción arquitectónica con precios altamente competitivos, garantizando
+									ser una mejor alternativa para nuestros clientes en términos de formalidad, innovación y tecnología de punta, ofrecemos
+									un excelente servicio de pre y post venta para garantizar la satisfacción y lealtad de nuestros clientes y con ello
+									promover el crecimiento humano y profesional de nuestros colaboradores, afianzando el crecimiento de la empresa y de
+									quienes la conforman.
+								</p>
+							</div>
+						</div>
+						<div class="space-y-4">
+							<h2 class="text-center font-semibold text-xl uppercase">Visión</h2>
+							<div class="p-4 border border-black rounded-3xl">
+								<p>
+									Buscamos diferenciarnos mediante la incorporación de nuevas tecnologías, incluyendo el vidrio fotovoltaico, promoviendo
+									soluciones sostenibles y eficientes para edificaciones modernas. Nos proyectamos a expandir nuestro alcance en el mercado,
+									ofreciendo productos de alta calidad, eficiencia energética y respeto al medio ambiente, garantizando así la plena
+									satisfacción de nuestros clientes y contribuyendo al desarrollo de una construcción más sostenible, segura e innovadora.
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<section>
+				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+					<div>
+						<div>
+							<div class="flex flex-col justify-between items-center gap-9 lg:flex-row">
+								<div class="flex-1">
+									<div class="max-w-[35rem] space-y-6">
+										<div class="space-y-4">
+											<h3 class="font-semibold text-xl uppercase">Valores</h3>
+											<p>
+												Honestidad, Respeto, Cumplimiento, Pasión, Innovación, Responsabilidad
+											</p>
+										</div>
+										<div class="space-y-4">
+											<h3 class="font-semibold text-xl uppercase">Target</h3>
+											<p>
+												Privado: Constructoras, edificaciones empresariales, residenciales y multifamiliares,
+												casas de playa, instituciones educativas, hospitalarias, y culinarias.
+											</p>
+											<p>
+												Publico: Edificaciones educativas, hospitalarias, regionales y municipales.
+											</p>
+										</div>
+									</div>
+								</div>
+								<div>
+									<div class="w-full max-w-96 aspect-square">
+										<img
+											class="object-cover w-full h-full"
+											src="/static/img/placeholder.webp"
+											alt="La empresa"
+										/>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</section>
+			<!-- Formulario -->
+			<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+				@Form()
+			</div>
+		</main>
+	}
+}
+
+templ Form() {
+	<form
+		class="flex flex-col gap-6 p-4 border border-black rounded-3xl lg:flex-row"
+		autocomplete="off"
+	>
+		<div class="grid gap-6 lg:grid-cols-4 lg:grid-rows-2">
+			<div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:col-span-3 lg:order-1">
+				<div class="font-semibold text-lg lg:text-xl">Envíanos un mensaje</div>
+				<div class="flex-1">
+					<input
+						class="w-full px-4 py-2 border border-black rounded-3xl placeholder:text-center"
+						type="text"
+						placeholder="Nombre Completo o de Empresa"
+						name=""
+						id=""
+					/>
+				</div>
+			</div>
+			<div class="self-start flex gap-3 lg:order-3">
+				<select class="w-20 border border-gray-400 text-center rounded-3xl" name="DocumentType" required="">
+					<option value="DNI">DNI</option>
+					<option value="RUC">RUC</option>
+					<option value="CARNET">C. EXTRANJERÍA</option>
+					<option value="OTROS">OTROS</option>
+				</select>
+				<input
+					class="w-full px-4 py-2 border border-black rounded-3xl placeholder:text-center"
+					type="text"
+					placeholder="Nro. Documento"
+					name=""
+					id=""
+				/>
+			</div>
+			<div class="lg:order-4">
+				<input
+					class="w-full px-4 py-2 border border-black rounded-3xl placeholder:text-center"
+					type="text"
+					placeholder="Su Celular"
+					name=""
+					id=""
+				/>
+			</div>
+			<div class="lg:order-5">
+				<input
+					class="w-full px-4 py-2 border border-black rounded-3xl placeholder:text-center"
+					type="text"
+					placeholder="Su correo"
+					name=""
+					id=""
+				/>
+			</div>
+			<div class="row-span-2 lg:order-2">
+				<textarea
+					class="w-full px-4 py-2 border border-black rounded-3xl resize-none placeholder:text-center"
+					rows="5"
+					placeholder="Tu consulta"
+					name=""
+					id=""
+				></textarea>
+			</div>
+		</div>
+		<div class="self-center lg:order-6">
+			<button
+				class="px-4 py-2 font-semibold bg-[#50e244]"
+				type="submit"
+			>
+				Enviar
+			</button>
+		</div>
+	</form>
+}

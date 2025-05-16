@@ -1,4 +1,4 @@
-package image
+package model
 
 type Image struct {
 	Id       int

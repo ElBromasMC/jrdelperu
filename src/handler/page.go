@@ -1,29 +1,26 @@
-package page
+package handler
 
 import (
-	"alc/handler/util"
-	"alc/view/page"
-	"net/http"
-
+	"alc/view"
 	"github.com/labstack/echo/v4"
 )
 
 func (h *Handler) HandleIndexShow(c echo.Context) error {
-	return util.Render(c, http.StatusOK, page.Index())
+	return renderOK(c, view.Index())
 }
 
 func (h *Handler) HandleNosotrosShow(c echo.Context) error {
-	return util.Render(c, http.StatusOK, page.Nosotros())
+	return renderOK(c, view.Nosotros())
 }
 
 func (h *Handler) HandleDescargasShow(c echo.Context) error {
-	return util.Render(c, http.StatusOK, page.Descargas())
+	return renderOK(c, view.Descargas())
 }
 
 func (h *Handler) HandleGaleriaShow(c echo.Context) error {
-	return util.Render(c, http.StatusOK, page.Galeria())
+	return renderOK(c, view.Galeria())
 }
 
 func (h *Handler) HandleContactoShow(c echo.Context) error {
-	return util.Render(c, http.StatusOK, page.Contacto())
+	return renderOK(c, view.Contacto())
 }

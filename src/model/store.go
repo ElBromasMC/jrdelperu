@@ -1,10 +1,8 @@
-package store
+package model
 
 import (
-	"alc/model/image"
 	"errors"
 	"strings"
-	"unicode"
 )
 
 type Type string
@@ -22,7 +20,7 @@ type Category struct {
 	Description     string
 	LongDescription string
 	Slug            string
-	Img             image.Image
+	Img             Image
 }
 
 type Item struct {
@@ -32,7 +30,7 @@ type Item struct {
 	Description     string
 	LongDescription string
 	Slug            string
-	Img             image.Image
+	Img             Image
 }
 
 type CategoryFeature struct {
@@ -80,10 +78,4 @@ func (p Product) Normalize() (Product, error) {
 	}
 
 	return p, nil
-}
-func toUpperAndRemoveSpaces(r rune) rune {
-	if unicode.IsSpace(r) {
-		return -1
-	}
-	return unicode.ToUpper(r)
 }
