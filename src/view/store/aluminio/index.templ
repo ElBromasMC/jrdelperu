@@ -15,10 +15,10 @@ templ Index(cats []store.Category) {
 			<section>
 				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
 					<div class="space-y-16">
-						<h2 class="text-center font-bold text-4xl">
+						<h2 class="text-center font-semibold text-4xl uppercase">
 							Aluminios
 						</h2>
-						<div class="flex flex-row justify-center flex-wrap gap-x-24 gap-y-16 mt-12">
+						<div class="flex flex-row justify-center flex-wrap gap-12 mt-12">
 							for _, cat := range cats {
 								<a
 									class="border border-black w-full max-w-96"
@@ -35,7 +35,7 @@ templ Index(cats []store.Category) {
 										/>
 									</div>
 									<div class="flex justify-center items-center py-3 border-t border-black">
-										<div class="text-center font-semibold text-2xl">
+										<div class="text-center font-semibold text-2xl px-2">
 											{ cat.Name }
 										</div>
 									</div>

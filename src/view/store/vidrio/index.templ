@@ -13,7 +13,7 @@ templ Index(cats []store.Category) {
 			<section>
 				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
 					<div class="space-y-16">
-						<h2 class="text-center font-bold text-4xl">
+						<h2 class="text-center font-semibold text-4xl uppercase">
 							Vidrios
 						</h2>
 						<div class="flex flex-col items-center gap-9 lg:flex-row lg:items-start">
@@ -28,7 +28,9 @@ templ Index(cats []store.Category) {
 										</div>
 									</div>
 								</div>
-								<a class="block w-full py-2 bg-cloud text-center hover:bg-livid hover:text-white">
+								<a
+									class="block w-full py-2 bg-cloud text-center hover:bg-livid hover:text-white"
+								>
 									Catálogo de Vidrios
 									<br/>
 									Descargar PDF
@@ -44,7 +46,7 @@ templ Index(cats []store.Category) {
 									for _, cat := range cats {
 										<li class="flex flex-col gap-3 items-center lg:flex-row lg:gap-6">
 											<a
-												class="flex-none w-60 px-3 py-2 border border-black"
+												class="flex-none w-60 py-2 bg-cloud text-center hover:bg-livid hover:text-white"
 												href={ templ.URL(fmt.Sprintf("/servicio/vidrios/%s", cat.Slug)) }
 											>
 												{ cat.Name }

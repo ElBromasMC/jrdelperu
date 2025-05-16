@@ -6,37 +6,35 @@ templ Index() {
 	@layout.BasePage("Corporación JR Del Perú") {
 		<main>
 			<div>
-				<my-carousel class="h-[calc(100dvh-8rem)] lg:h-[calc(100dvh-9.5rem)] border-b border-black" controls indicator>
-					for _, s := range []string{"1", "2", "3"} {
-						<div>
-							<img class="relative object-cover w-full h-full opacity-10" src="/static/img/electronic.png" alt="Fondo"/>
-							<section class="absolute max-w-7xl mx-auto inset-x-0 inset-y-0 px-4 py-16">
-								<div class="h-full grid items-center gap-6 lg:grid-cols-5">
-									<div class="space-y-6 lg:space-y-9 lg:col-span-3">
-										<h2 class="text-4xl uppercase font-bold lg:text-5xl">{ "Promoción " + s }</h2>
-										<hr class="w-24 border border-t-[3px] border-logored lg:w-48"/>
-										<p class="text-lg lg:text-2xl">
-											Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus ullamcorper,
-											dui id molestie pharetra, urna nulla faucibus quam, ac finibus dui diam sagittis
-											ante. Proin nibh ipsum, tempus vel neque sed, euismod gravida risus. Nam at enim neque.
-											Proin ullamcorper congue nulla, eu bibendum sem feugiat vel.
-										</p>
-										<svg class="relative w-16 h-16 -left-5 text-logored" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-											<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 14-4-4m4 4 4-4"></path>
-										</svg>
-									</div>
-									<div class="hidden relative -top-10 lg:col-span-2 lg:block">
-										<img src="/static/img/dentist.png" alt="Test"/>
-									</div>
+				<my-carousel class="h-[calc(100dvh-8rem)] lg:h-[calc(100dvh-9.5rem)] border-b border-black">
+					<div>
+						<img class="relative object-cover w-full h-full opacity-10" src="/static/img/electronic.png" alt="Fondo"/>
+						<section class="absolute max-w-7xl mx-auto inset-x-0 inset-y-0 px-4 py-16">
+							<div class="h-full grid items-center gap-6 lg:grid-cols-5">
+								<div class="space-y-6 lg:space-y-9 lg:col-span-3">
+									<h2 class="text-4xl uppercase font-bold lg:text-5xl">Promoción</h2>
+									<hr class="w-24 border border-t-[3px] border-logored lg:w-48"/>
+									<p class="text-lg lg:text-2xl">
+										Lorem ipsum dolor sit amet, consectetur adipiscing elit. Phasellus ullamcorper,
+										dui id molestie pharetra, urna nulla faucibus quam, ac finibus dui diam sagittis
+										ante. Proin nibh ipsum, tempus vel neque sed, euismod gravida risus. Nam at enim neque.
+										Proin ullamcorper congue nulla, eu bibendum sem feugiat vel.
+									</p>
+									<svg class="relative w-16 h-16 -left-5 text-logored" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+										<path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19V5m0 14-4-4m4 4 4-4"></path>
+									</svg>
 								</div>
-							</section>
-						</div>
-					}
+								<div class="hidden relative -top-10 lg:col-span-2 lg:block">
+									<img src="/static/img/dentist.png" alt="Test"/>
+								</div>
+							</div>
+						</section>
+					</div>
 				</my-carousel>
 				<!-- Servicios -->
 				<section id="servicios">
 					<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
-						<h2 class="text-center font-bold text-3xl lg:text-4xl">
+						<h2 class="text-center font-semibold text-3xl uppercase">
 							Bienvenidos ... Nuestros Servicios y Productos
 						</h2>
 						<div class="flex flex-row justify-center flex-wrap gap-12 mt-12 lg:flex-row lg:gap-16 lg:mt-16">
@@ -96,7 +94,7 @@ templ Index() {
 								</ul>
 							</div>
 							<div>
-								<div class="w-full max-w-[30rem] aspect-square">
+								<div class="w-full max-w-[30rem] aspect-[12/7]">
 									<img
 										class="object-cover w-full h-full"
 										src="/static/img/placeholder.webp"
@@ -169,7 +167,7 @@ templ Index() {
 				</section>
 				<section id="galeria">
 					<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
-						<h2 class="text-center font-bold text-3xl lg:text-4xl">
+						<h2 class="text-center font-semibold text-3xl uppercase">
 							Obras realizadas por JR DEL PERÚ
 						</h2>
 						<div class="flex flex-row justify-center flex-wrap gap-12 mt-12 lg:flex-row lg:mt-16">

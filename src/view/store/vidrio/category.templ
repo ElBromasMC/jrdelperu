@@ -57,47 +57,49 @@ templ Category(cat store.Category, is []store.Item, fs []store.CategoryFeature) 
 									de calidad
 								</a>
 							</div>
-							<div class="flex-1 space-y-6">
-								{ cat.LongDescription }
+							<div class="flex-1 space-y-12">
+								<div>
+									{ cat.LongDescription }
+								</div>
+								<div class="flex justify-center">
+									<table class="table-auto border-collapse border border-black max-w-2xl">
+										<caption class="border border-black font-bold uppercase bg-livid text-white">{ cat.Name }</caption>
+										<thead>
+											<tr>
+												<th class="border border-black bg-cloud">Grosor (mm)</th>
+												<th class="border border-black bg-cloud">Aplicaciones Comunes</th>
+											</tr>
+										</thead>
+										<tbody>
+											for _, i := range is {
+												<tr>
+													<td class="border border-black font-semibold bg-cloud">{ i.Name }</td>
+													<td class="border border-black">{ i.Description }</td>
+												</tr>
+											}
+										</tbody>
+									</table>
+								</div>
+								<div class="flex justify-center">
+									<table class="table-auto border-collapse border border-black max-w-2xl">
+										<caption class="border border-black font-bold uppercase bg-livid text-white">{ cat.Name }</caption>
+										<thead>
+											<tr>
+												<th class="border border-black bg-cloud">Características</th>
+												<th class="border border-black bg-cloud">Detalles</th>
+											</tr>
+										</thead>
+										<tbody>
+											for _, f := range fs {
+												<tr>
+													<td class="border border-black">{ f.Name }</td>
+													<td class="border border-black">{ f.Description }</td>
+												</tr>
+											}
+										</tbody>
+									</table>
+								</div>
 							</div>
-						</div>
-						<div class="flex justify-center">
-							<table class="table-auto border-collapse border border-black max-w-2xl">
-								<caption class="border border-black font-bold uppercase bg-livid text-white">{ cat.Name }</caption>
-								<thead>
-									<tr>
-										<th class="border border-black bg-cloud">Grosor (mm)</th>
-										<th class="border border-black bg-cloud">Aplicaciones Comunes</th>
-									</tr>
-								</thead>
-								<tbody>
-									for _, i := range is {
-										<tr>
-											<td class="border border-black font-semibold bg-cloud">{ i.Name }</td>
-											<td class="border border-black">{ i.Description }</td>
-										</tr>
-									}
-								</tbody>
-							</table>
-						</div>
-						<div class="flex justify-center">
-							<table class="table-auto border-collapse border border-black max-w-2xl">
-								<caption class="border border-black font-bold uppercase bg-livid text-white">{ cat.Name }</caption>
-								<thead>
-									<tr>
-										<th class="border border-black bg-cloud">Características</th>
-										<th class="border border-black bg-cloud">Detalles</th>
-									</tr>
-								</thead>
-								<tbody>
-									for _, f := range fs {
-										<tr>
-											<td class="border border-black">{ f.Name }</td>
-											<td class="border border-black">{ f.Description }</td>
-										</tr>
-									}
-								</tbody>
-							</table>
 						</div>
 					</div>
 				</div>
