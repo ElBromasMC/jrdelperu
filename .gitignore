@@ -1,13 +1,3 @@
 # Dotenv file
 .env
 
-# Heaviest thing on earth
-node_modules/
-
-# Build artifacts
-build/
-tmp/
-src/assets/static/css/tailwind.css
-src/assets/static/js/main.js
-src/view/**/*_templ.go
-

@@ -14,7 +14,8 @@ USER runner
 
 # Install run-time and compile-time local dependencies
 RUN go install github.com/a-h/templ/cmd/templ@latest \
-    && go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+    && go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest \
+    && go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
 # Create required folders and change to source directory
 RUN mkdir /home/runner/src

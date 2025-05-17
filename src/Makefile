@@ -9,32 +9,40 @@ BUILD_DIR := ./build
 CMD_DIR := ./cmd
 VIEW_DIR := ./view
 JS_DIR := $(VIEW_DIR)/js
+REPOSITORY_DIR := ./repository
 
 GO_FILES := $(shell find . -path ./node_modules -prune -o -path $(VIEW_DIR) -prune -o -name '*.go' -print)
 TEMPL_FILES := $(shell find $(VIEW_DIR) -name '*.templ')
 TEMPL_GO_FILES = $(TEMPL_FILES:.templ=_templ.go)
 JS_FILES := $(shell find $(JS_DIR) -name '*.js')
+SQL_FILES := $(wildcard ./db/migrations/*.sql) $(wildcard ./db/query/*.sql)
 
 MAINJS_OUT := ./assets/static/js/main.js
 TAILWINDCSS_OUT := ./assets/static/css/tailwind.css
 
 TAILWINDCSS_LOG := tailwind.log
+SQLC_SENTINEL := $(REPOSITORY_DIR)/.sqlc_generated
 
 $(TMP_DIR)/%: $(BUILD_DIR)/% $(MAINJS_OUT) $(TAILWINDCSS_OUT)
 	touch "$@"
 
 # The final build step
 ifeq ($(ENV),development)
-$(BUILD_DIR)/%: $(GO_FILES) $(TEMPL_GO_FILES)
+$(BUILD_DIR)/%: $(GO_FILES) $(TEMPL_GO_FILES) $(SQLC_SENTINEL)
 	go build -tags=dev -o "$@" "$(CMD_DIR)/$*"
 else
-$(BUILD_DIR)/%: $(GO_FILES) $(TEMPL_GO_FILES) $(MAINJS_OUT) $(TAILWINDCSS_OUT)
+$(BUILD_DIR)/%: $(GO_FILES) $(TEMPL_GO_FILES) $(SQLC_SENTINEL) $(MAINJS_OUT) $(TAILWINDCSS_OUT)
 	go build -o "$@" "$(CMD_DIR)/$*"
 endif
 
 # Build step for templ source
 %_templ.go: %.templ
 	"$(GOBIN)/templ" generate -f "$<"
+
+# Build step for sqlc source
+$(SQLC_SENTINEL): $(SQL_FILES) sqlc.yml
+	sqlc generate
+	touch "$@"
 
 # Build step for main.js
 $(MAINJS_OUT): $(JS_FILES)
@@ -67,11 +75,12 @@ endif
 
 .PHONY: clean
 clean:
-	@if [ -z "$(VIEW_DIR)" ] || [ -z "$(BUILD_DIR)" ]; then \
-		echo "Error: VIEW_DIR or BUILD_DIR is not set."; \
+	@if [ -z "$(VIEW_DIR)" ] || [ -z "$(BUILD_DIR)" ] || [ -z "$(REPOSITORY_DIR)" ]; then \
+		echo "Error: VIEW_DIR, BUILD_DIR or REPOSITORY_DIR is not set."; \
 		exit 1; \
 	fi
 	find "$(VIEW_DIR)" -type f -name '*_templ.go' -exec rm -f {} +
+	rm -f "$(REPOSITORY_DIR)"/*.go "$(SQLC_SENTINEL)"
 	rm -f "$(TAILWINDCSS_OUT)" "$(MAINJS_OUT)"
 	rm -rf "$(BUILD_DIR)"
 	rm -rf "$(TMP_DIR)"
