@@ -9,12 +9,16 @@ services:
     environment:
       - ENV=development
     volumes:
+      - runner-home:/home/runner
       - type: bind
         source: ./src
         target: /home/runner/src
     ports:
       - "8080:8080"
       - "8010:8010"
+
+volumes:
+  runner-home:
 
 x-podman:
   in_pod: false

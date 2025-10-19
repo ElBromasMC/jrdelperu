@@ -8,14 +8,14 @@ PROJECT_ROOT="$(realpath "$SCRIPT_DIR/..")"
 
 compose_arguments=(
     # Project name
-    #-p "$(basename "${PROJECT_ROOT}")_prod"
+    -p "$(basename "${PROJECT_ROOT}")_prod"
     # Merge compose files
     -f docker-compose.base.yml
     -f docker-compose.prod.yml
 )
 
-if [[ "$TRAEFIK" == "yes" ]]; then
-    compose_arguments+=( -f docker-compose.traefik.yml )
+if [[ "$REVERSE_PROXY" == "yes" ]]; then
+    compose_arguments+=( -f docker-compose.proxy.yml )
 fi
 
 cd ${PROJECT_ROOT}

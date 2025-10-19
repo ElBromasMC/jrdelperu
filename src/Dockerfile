@@ -1,4 +1,4 @@
-FROM docker.io/golang:1.24-alpine AS base
+FROM docker.io/golang:1.25-alpine AS base
 
 # Install run-time and compile-time system dependencies
 USER root
@@ -31,7 +31,7 @@ RUN go mod download
 # Production
 #
 
-FROM base AS builder
+FROM base AS production
 
 # Copy source and build
 USER runner
@@ -40,19 +40,11 @@ COPY --chown=runner:runner . .
 RUN make clean
 RUN make ./build/server
 
-FROM docker.io/alpine:latest AS production
-
-# Create and switch to non-root user
-RUN addgroup -g 1000 runner \
-    && adduser -G runner -u 1000 -D runner
-USER runner
-
 # Create required folders and change to app directory
-RUN mkdir /home/runner/app
+RUN mkdir /home/runner/app \
+    && cp /home/runner/src/build/server \
+    /home/runner/app/
 WORKDIR /home/runner/app
-
-# Deploy the application binary into a lean image
-COPY --from=builder --chown=runner:runner /home/runner/src/build/server ./
 
 # Expose required ports
 EXPOSE 8080
@@ -70,13 +62,19 @@ FROM base AS development
 USER root
 RUN apk add --no-cache \
     inotify-tools \
-    bash
+    bash \
+    ripgrep
+
+# Fix npm -g installation
+RUN install -d -m 0775 -o runner -g runner /usr/local/lib/node_modules \\
+    && chown -R runner:runner /usr/local/bin
 
 # Change to non-root user
 USER runner
 
 # Install dev-time local dependencies
-RUN go install github.com/air-verse/air@latest
+RUN go install github.com/air-verse/air@latest \
+    && npm install -g @anthropic-ai/claude-code
 
 # Change to source directory
 WORKDIR /home/runner/src

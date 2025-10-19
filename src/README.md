@@ -10,7 +10,6 @@ Example:
 ```bash
 ENV="development"
 POSTGRESQL_URL="postgres://postgres:LlaveSecreta01@db:5432/jrdelperu?sslmode=disable"
-SESSION_KEY="LlaveSecreta02"
 REL="1"
 ```
 

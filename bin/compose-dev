@@ -12,6 +12,7 @@ compose_arguments=(
     # Merge compose files
     -f docker-compose.base.yml
     -f docker-compose.dev.yml
+    -f docker-compose.db.yml
 )
 
 cd ${PROJECT_ROOT}
