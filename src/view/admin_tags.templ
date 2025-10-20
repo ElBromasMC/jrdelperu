@@ -1,0 +1,151 @@
+package view
+
+import (
+	"alc/repository"
+	"fmt"
+)
+
+// AdminTagsIndex muestra la página de gestión de tags
+templ AdminTagsIndex(username string, tags []repository.CategoriesTag) {
+	@AdminLayout("Etiquetas", username) {
+		<div class="space-y-6">
+			<!-- Header -->
+			<div class="flex justify-between items-center">
+				<h1 class="text-3xl font-bold">Gestión de Etiquetas</h1>
+			</div>
+			<!-- Tags List -->
+			<div class="card bg-base-100 shadow-xl">
+				<div class="card-body">
+					<h2 class="card-title">Etiquetas de Categorías</h2>
+					<p class="text-base-content/70 mb-4">
+						Las etiquetas se usan para marcar categorías destacadas (ej: "Nuevo", "Destacado", "Promoción").
+					</p>
+					<!-- Add Tag Form -->
+					<form
+						hx-post="/admin/tags"
+						hx-target="#tags-table tbody"
+						hx-swap="afterbegin"
+						hx-on::after-request="this.reset()"
+						class="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-base-200 rounded-lg mb-4"
+					>
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text">Nombre</span>
+							</label>
+							<input type="text" name="tag_name" placeholder="Ej: Destacado" class="input input-bordered" required/>
+						</div>
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text">Posición</span>
+							</label>
+							<input type="number" name="position_num" placeholder="1" class="input input-bordered" required/>
+						</div>
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text">&nbsp;</span>
+							</label>
+							<button type="submit" class="btn btn-primary">
+								Agregar Etiqueta
+							</button>
+						</div>
+					</form>
+					<!-- Tags Table -->
+					<div class="overflow-x-auto">
+						<table class="table table-zebra" id="tags-table">
+							<thead>
+								<tr>
+									<th>ID</th>
+									<th>Nombre</th>
+									<th>Posición</th>
+									<th>Creado</th>
+									<th>Acciones</th>
+								</tr>
+							</thead>
+							<tbody>
+								if len(tags) == 0 {
+									<tr>
+										<td colspan="5" class="text-center text-base-content/70">No hay etiquetas creadas.</td>
+									</tr>
+								} else {
+									for _, tag := range tags {
+										@TagRow(tag)
+									}
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// TagRow muestra una fila de tag (usada para HTMX swap)
+templ TagRow(tag repository.CategoriesTag) {
+	<tr id={ fmt.Sprintf("tag-%d", tag.TagID) }>
+		<td>{ fmt.Sprintf("%d", tag.TagID) }</td>
+		<td>
+			<span class="tag-name">{ tag.TagName }</span>
+			<input type="text" name="tag_name" value={ tag.TagName } class="input input-sm input-bordered hidden tag-edit-input"/>
+		</td>
+		<td>
+			<span class="tag-position">{ fmt.Sprintf("%d", tag.PositionNum) }</span>
+			<input type="number" name="position_num" value={ fmt.Sprintf("%d", tag.PositionNum) } class="input input-sm input-bordered hidden tag-edit-input"/>
+		</td>
+		<td>
+			if tag.CreatedAt.Valid {
+				{ tag.CreatedAt.Time.Format("02/01/2006") }
+			}
+		</td>
+		<td class="space-x-2">
+			<button
+				class="btn btn-xs btn-ghost tag-edit-btn"
+				onclick="toggleTagEdit(this)"
+			>
+				Editar
+			</button>
+			<button
+				class="btn btn-xs btn-success hidden tag-save-btn"
+				hx-put={ fmt.Sprintf("/admin/tags/%d", tag.TagID) }
+				hx-include="closest tr"
+				hx-target={ fmt.Sprintf("#tag-%d", tag.TagID) }
+				hx-swap="outerHTML"
+			>
+				Guardar
+			</button>
+			<button
+				class="btn btn-xs btn-ghost hidden tag-cancel-btn"
+				onclick="toggleTagEdit(this)"
+			>
+				Cancelar
+			</button>
+			<button
+				class="btn btn-xs btn-error"
+				hx-delete={ fmt.Sprintf("/admin/tags/%d", tag.TagID) }
+				hx-confirm="¿Eliminar esta etiqueta?"
+				hx-target={ fmt.Sprintf("#tag-%d", tag.TagID) }
+				hx-swap="outerHTML"
+			>
+				Eliminar
+			</button>
+		</td>
+	</tr>
+	<script>
+		function toggleTagEdit(btn) {
+			const row = btn.closest('tr');
+			const isEditing = row.querySelector('.tag-edit-input').classList.contains('hidden');
+
+			// Toggle visibility
+			row.querySelectorAll('.tag-name, .tag-position').forEach(el => {
+				el.classList.toggle('hidden');
+			});
+			row.querySelectorAll('.tag-edit-input').forEach(el => {
+				el.classList.toggle('hidden');
+			});
+			row.querySelector('.tag-edit-btn').classList.toggle('hidden');
+			row.querySelector('.tag-save-btn').classList.toggle('hidden');
+			row.querySelector('.tag-cancel-btn').classList.toggle('hidden');
+		}
+
+	</script>
+}

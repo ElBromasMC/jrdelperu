@@ -52,21 +52,21 @@ else
 	"$(NODEBIN)/esbuild" "$(JS_DIR)/main.js" --outfile="$@" --bundle --minify
 endif
 
-# Build step for tailwind.css
-$(TAILWINDCSS_OUT): $(TEMPL_FILES) tailwind.config.cjs tailwind.css
+# Build step for tailwind.css (Tailwind v4)
+$(TAILWINDCSS_OUT): $(TEMPL_FILES) tailwind.css
 ifeq ($(ENV),development)
-	./scripts/tailwind.sh "$(TMP_DIR)" "$(TAILWINDCSS_LOG)"
+	npx --yes @tailwindcss/cli -i tailwind.css -o "$@"
 else
-	"$(NODEBIN)/tailwindcss" build -i tailwind.css -o "$@" --minify
+	npx --yes @tailwindcss/cli -i tailwind.css -o "$@" --minify
 endif
 	touch "$@"
 
-# Live reload
+# Live reload (Tailwind v4 with fast rebuild)
 .PHONY: live
 live:
 ifeq ($(ENV),development)
 	mkdir -p "$(TMP_DIR)"
-	"$(NODEBIN)/tailwindcss" build -i tailwind.css -o "$(TAILWINDCSS_OUT)" --watch=always &> "$(TMP_DIR)/$(TAILWINDCSS_LOG)" &
+	npx --yes @tailwindcss/cli -i tailwind.css -o "$(TAILWINDCSS_OUT)" --watch &> "$(TMP_DIR)/$(TAILWINDCSS_LOG)" &
 	node ./scripts/live-reload.cjs &
 	"$(GOBIN)/air"
 else

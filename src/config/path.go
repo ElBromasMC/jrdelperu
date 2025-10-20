@@ -1,6 +1,6 @@
 package config
 
 const (
-	IMAGES_PATH    = "/images"
-	IMAGES_SAVEDIR = "./images"
+	IMAGES_PATH    = "/uploads/images"
+	IMAGES_SAVEDIR = "./uploads/images"
 )

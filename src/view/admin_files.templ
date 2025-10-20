@@ -1,0 +1,445 @@
+package view
+
+import (
+	"alc/repository"
+	"fmt"
+)
+
+// AdminFilesIndex muestra la página de gestión de archivos
+templ AdminFilesIndex(username string, images []repository.StaticFile, pdfs []repository.StaticFile) {
+	@AdminLayout("Archivos", username) {
+		<div class="space-y-6">
+			<!-- Header -->
+			<div class="flex justify-between items-center">
+				<h1 class="text-3xl font-bold">Gestión de Archivos</h1>
+			<div class="flex gap-2">
+				<button class="btn btn-primary" onclick="image_upload_modal.showModal()">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+					</svg>
+					Subir Imagen
+				</button>
+				<button class="btn btn-secondary" onclick="pdf_upload_modal.showModal()">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+					</svg>
+					Subir PDF
+				</button>
+			</div>
+			</div>
+			<!-- Stats -->
+			<div class="stats shadow">
+				<div class="stat">
+					<div class="stat-title">Total Imágenes</div>
+					<div class="stat-value text-primary" id="images-count">{ fmt.Sprintf("%d", len(images)) }</div>
+				</div>
+				<div class="stat">
+					<div class="stat-title">Total PDFs</div>
+					<div class="stat-value text-secondary" id="pdfs-count">{ fmt.Sprintf("%d", len(pdfs)) }</div>
+				</div>
+			</div>
+			<!-- Images Section -->
+			<div class="card bg-base-100 shadow-xl">
+				<div class="card-body">
+					<h2 class="card-title">Imágenes</h2>
+					if len(images) == 0 {
+						<p class="text-base-content/70">No hay imágenes subidas.</p>
+					} else {
+						<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="images-grid">
+							for _, img := range images {
+								@FileCard(img, "image")
+							}
+						</div>
+					}
+				</div>
+			</div>
+			<!-- PDFs Section -->
+			<div class="card bg-base-100 shadow-xl">
+				<div class="card-body">
+					<h2 class="card-title">PDFs</h2>
+					if len(pdfs) == 0 {
+						<p class="text-base-content/70">No hay PDFs subidos.</p>
+					} else {
+						<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="pdfs-grid">
+							for _, pdf := range pdfs {
+								@FileCard(pdf, "pdf")
+							}
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+		<!-- Upload Modal -->
+		@ImageUploadModal()
+		@PDFUploadModal()
+	}
+}
+
+// FileCard muestra una tarjeta de archivo en modo visualización
+templ FileCard(file repository.StaticFile, fileType string) {
+	<div class="card bg-base-200 shadow" id={ fmt.Sprintf("file-card-%d", file.FileID) }>
+		<div class="card-body p-4">
+			if fileType == "image" {
+				<div class="aspect-video bg-base-300 rounded flex items-center justify-center overflow-hidden">
+					<img src={ fmt.Sprintf("/uploads/images/%s", file.FileName) } alt={ file.FileName } class="w-full h-full object-cover"/>
+				</div>
+			} else {
+				<div class="aspect-video bg-base-300 rounded flex items-center justify-center">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+					</svg>
+				</div>
+			}
+			<div class="mt-2">
+				if file.DisplayName.Valid {
+					<p class="text-sm font-semibold truncate" title={ file.DisplayName.String }>
+						{ file.DisplayName.String }
+					</p>
+				} else {
+					<p class="text-sm font-semibold truncate" title={ file.FileName }>
+						{ file.FileName }
+					</p>
+				}
+				<p class="text-xs font-mono text-base-content/50 truncate mt-1" title={ file.FileName }>{ file.FileName }</p>
+				<p class="text-xs text-base-content/70">
+					if file.FileSizeBytes.Valid {
+						{ formatFileSize(file.FileSizeBytes.Int64) }
+					}
+				</p>
+			</div>
+			<div class="card-actions justify-end mt-2">
+				<button
+					type="button"
+					class="btn btn-xs btn-ghost"
+					hx-get={ fmt.Sprintf("/admin/files/%d/edit", file.FileID) }
+					hx-target={ fmt.Sprintf("#file-card-%d", file.FileID) }
+					hx-swap="outerHTML"
+				>
+					Renombrar
+				</button>
+				if fileType == "image" {
+					<a href={ templ.URL(fmt.Sprintf("/uploads/images/%s", file.FileName)) } target="_blank" class="btn btn-xs btn-ghost">
+						Ver
+					</a>
+				} else {
+					<a href={ templ.URL(fmt.Sprintf("/uploads/pdfs/%s", file.FileName)) } target="_blank" class="btn btn-xs btn-ghost">
+						Descargar
+					</a>
+				}
+				<button
+					class="btn btn-xs btn-error"
+					hx-delete={ fmt.Sprintf("/admin/files/%d", file.FileID) }
+					hx-confirm="¿Estás seguro de eliminar este archivo?"
+					hx-target={ fmt.Sprintf("#file-card-%d", file.FileID) }
+					hx-swap="outerHTML"
+				>
+					Eliminar
+				</button>
+			</div>
+		</div>
+	</div>
+}
+
+// FileCardEdit muestra una tarjeta de archivo en modo edición
+templ FileCardEdit(file repository.StaticFile, fileType string) {
+	<div class="card bg-base-200 shadow" id={ fmt.Sprintf("file-card-%d", file.FileID) }>
+		<div class="card-body p-4">
+			if fileType == "image" {
+				<div class="aspect-video bg-base-300 rounded flex items-center justify-center overflow-hidden">
+					<img src={ fmt.Sprintf("/uploads/images/%s", file.FileName) } alt={ file.FileName } class="w-full h-full object-cover"/>
+				</div>
+			} else {
+				<div class="aspect-video bg-base-300 rounded flex items-center justify-center">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+					</svg>
+				</div>
+			}
+			<div class="mt-2">
+				<input
+					type="text"
+					name="display_name"
+					class="input input-bordered input-sm w-full mb-2"
+					if file.DisplayName.Valid {
+						value={ file.DisplayName.String }
+					} else {
+						value={ file.FileName }
+					}
+				/>
+				<p class="text-xs font-mono text-base-content/50 truncate mt-1" title={ file.FileName }>{ file.FileName }</p>
+				<p class="text-xs text-base-content/70">
+					if file.FileSizeBytes.Valid {
+						{ formatFileSize(file.FileSizeBytes.Int64) }
+					}
+				</p>
+			</div>
+			<div class="card-actions justify-end mt-2">
+				<button
+					type="button"
+					class="btn btn-xs btn-primary"
+					hx-put={ fmt.Sprintf("/admin/files/%d/display-name", file.FileID) }
+					hx-target={ fmt.Sprintf("#file-card-%d", file.FileID) }
+					hx-swap="outerHTML"
+					hx-include={ fmt.Sprintf("#file-card-%d [name='display_name']", file.FileID) }
+				>
+					Guardar
+				</button>
+				<button
+					type="button"
+					class="btn btn-xs btn-ghost"
+					hx-get={ fmt.Sprintf("/admin/files/%d", file.FileID) }
+					hx-target={ fmt.Sprintf("#file-card-%d", file.FileID) }
+					hx-swap="outerHTML"
+				>
+					Cancelar
+				</button>
+			</div>
+		</div>
+	</div>
+}
+
+// ImageUploadModal muestra el modal de subida de imágenes
+templ ImageUploadModal() {
+	<dialog id="image_upload_modal" class="modal">
+		<div class="modal-box">
+			<h3 class="font-bold text-lg">Subir Imagen</h3>
+			<form
+				hx-post="/admin/files/upload"
+				hx-encoding="multipart/form-data"
+				hx-target="#upload-result-image"
+				class="space-y-4 mt-4"
+			>
+				<div class="form-control">
+					<label class="label">
+						<span class="label-text font-semibold">Archivo</span>
+					</label>
+					<input
+						type="file"
+						id="image_file_input"
+						name="file"
+						class="file-input file-input-bordered"
+						required
+						accept="image/*"
+					/>
+					<label class="label">
+						<span class="label-text-alt">JPG, PNG, WebP, GIF (máx 10 MB)</span>
+					</label>
+				</div>
+				<div class="form-control">
+					<label class="label">
+						<span class="label-text font-semibold">Nombre</span>
+					</label>
+					<input
+						type="text"
+						id="image_display_name"
+						name="display_name"
+						class="input input-bordered"
+						placeholder="Ej: Logo Principal"
+						required
+					/>
+				</div>
+				<div id="upload-result-image" class="text-sm"></div>
+				<div class="modal-action">
+					<button type="button" class="btn" onclick="image_upload_modal.close()">Cancelar</button>
+					<button type="submit" class="btn btn-primary">Subir</button>
+				</div>
+			</form>
+		</div>
+		<form method="dialog" class="modal-backdrop">
+			<button>Cerrar</button>
+		</form>
+	</dialog>
+}
+
+// FileCardOOB renders a FileCard with OOB swap attributes for prepending to grids
+templ FileCardOOB(file repository.StaticFile, fileType string) {
+	if fileType == "image" {
+		<div hx-swap-oob="afterbegin:#images-grid">
+			<div class="card bg-base-200 shadow" id={ fmt.Sprintf("file-card-%d", file.FileID) }>
+				<div class="card-body p-4">
+					<div class="aspect-video bg-base-300 rounded flex items-center justify-center overflow-hidden">
+						<img src={ fmt.Sprintf("/uploads/images/%s", file.FileName) } alt={ file.FileName } class="w-full h-full object-cover"/>
+					</div>
+					<div class="mt-2">
+						if file.DisplayName.Valid {
+							<p class="text-sm font-semibold truncate" title={ file.DisplayName.String }>
+								{ file.DisplayName.String }
+							</p>
+						} else {
+							<p class="text-sm font-semibold truncate" title={ file.FileName }>
+								{ file.FileName }
+							</p>
+						}
+						<p class="text-xs font-mono text-base-content/50 truncate mt-1" title={ file.FileName }>{ file.FileName }</p>
+						<p class="text-xs text-base-content/70">
+							if file.FileSizeBytes.Valid {
+								{ formatFileSize(file.FileSizeBytes.Int64) }
+							}
+						</p>
+					</div>
+					<div class="card-actions justify-end mt-2">
+						<button
+							type="button"
+							class="btn btn-xs btn-ghost"
+							hx-get={ fmt.Sprintf("/admin/files/%d/edit", file.FileID) }
+							hx-target={ fmt.Sprintf("#file-card-%d", file.FileID) }
+							hx-swap="outerHTML"
+						>
+							Renombrar
+						</button>
+						<a href={ templ.URL(fmt.Sprintf("/uploads/images/%s", file.FileName)) } target="_blank" class="btn btn-xs btn-ghost">
+							Ver
+						</a>
+						<button
+							class="btn btn-xs btn-error"
+							hx-delete={ fmt.Sprintf("/admin/files/%d", file.FileID) }
+							hx-confirm="¿Estás seguro de eliminar este archivo?"
+							hx-target={ fmt.Sprintf("#file-card-%d", file.FileID) }
+							hx-swap="outerHTML"
+						>
+							Eliminar
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	} else {
+		<div hx-swap-oob="afterbegin:#pdfs-grid">
+			<div class="card bg-base-200 shadow" id={ fmt.Sprintf("file-card-%d", file.FileID) }>
+				<div class="card-body p-4">
+					<div class="aspect-video bg-base-300 rounded flex items-center justify-center">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+						</svg>
+					</div>
+					<div class="mt-2">
+						if file.DisplayName.Valid {
+							<p class="text-sm font-semibold truncate" title={ file.DisplayName.String }>
+								{ file.DisplayName.String }
+							</p>
+						} else {
+							<p class="text-sm font-semibold truncate" title={ file.FileName }>
+								{ file.FileName }
+							</p>
+						}
+						<p class="text-xs font-mono text-base-content/50 truncate mt-1" title={ file.FileName }>{ file.FileName }</p>
+						<p class="text-xs text-base-content/70">
+							if file.FileSizeBytes.Valid {
+								{ formatFileSize(file.FileSizeBytes.Int64) }
+							}
+						</p>
+					</div>
+					<div class="card-actions justify-end mt-2">
+						<button
+							type="button"
+							class="btn btn-xs btn-ghost"
+							hx-get={ fmt.Sprintf("/admin/files/%d/edit", file.FileID) }
+							hx-target={ fmt.Sprintf("#file-card-%d", file.FileID) }
+							hx-swap="outerHTML"
+						>
+							Renombrar
+						</button>
+						<a href={ templ.URL(fmt.Sprintf("/uploads/pdfs/%s", file.FileName)) } target="_blank" class="btn btn-xs btn-ghost">
+							Descargar
+						</a>
+						<button
+							class="btn btn-xs btn-error"
+							hx-delete={ fmt.Sprintf("/admin/files/%d", file.FileID) }
+							hx-confirm="¿Estás seguro de eliminar este archivo?"
+							hx-target={ fmt.Sprintf("#file-card-%d", file.FileID) }
+							hx-swap="outerHTML"
+						>
+							Eliminar
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// ImageCountStat renders just the image count stat value for OOB swaps
+templ ImageCountStat(count int) {
+	<div class="stat-value text-primary" id="images-count" hx-swap-oob="true">{ fmt.Sprintf("%d", count) }</div>
+}
+
+// PDFCountStat renders just the PDF count stat value for OOB swaps
+templ PDFCountStat(count int) {
+	<div class="stat-value text-secondary" id="pdfs-count" hx-swap-oob="true">{ fmt.Sprintf("%d", count) }</div>
+}
+
+// FileUploadResponse returns success message + OOB swaps for new file card and updated stats
+templ FileUploadResponse(displayName string, file repository.StaticFile, fileType string, imagesCount int, pdfsCount int) {
+	<!-- Success message for the upload result target -->
+	<div class="alert alert-success">
+		<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+		</svg>
+		<span>Archivo "{ displayName }" subido correctamente</span>
+	</div>
+	<!-- OOB: New file card prepended to the appropriate grid -->
+	@FileCardOOB(file, fileType)
+	<!-- OOB: Updated count stats -->
+	@ImageCountStat(imagesCount)
+	@PDFCountStat(pdfsCount)
+}
+
+// FileDeleteResponse returns OOB swaps for updated counts after deletion
+templ FileDeleteResponse(imagesCount int, pdfsCount int) {
+	<!-- OOB: Updated count stats -->
+	@ImageCountStat(imagesCount)
+	@PDFCountStat(pdfsCount)
+}
+
+// PDFUploadModal muestra el modal de subida de PDFs
+templ PDFUploadModal() {
+	<dialog id="pdf_upload_modal" class="modal">
+		<div class="modal-box">
+			<h3 class="font-bold text-lg">Subir PDF</h3>
+			<form
+				hx-post="/admin/files/upload"
+				hx-encoding="multipart/form-data"
+				hx-target="#upload-result-pdf"
+				class="space-y-4 mt-4"
+			>
+				<div class="form-control">
+					<label class="label">
+						<span class="label-text font-semibold">Archivo</span>
+					</label>
+					<input
+						type="file"
+						id="pdf_file_input"
+						name="file"
+						class="file-input file-input-bordered"
+						required
+						accept=".pdf,application/pdf"
+					/>
+					<label class="label">
+						<span class="label-text-alt">Archivos PDF (máx 20 MB)</span>
+					</label>
+				</div>
+				<div class="form-control">
+					<label class="label">
+						<span class="label-text font-semibold">Nombre</span>
+					</label>
+					<input
+						type="text"
+						id="pdf_display_name"
+						name="display_name"
+						class="input input-bordered"
+						placeholder="Ej: Catálogo de Productos"
+						required
+					/>
+				</div>
+				<div id="upload-result-pdf" class="text-sm"></div>
+				<div class="modal-action">
+					<button type="button" class="btn" onclick="pdf_upload_modal.close()">Cancelar</button>
+					<button type="submit" class="btn btn-primary">Subir</button>
+				</div>
+			</form>
+		</div>
+		<form method="dialog" class="modal-backdrop">
+			<button>Cerrar</button>
+		</form>
+	</dialog>
+}

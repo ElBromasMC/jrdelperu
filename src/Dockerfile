@@ -5,7 +5,9 @@ USER root
 RUN apk add --no-cache \
     make \
     nodejs \
-    npm
+    npm \
+    build-base \
+    vips-dev
 
 # Create and switch to non-root user
 RUN addgroup -g 1000 runner \

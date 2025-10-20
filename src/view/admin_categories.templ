@@ -1,0 +1,519 @@
+package view
+
+import (
+	"alc/repository"
+	"fmt"
+)
+
+// AdminCategoriesPage muestra la lista de categorías
+templ AdminCategoriesPage(username string, categories []repository.Category, images map[int32]repository.StaticFile) {
+	@AdminLayout("Categorías", username) {
+		<div class="space-y-6">
+			<div class="flex justify-between items-center">
+				<h1 class="text-3xl font-bold">Gestión de Categorías</h1>
+				<a href="/admin/categories/new" class="btn btn-primary">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+					</svg>
+					Nueva Categoría
+				</a>
+			</div>
+			<!-- Filter by material type -->
+			<div class="flex gap-2">
+				<a href="/admin/categories" class="btn btn-sm">Todas</a>
+				<a href="/admin/categories?type=vidrio" class="btn btn-sm btn-ghost">Vidrios</a>
+				<a href="/admin/categories?type=aluminio" class="btn btn-sm btn-ghost">Aluminios</a>
+				<a href="/admin/categories?type=upvc" class="btn btn-sm btn-ghost">uPVC</a>
+			</div>
+			<!-- Categories Table -->
+			<div class="overflow-x-auto bg-base-100 rounded-lg shadow">
+				<table class="table table-zebra">
+					<thead>
+						<tr>
+							<th>Imagen</th>
+							<th>Tipo Material</th>
+							<th>Nombre</th>
+							<th>Slug</th>
+							<th>Descripción</th>
+							<th>Acciones</th>
+						</tr>
+					</thead>
+					<tbody id="categories-list">
+						for _, cat := range categories {
+							@AdminCategoryRow(cat, images[cat.ImageID.Int32])
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	}
+}
+
+// AdminCategoryRow representa una fila de categoría
+templ AdminCategoryRow(cat repository.Category, img repository.StaticFile) {
+	<tr id={ fmt.Sprintf("category-%d", cat.CategoryID) }>
+		<td>
+			<div class="avatar">
+				<div class="w-16 h-16 rounded">
+					<img src={ getAdminFileURL(img) } alt={ cat.Name }/>
+				</div>
+			</div>
+		</td>
+		<td>
+			<span class="badge badge-lg">
+				switch cat.MaterialType {
+					case repository.MaterialTypeVidrio:
+						VIDRIO
+					case repository.MaterialTypeAluminio:
+						ALUMINIO
+					case repository.MaterialTypeUpvc:
+						uPVC
+				}
+			</span>
+		</td>
+		<td class="font-semibold">{ cat.Name }</td>
+		<td><code class="text-xs">{ cat.Slug }</code></td>
+		<td class="max-w-xs truncate">{ cat.Description }</td>
+		<td>
+			<div class="flex gap-2">
+				<a href={ templ.URL(fmt.Sprintf("/admin/categories/%d/edit", cat.CategoryID)) } class="btn btn-xs btn-info">
+					Editar
+				</a>
+				<a href={ templ.URL(fmt.Sprintf("/admin/categories/%d/items", cat.CategoryID)) } class="btn btn-xs btn-primary">
+					Items
+				</a>
+				<a href={ templ.URL(fmt.Sprintf("/admin/categories/%d/features", cat.CategoryID)) } class="btn btn-xs btn-ghost">
+					Características
+				</a>
+				<button
+					class="btn btn-xs btn-error"
+					hx-delete={ fmt.Sprintf("/admin/categories/%d", cat.CategoryID) }
+					hx-confirm="¿Eliminar esta categoría? Se eliminarán también sus items y características."
+					hx-target={ fmt.Sprintf("#category-%d", cat.CategoryID) }
+					hx-swap="outerHTML"
+				>
+					Eliminar
+				</button>
+			</div>
+		</td>
+	</tr>
+}
+
+// AdminCategoryFormPage muestra el formulario de crear/editar categoría
+templ AdminCategoryFormPage(username string, cat *repository.Category, images []repository.StaticFile, tags []repository.CategoriesTag, pdfs []repository.StaticFile, isEdit bool) {
+	if isEdit {
+		@AdminLayout("Editar Categoría", username) {
+			@adminCategoryFormContent(cat, images, tags, pdfs, isEdit)
+		}
+	} else {
+		@AdminLayout("Nueva Categoría", username) {
+			@adminCategoryFormContent(cat, images, tags, pdfs, isEdit)
+		}
+	}
+}
+
+// adminCategoryFormContent contiene el contenido del formulario
+templ adminCategoryFormContent(cat *repository.Category, images []repository.StaticFile, tags []repository.CategoriesTag, pdfs []repository.StaticFile, isEdit bool) {
+		<div class="max-w-4xl mx-auto space-y-6">
+			<div class="flex items-center gap-4">
+				<a href="/admin/categories" class="btn btn-ghost btn-sm">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+					</svg>
+					Volver
+				</a>
+				<h1 class="text-3xl font-bold">
+					if isEdit {
+						Editar Categoría
+					} else {
+						Nueva Categoría
+					}
+				</h1>
+			</div>
+			<div class="card bg-base-100 shadow-xl">
+				<div class="card-body">
+					<form
+						if isEdit {
+							hx-put={ fmt.Sprintf("/admin/categories/%d", cat.CategoryID) }
+						} else {
+							hx-post="/admin/categories"
+						}
+						hx-target="body"
+						class="space-y-4"
+					>
+						<!-- Material Type -->
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">Tipo de Material *</span>
+							</label>
+							<select name="material_type" class="select select-bordered" required>
+								<option value="">Seleccionar tipo...</option>
+								<option
+									value="vidrio"
+									if isEdit && cat.MaterialType == repository.MaterialTypeVidrio {
+										selected
+									}
+								>
+									Vidrio
+								</option>
+								<option
+									value="aluminio"
+									if isEdit && cat.MaterialType == repository.MaterialTypeAluminio {
+										selected
+									}
+								>
+									Aluminio
+								</option>
+								<option
+									value="upvc"
+									if isEdit && cat.MaterialType == repository.MaterialTypeUpvc {
+										selected
+									}
+								>
+									uPVC
+								</option>
+							</select>
+						</div>
+						<!-- Name -->
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">Nombre *</span>
+							</label>
+							<input
+								type="text"
+								name="name"
+								class="input input-bordered"
+								placeholder="Ej: Vidrio Monolítico"
+								if isEdit {
+									value={ cat.Name }
+								}
+								required
+							/>
+						</div>
+						<!-- Slug -->
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">Slug (URL) *</span>
+								<span class="label-text-alt">Solo letras minúsculas, números y guiones</span>
+							</label>
+							<input
+								type="text"
+								name="slug"
+								class="input input-bordered"
+								placeholder="vidrio-monolitico"
+								pattern="[a-z0-9\-]+"
+								if isEdit {
+									value={ cat.Slug }
+								}
+								required
+							/>
+						</div>
+						<!-- Description -->
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">Descripción Corta *</span>
+							</label>
+							<textarea
+								name="description"
+								class="textarea textarea-bordered"
+								rows="2"
+								placeholder="Descripción breve para listados"
+								required
+							>
+								if isEdit {
+									{ cat.Description }
+								}
+							</textarea>
+						</div>
+						<!-- Long Description -->
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">Descripción Larga *</span>
+							</label>
+							<textarea
+								name="long_description"
+								class="textarea textarea-bordered"
+								rows="6"
+								placeholder="Descripción detallada que aparecerá en la página de la categoría"
+								required
+							>
+								if isEdit {
+									{ cat.LongDescription }
+								}
+							</textarea>
+						</div>
+						<!-- Image -->
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">Imagen</span>
+							</label>
+							<select name="image_id" class="select select-bordered">
+								<option value="">Sin imagen</option>
+								for _, img := range images {
+									<option
+										value={ fmt.Sprint(img.FileID) }
+										if isEdit && cat.ImageID.Valid && cat.ImageID.Int32 == img.FileID {
+											selected
+										}
+									>
+										if img.DisplayName.Valid {
+											{ img.DisplayName.String }
+										} else {
+											{ img.FileName }
+										}
+									</option>
+								}
+							</select>
+							<label class="label">
+								<span class="label-text-alt">
+									<a href="/admin/files" class="link" target="_blank">Gestionar archivos</a>
+									{ " | " }
+									<button type="button" class="link" onclick="image_upload_modal.showModal()">Subir nuevo</button>
+								</span>
+							</label>
+						</div>
+						<!-- Tag -->
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">Etiqueta</span>
+							</label>
+							<select name="tag_id" class="select select-bordered">
+								<option value="">Sin etiqueta</option>
+								for _, tag := range tags {
+									<option
+										value={ fmt.Sprint(tag.TagID) }
+										if isEdit && cat.TagID.Valid && cat.TagID.Int32 == tag.TagID {
+											selected
+										}
+									>
+										{ tag.TagName }
+									</option>
+								}
+							</select>
+						</div>
+						<!-- PDF -->
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">PDF (Catálogo)</span>
+							</label>
+							<select name="pdf_id" class="select select-bordered">
+								<option value="">Sin PDF</option>
+								for _, pdf := range pdfs {
+									<option
+										value={ fmt.Sprint(pdf.FileID) }
+										if isEdit && cat.PdfID.Valid && cat.PdfID.Int32 == pdf.FileID {
+											selected
+										}
+									>
+										if pdf.DisplayName.Valid {
+											{ pdf.DisplayName.String }
+										} else {
+											{ pdf.FileName }
+										}
+									</option>
+								}
+							</select>
+							<label class="label">
+								<span class="label-text-alt">
+									<a href="/admin/files?type=pdf" class="link" target="_blank">Gestionar archivos</a>
+									{ " | " }
+									<button type="button" class="link" onclick="pdf_upload_modal.showModal()">Subir nuevo</button>
+								</span>
+							</label>
+						</div>
+						<!-- Submit -->
+						<div class="form-control mt-6">
+							<button type="submit" class="btn btn-primary">
+								if isEdit {
+									Actualizar Categoría
+								} else {
+									Crear Categoría
+								}
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+		<!-- Upload Modal -->
+		@ImageUploadModal()
+		@PDFUploadModal()
+}
+
+// AdminCategoryFeaturesPage muestra las características de una categoría
+templ AdminCategoryFeaturesPage(username string, category repository.Category, features []repository.CategoryFeature) {
+	@AdminLayout(fmt.Sprintf("Características: %s", category.Name), username) {
+		<div class="space-y-6">
+			<div class="flex items-center gap-4">
+				<a href="/admin/categories" class="btn btn-ghost btn-sm">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+					</svg>
+					Volver a Categorías
+				</a>
+				<h1 class="text-3xl font-bold">
+					Características: <span class="text-primary">{ category.Name }</span>
+				</h1>
+			</div>
+			<!-- Add Feature Form -->
+			<div class="card bg-base-100 shadow-xl">
+				<div class="card-body">
+					<h2 class="card-title">Agregar Característica</h2>
+					<form
+						hx-post={ fmt.Sprintf("/admin/categories/%d/features", category.CategoryID) }
+						hx-target="#features-list"
+						hx-swap="afterbegin"
+						hx-on::after-request="this.reset()"
+						class="flex flex-col gap-4 md:flex-row md:items-end"
+					>
+						<div class="form-control flex-1">
+							<label class="label">
+								<span class="label-text font-semibold">Nombre</span>
+							</label>
+							<input
+								type="text"
+								name="name"
+								class="input input-bordered"
+								placeholder="Ej: Resistencia Mecánica"
+								required
+							/>
+						</div>
+						<div class="form-control flex-1">
+							<label class="label">
+								<span class="label-text font-semibold">Descripción</span>
+							</label>
+							<input
+								type="text"
+								name="description"
+								class="input input-bordered"
+								placeholder="Ej: Resistencia a flexión: 20-30 MPa"
+								required
+							/>
+						</div>
+						<div class="form-control">
+							<button type="submit" class="btn btn-primary">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+								</svg>
+								Agregar
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+			<!-- Features List -->
+			<div class="card bg-base-100 shadow-xl">
+				<div class="card-body">
+					<h2 class="card-title">Lista de Características</h2>
+					<div class="overflow-x-auto">
+						<table class="table table-zebra">
+							<thead>
+								<tr>
+									<th>Nombre</th>
+									<th>Descripción</th>
+									<th class="text-right">Acciones</th>
+								</tr>
+							</thead>
+							<tbody id="features-list">
+								if len(features) == 0 {
+									<tr id="features-empty-state">
+										<td colspan="3" class="text-center text-base-content/70 py-8">
+											No hay características definidas para esta categoría.
+										</td>
+									</tr>
+								} else {
+									for _, feature := range features {
+										@AdminCategoryFeatureRow(category.CategoryID, feature)
+									}
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// AdminCategoryFeatureRowWithEmptyRemoval returns a new feature row and removes empty state
+templ AdminCategoryFeatureRowWithEmptyRemoval(categoryID int32, feature repository.CategoryFeature) {
+	@AdminCategoryFeatureRow(categoryID, feature)
+	<!-- Remove empty state if it exists -->
+	<tr id="features-empty-state" hx-swap-oob="true"></tr>
+}
+
+// AdminCategoryFeatureRow representa una fila de característica en modo visualización
+templ AdminCategoryFeatureRow(categoryID int32, feature repository.CategoryFeature) {
+	<tr id={ fmt.Sprintf("feature-%d", feature.FeatureID) }>
+		<td>{ feature.Name }</td>
+		<td>{ feature.Description }</td>
+		<td class="text-right">
+			<div class="flex gap-2 justify-end">
+				<button
+					class="btn btn-xs btn-ghost"
+					hx-get={ fmt.Sprintf("/admin/categories/%d/features/%d/edit", categoryID, feature.FeatureID) }
+					hx-target={ fmt.Sprintf("#feature-%d", feature.FeatureID) }
+					hx-swap="outerHTML"
+				>
+					Editar
+				</button>
+				<button
+					class="btn btn-xs btn-error"
+					hx-delete={ fmt.Sprintf("/admin/categories/%d/features/%d", categoryID, feature.FeatureID) }
+					hx-confirm="¿Eliminar esta característica?"
+					hx-target={ fmt.Sprintf("#feature-%d", feature.FeatureID) }
+					hx-swap="outerHTML"
+				>
+					Eliminar
+				</button>
+			</div>
+		</td>
+	</tr>
+}
+
+// AdminCategoryFeatureRowEdit representa una fila de característica en modo edición
+templ AdminCategoryFeatureRowEdit(categoryID int32, feature repository.CategoryFeature) {
+	<tr id={ fmt.Sprintf("feature-%d", feature.FeatureID) }>
+		<td>
+			<input
+				type="text"
+				name="name"
+				class="input input-sm input-bordered w-full"
+				value={ feature.Name }
+				required
+			/>
+		</td>
+		<td>
+			<input
+				type="text"
+				name="description"
+				class="input input-sm input-bordered w-full"
+				value={ feature.Description }
+				required
+			/>
+		</td>
+		<td class="text-right">
+			<div class="flex gap-2 justify-end">
+				<button
+					type="button"
+					class="btn btn-xs btn-success"
+					hx-put={ fmt.Sprintf("/admin/categories/%d/features/%d", categoryID, feature.FeatureID) }
+					hx-include={ fmt.Sprintf("#feature-%d", feature.FeatureID) }
+					hx-target={ fmt.Sprintf("#feature-%d", feature.FeatureID) }
+					hx-swap="outerHTML"
+				>
+					Guardar
+				</button>
+				<button
+					type="button"
+					class="btn btn-xs btn-ghost"
+					hx-get={ fmt.Sprintf("/admin/categories/%d/features/%d", categoryID, feature.FeatureID) }
+					hx-target={ fmt.Sprintf("#feature-%d", feature.FeatureID) }
+					hx-swap="outerHTML"
+				>
+					Cancelar
+				</button>
+			</div>
+		</td>
+	</tr>
+}

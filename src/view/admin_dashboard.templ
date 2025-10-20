@@ -1,0 +1,85 @@
+package view
+
+import "fmt"
+
+// AdminDashboard es la página principal del dashboard
+templ AdminDashboard(username string, categoriesCount, itemsCount, messagesCount, filesCount int) {
+	@AdminLayout("Dashboard", username) {
+		<div class="space-y-6">
+			<!-- Welcome section -->
+			<div class="card bg-base-100 shadow-xl">
+				<div class="card-body">
+					<h2 class="card-title text-2xl">Bienvenido, { username }!</h2>
+					<p class="text-base-content/70">Este es tu panel de control para gestionar el contenido del sitio web.</p>
+				</div>
+			</div>
+			<!-- Stats -->
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+				<div class="stats shadow">
+					<div class="stat">
+						<div class="stat-figure text-primary">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6z"></path>
+							</svg>
+						</div>
+						<div class="stat-title">Categorías</div>
+						<div class="stat-value text-primary">{ fmt.Sprint(categoriesCount) }</div>
+					</div>
+				</div>
+				<div class="stats shadow">
+					<div class="stat">
+						<div class="stat-figure text-secondary">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4"></path>
+							</svg>
+						</div>
+						<div class="stat-title">Productos</div>
+						<div class="stat-value text-secondary">{ fmt.Sprint(itemsCount) }</div>
+					</div>
+				</div>
+				<div class="stats shadow">
+					<div class="stat">
+						<div class="stat-figure text-accent">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8"></path>
+							</svg>
+						</div>
+						<div class="stat-title">Mensajes</div>
+						<div class="stat-value text-accent">{ fmt.Sprint(messagesCount) }</div>
+					</div>
+				</div>
+				<div class="stats shadow">
+					<div class="stat">
+						<div class="stat-figure text-info">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414"></path>
+							</svg>
+						</div>
+						<div class="stat-title">Archivos</div>
+						<div class="stat-value text-info">{ fmt.Sprint(filesCount) }</div>
+					</div>
+				</div>
+			</div>
+			<!-- Quick actions -->
+			<div class="card bg-base-100 shadow-xl">
+				<div class="card-body">
+					<h3 class="card-title">Acciones Rápidas</h3>
+					<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+						<a href="/admin/categories/new" class="btn btn-outline btn-primary">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+							</svg>
+							Nueva Categoría
+						</a>
+						<a href="/admin/files" class="btn btn-outline btn-accent">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+							</svg>
+							Subir Archivo
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}

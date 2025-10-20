@@ -1,0 +1,301 @@
+package view
+
+import (
+	"alc/repository"
+	"fmt"
+	"os"
+	"time"
+)
+
+// getAdminFileURL constructs the correct URL for a static file in admin
+func getAdminFileURL(file repository.StaticFile) string {
+	if file.FileID == 0 {
+		return "/static/img/placeholder.webp"
+	}
+	if !file.FileType.Valid {
+		return "/static/img/placeholder.webp"
+	}
+	fileType := file.FileType.String
+	if fileType == "image" || fileType == "pdf" {
+		return fmt.Sprintf("/uploads/%ss/%s", fileType, file.FileName)
+	}
+	return "/static/img/placeholder.webp"
+}
+
+// AdminBase es el layout base para páginas de administración
+templ AdminBase(title string) {
+	<!DOCTYPE html>
+	<html lang="es" data-theme="admin">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<title>{ title } - Admin | JR del Perú</title>
+			<!-- HTMX -->
+			<script src="https://unpkg.com/htmx.org@2.0.3" integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" crossorigin="anonymous"></script>
+			if os.Getenv("ENV") == "development" {
+				<!-- Live reload -->
+				<script src="/static/js/live-reload.js"></script>
+				<script src={ fmt.Sprintf("/static/js/main.js?v=%s", time.Now().Format("20060102150405")) } defer></script>
+				<link href={ fmt.Sprintf("/static/css/tailwind.css?v=%s", time.Now().Format("20060102150405")) } rel="stylesheet"/>
+			} else {
+				<script src={ fmt.Sprintf("/static/js/main.js?v=%s", os.Getenv("REL")) } defer></script>
+				<link href={ fmt.Sprintf("/static/css/tailwind.css?v=%s", os.Getenv("REL")) } rel="stylesheet"/>
+			}
+			<link rel="icon" href="/static/img/favicon.webp"/>
+		</head>
+		<body class="bg-base-200">
+			{ children... }
+			<script>
+
+		// Auto-select uploaded file in form selects
+		document.body.addEventListener('fileUploaded', function(evt) {
+			const detail = evt.detail;
+			const fileId = detail.fileId;
+			const fileType = detail.fileType;
+			const displayName = detail.displayName;
+
+			// Find and update relevant select elements
+			const selectName = fileType === 'image' ? 'image_id' : 'pdf_id';
+			const selects = document.querySelectorAll(`select[name="${selectName}"]`);
+
+			selects.forEach(select => {
+				// Check if option already exists
+				let option = select.querySelector(`option[value="${fileId}"]`);
+
+				if (!option) {
+					// Create new option
+					option = document.createElement('option');
+					option.value = fileId;
+					option.textContent = displayName;
+					select.appendChild(option);
+				}
+
+				// Select the newly uploaded file
+				select.value = fileId;
+			});
+
+			// Close the appropriate upload modal
+			const imageModal = document.getElementById('image_upload_modal');
+			const pdfModal = document.getElementById('pdf_upload_modal');
+
+			if (imageModal && imageModal.open) {
+				imageModal.close();
+				const form = imageModal.querySelector('form');
+				if (form) form.reset();
+				const result = document.getElementById('upload-result-image');
+				if (result) result.textContent = '';
+			} else if (pdfModal && pdfModal.open) {
+				pdfModal.close();
+				const form = pdfModal.querySelector('form');
+				if (form) form.reset();
+				const result = document.getElementById('upload-result-pdf');
+				if (result) result.textContent = '';
+			}
+		});
+
+
+		// Slug generation from name field
+		function generateSlug(text) {
+			return text
+				.toLowerCase()
+				.normalize('NFD')
+				.replace(/[\u0300-\u036f]/g, '') // Remove diacritics
+				.replace(/[^a-z0-9\s-]/g, '') // Remove invalid chars
+				.trim()
+				.replace(/\s+/g, '-') // Replace spaces with hyphens
+				.replace(/-+/g, '-'); // Replace multiple hyphens with single
+		}
+
+		// Auto-generate slug when name changes
+		document.addEventListener('DOMContentLoaded', function() {
+			const nameInputs = document.querySelectorAll('input[name="name"]');
+			nameInputs.forEach(nameInput => {
+				const form = nameInput.closest('form');
+				if (!form) return;
+
+				const slugInput = form.querySelector('input[name="slug"]');
+				if (!slugInput) return;
+
+				nameInput.addEventListener('input', function() {
+					// Only auto-generate if slug is empty or was auto-generated before
+					if (!slugInput.dataset.manuallyEdited) {
+						slugInput.value = generateSlug(this.value);
+					}
+				});
+
+				// Mark slug as manually edited when user types in it
+				slugInput.addEventListener('input', function() {
+					slugInput.dataset.manuallyEdited = 'true';
+				});
+
+				// Allow re-autogeneration if slug is cleared
+				slugInput.addEventListener('change', function() {
+					if (this.value === '') {
+						delete slugInput.dataset.manuallyEdited;
+					}
+				});
+			});
+		});
+
+
+		// Auto-fill display name from selected file
+		function generateDisplayNameFromFile(filename) {
+			// Remove extension
+			const lastDot = filename.lastIndexOf('.');
+			const nameWithoutExt = lastDot > 0 ? filename.substring(0, lastDot) : filename;
+
+			// Replace separators with spaces
+			let displayName = nameWithoutExt.replace(/[_-]/g, ' ');
+
+			// Normalize unicode (remove accents)
+			displayName = displayName.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+			// Title case words
+			displayName = displayName.split(' ')
+				.map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+				.join(' ');
+
+			return displayName;
+		}
+
+		// Listen for file selection in image upload modal
+		document.addEventListener('change', function(e) {
+			if (e.target.id === 'image_file_input') {
+				const fileInput = e.target;
+				const displayNameInput = document.getElementById('image_display_name');
+				if (fileInput.files.length > 0 && displayNameInput) {
+					const filename = fileInput.files[0].name;
+					displayNameInput.value = generateDisplayNameFromFile(filename);
+				}
+			} else if (e.target.id === 'pdf_file_input') {
+				const fileInput = e.target;
+				const displayNameInput = document.getElementById('pdf_display_name');
+				if (fileInput.files.length > 0 && displayNameInput) {
+					const filename = fileInput.files[0].name;
+					displayNameInput.value = generateDisplayNameFromFile(filename);
+				}
+			}
+		});
+		</script>
+		</body>
+	</html>
+}
+
+// AdminLayout es el layout con navegación para páginas autenticadas
+templ AdminLayout(title, username string) {
+	@AdminBase(title) {
+		<div class="drawer lg:drawer-open">
+			<input id="admin-drawer" type="checkbox" class="drawer-toggle"/>
+			<div class="drawer-content flex flex-col">
+				<!-- Navbar -->
+				<div class="w-full navbar bg-base-100 shadow-md">
+					<div class="flex-none lg:hidden">
+						<label for="admin-drawer" class="btn btn-square btn-ghost">
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-6 h-6 stroke-current">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+							</svg>
+						</label>
+					</div>
+					<div class="flex-1 px-2 mx-2">
+						<span class="text-lg font-bold">Panel de Administración</span>
+					</div>
+					<div class="flex-none"></div>
+				</div>
+				<!-- Page content -->
+				<div class="p-4 lg:p-8">
+					{ children... }
+				</div>
+			</div>
+			<div class="drawer-side">
+				<label for="admin-drawer" class="drawer-overlay"></label>
+				<aside class="bg-base-100 w-64 min-h-screen">
+					<div class="p-4">
+						<h2 class="text-2xl font-bold text-primary">JR del Perú</h2>
+						<p class="text-sm text-base-content/70">Administración</p>
+					</div>
+					<ul class="menu p-4 w-full">
+						<li class="menu-title">
+							<span>Principal</span>
+						</li>
+						<li>
+							<a href="/admin/dashboard" class="hover:bg-primary hover:text-primary-content">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+								</svg>
+								Dashboard
+							</a>
+						</li>
+						<li class="menu-title">
+							<span>Contenido</span>
+						</li>
+						<li>
+							<a href="/admin/categories" class="hover:bg-primary hover:text-primary-content">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+								</svg>
+								Categorías
+							</a>
+						</li>
+						<li>
+							<a href="/admin/tags" class="hover:bg-primary hover:text-primary-content">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+								</svg>
+								Etiquetas
+							</a>
+						</li>
+						<li>
+							<a href="/admin/files" class="hover:bg-primary hover:text-primary-content">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+								</svg>
+								Archivos
+							</a>
+						</li>
+						<li class="menu-title">
+							<span>Comunicación</span>
+						</li>
+						<li>
+							<a href="/admin/contact" class="hover:bg-primary hover:text-primary-content">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+								</svg>
+								Mensajes
+							</a>
+						</li>
+						<li class="menu-title">
+							<span>Sistema</span>
+						</li>
+						<li>
+							<a href="/admin/users" class="hover:bg-primary hover:text-primary-content">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+								</svg>
+								Usuarios Admin
+							</a>
+						</li>
+					</ul>
+				</aside>
+			</div>
+		</div>
+	}
+}
+
+func formatFileSize(bytes int64) string {
+	const (
+		KB = 1024
+		MB = KB * 1024
+		GB = MB * 1024
+	)
+
+	switch {
+	case bytes >= GB:
+		return fmt.Sprintf("%.2f GB", float64(bytes)/float64(GB))
+	case bytes >= MB:
+		return fmt.Sprintf("%.2f MB", float64(bytes)/float64(MB))
+	case bytes >= KB:
+		return fmt.Sprintf("%.2f KB", float64(bytes)/float64(KB))
+	default:
+		return fmt.Sprintf("%d B", bytes)
+	}
+}

@@ -6,7 +6,8 @@ import (
 	"net/http"
 )
 
-func render(ctx echo.Context, statusCode int, t templ.Component) error {
+// Render renderiza un componente Templ (exportado para uso en otros handlers)
+func Render(ctx echo.Context, statusCode int, t templ.Component) error {
 	buf := templ.GetBuffer()
 	defer templ.ReleaseBuffer(buf)
 
@@ -18,5 +19,5 @@ func render(ctx echo.Context, statusCode int, t templ.Component) error {
 }
 
 func renderOK(ctx echo.Context, t templ.Component) error {
-	return render(ctx, http.StatusOK, t)
+	return Render(ctx, http.StatusOK, t)
 }

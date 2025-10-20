@@ -11,7 +11,6 @@ if [ -d "../node_modules" ]; then
     mv "../node_modules" .
 else
     echo "Error: node_modules folder not found in the parent directory." >&2
-    exit 1
 fi
 
 # Clean build artifacts and run the live reload!

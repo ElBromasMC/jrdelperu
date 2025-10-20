@@ -3,9 +3,22 @@ package view
 import (
 	"alc/config"
 	"alc/model"
+	"alc/repository"
 	"fmt"
 	"path"
 )
+
+// getFileURL constructs the correct URL for a static file
+func getFileURL(file repository.StaticFile) string {
+	if !file.FileType.Valid {
+		return "/static/img/placeholder.webp"
+	}
+	fileType := file.FileType.String
+	if fileType == "image" || fileType == "pdf" {
+		return fmt.Sprintf("/uploads/%ss/%s", fileType, file.FileName)
+	}
+	return "/static/img/placeholder.webp"
+}
 
 templ StoreIndex() {
 	@BasePage("Servicios") {

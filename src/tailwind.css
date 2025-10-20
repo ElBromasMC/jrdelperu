@@ -1,13 +1,32 @@
+/* Custom fonts - must be first */
 @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Import Tailwind CSS v4 */
+@import "tailwindcss";
 
-@layer base {
-    html {
-        color: #0f151b;
-    }
+/* Import DaisyUI plugin */
+@plugin "daisyui" {
+  themes: light --default, dark;
+}
+
+/* Custom theme */
+@theme {
+  --font-sans: 'Roboto', ui-sans-serif, system-ui, sans-serif;
+  --font-header: 'Fira Code', ui-monospace, monospace;
+  --font-footer: 'Fira Code', ui-monospace, monospace;
+
+  --color-navy: #1d2747;
+  --color-azure: #39a0ed;
+  --color-chalky: #efefef;
+  --color-livid: #585b5e;
+  --color-cloud: #b1b1b2;
+  --color-darkblue: #0f151b;
+  --color-apple: #ab2422;
+}
+
+/* Base styles */
+html {
+  color: #0f151b;
 }

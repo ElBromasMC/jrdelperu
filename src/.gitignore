@@ -9,3 +9,9 @@ assets/static/js/main.js
 view/**/*_templ.go
 repository/
 
+# Repository
+uploads/
+
+# Claude files
+.claude/
+

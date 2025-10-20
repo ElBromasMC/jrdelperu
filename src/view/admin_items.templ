@@ -1,0 +1,261 @@
+package view
+
+import (
+	"alc/repository"
+	"fmt"
+)
+
+// AdminItemsPage muestra la lista de items de una categoría
+templ AdminItemsPage(username string, category repository.Category, items []repository.Item, imagesMap map[int32]repository.StaticFile) {
+	@AdminLayout("Items - " + category.Name, username) {
+		<div class="mb-6">
+			<div class="flex justify-between items-center">
+				<div>
+					<h1 class="text-3xl font-bold">Items de { category.Name }</h1>
+					<div class="breadcrumbs text-sm mt-2">
+						<ul>
+							<li><a href="/admin/categories">Categorías</a></li>
+							<li>{ category.Name }</li>
+							<li>Items</li>
+						</ul>
+					</div>
+				</div>
+				<div class="flex gap-2">
+					<a href={ templ.URL(fmt.Sprintf("/admin/categories/%d/items/new", category.CategoryID)) } class="btn btn-primary">
+						Nuevo Item
+					</a>
+					<a href="/admin/categories" class="btn btn-ghost">
+						Volver a Categorías
+					</a>
+				</div>
+			</div>
+		</div>
+		<div class="card bg-base-100 shadow-xl">
+			<div class="card-body">
+				if len(items) == 0 {
+					<div class="text-center py-12">
+						<p class="text-lg text-base-content/70">No hay items en esta categoría</p>
+						<a href={ templ.URL(fmt.Sprintf("/admin/categories/%d/items/new", category.CategoryID)) } class="btn btn-primary mt-4">
+							Crear Primer Item
+						</a>
+					</div>
+				} else {
+					<div class="overflow-x-auto">
+						<table class="table">
+							<thead>
+								<tr>
+									<th>Imagen</th>
+									<th>Nombre</th>
+									<th>Slug</th>
+									<th>Descripción</th>
+									<th class="text-right">Acciones</th>
+								</tr>
+							</thead>
+							<tbody>
+								for _, item := range items {
+									@AdminItemRow(category.CategoryID, item, imagesMap[item.ImageID.Int32])
+								}
+							</tbody>
+						</table>
+					</div>
+				}
+			</div>
+		</div>
+	}
+}
+
+// AdminItemRow muestra una fila de item
+templ AdminItemRow(categoryID int32, item repository.Item, img repository.StaticFile) {
+	<tr id={ fmt.Sprintf("item-%d", item.ItemID) }>
+		<td>
+			<div class="avatar">
+				<div class="w-16 h-16 rounded">
+					<img src={ getAdminFileURL(img) } alt={ item.Name }/>
+				</div>
+			</div>
+		</td>
+		<td>
+			<div class="font-semibold">{ item.Name }</div>
+		</td>
+		<td>
+			<code class="text-xs">{ item.Slug }</code>
+		</td>
+		<td>
+			<div class="max-w-xs truncate">{ item.Description }</div>
+		</td>
+		<td>
+			<div class="flex justify-end gap-2">
+				<a href={ templ.URL(fmt.Sprintf("/admin/categories/%d/items/%d/edit", categoryID, item.ItemID)) } class="btn btn-sm btn-ghost">
+					Editar
+				</a>
+				<button
+					hx-delete={ fmt.Sprintf("/admin/categories/%d/items/%d", categoryID, item.ItemID) }
+					hx-confirm="¿Estás seguro de eliminar este item?"
+					hx-target={ fmt.Sprintf("#item-%d", item.ItemID) }
+					hx-swap="outerHTML"
+					class="btn btn-sm btn-error btn-outline"
+				>
+					Eliminar
+				</button>
+			</div>
+		</td>
+	</tr>
+}
+
+// AdminItemFormPage muestra el formulario para crear/editar items
+templ AdminItemFormPage(username string, category repository.Category, item repository.Item, images []repository.StaticFile, isEdit bool) {
+	if isEdit {
+		@AdminLayout("Editar Item - " + category.Name, username) {
+			@adminItemFormContent(category, item, images, isEdit)
+		}
+	} else {
+		@AdminLayout("Nuevo Item - " + category.Name, username) {
+			@adminItemFormContent(category, item, images, isEdit)
+		}
+	}
+}
+
+// adminItemFormContent contiene el contenido del formulario
+templ adminItemFormContent(category repository.Category, item repository.Item, images []repository.StaticFile, isEdit bool) {
+	<div class="mb-6">
+		<div class="breadcrumbs text-sm">
+			<ul>
+				<li><a href="/admin/categories">Categorías</a></li>
+				<li><a href={ templ.URL(fmt.Sprintf("/admin/categories/%d/items", category.CategoryID)) }>{ category.Name }</a></li>
+				<li>
+					if isEdit {
+						Editar Item
+					} else {
+						Nuevo Item
+					}
+				</li>
+			</ul>
+		</div>
+		<h1 class="text-3xl font-bold mt-2">
+			if isEdit {
+				Editar Item
+			} else {
+				Nuevo Item
+			}
+		</h1>
+	</div>
+	<div class="card bg-base-100 shadow-xl max-w-4xl">
+		<div class="card-body">
+			<form
+				if isEdit {
+					hx-put={ fmt.Sprintf("/admin/categories/%d/items/%d", category.CategoryID, item.ItemID) }
+				} else {
+					hx-post={ fmt.Sprintf("/admin/categories/%d/items", category.CategoryID) }
+				}
+				hx-target="body"
+				class="space-y-4"
+			>
+				<!-- Nombre -->
+				<div class="form-control">
+					<label class="label">
+						<span class="label-text font-semibold">Nombre</span>
+					</label>
+					<input
+						type="text"
+						name="name"
+						value={ item.Name }
+						class="input input-bordered"
+						required
+					/>
+				</div>
+				<!-- Slug -->
+				<div class="form-control">
+					<label class="label">
+						<span class="label-text font-semibold">Slug</span>
+					</label>
+					<input
+						type="text"
+						name="slug"
+						value={ item.Slug }
+						class="input input-bordered"
+						required
+						pattern="[a-z0-9\-]+"
+					/>
+					<label class="label">
+						<span class="label-text-alt">Se genera automáticamente desde el nombre. Solo letras minúsculas, números y guiones.</span>
+					</label>
+				</div>
+				<!-- Descripción Corta -->
+				<div class="form-control">
+					<label class="label">
+						<span class="label-text font-semibold">Descripción Corta</span>
+					</label>
+					<textarea
+						name="description"
+						class="textarea textarea-bordered h-24"
+						required
+					>{ item.Description }</textarea>
+					<label class="label">
+						<span class="label-text-alt">Descripción breve para listados</span>
+					</label>
+				</div>
+				<!-- Descripción Larga -->
+				<div class="form-control">
+					<label class="label">
+						<span class="label-text font-semibold">Descripción Larga</span>
+					</label>
+					<textarea
+						name="long_description"
+						class="textarea textarea-bordered h-32"
+					>{ item.LongDescription }</textarea>
+					<label class="label">
+						<span class="label-text-alt">Descripción detallada para la página del item</span>
+					</label>
+				</div>
+				<!-- Imagen -->
+				<div class="form-control">
+					<label class="label">
+						<span class="label-text font-semibold">Imagen Principal</span>
+					</label>
+					<select name="image_id" class="select select-bordered">
+						<option value="">Sin imagen</option>
+						for _, img := range images {
+							<option
+								value={ fmt.Sprint(img.FileID) }
+								if item.ImageID.Valid && item.ImageID.Int32 == img.FileID {
+									selected
+								}
+							>
+								if img.DisplayName.Valid {
+									{ img.DisplayName.String }
+								} else {
+									{ img.FileName }
+								}
+							</option>
+						}
+					</select>
+					<label class="label">
+						<span class="label-text-alt">
+							<a href="/admin/files" class="link" target="_blank">Gestionar archivos</a>
+							{ " | " }
+							<button type="button" class="link" onclick="image_upload_modal.showModal()">Subir nuevo</button>
+						</span>
+					</label>
+				</div>
+				<!-- Botones -->
+				<div class="form-control mt-6">
+					<div class="flex gap-2 justify-end">
+						<a href={ templ.URL(fmt.Sprintf("/admin/categories/%d/items", category.CategoryID)) } class="btn btn-ghost">
+							Cancelar
+						</a>
+						<button type="submit" class="btn btn-primary">
+							if isEdit {
+								Actualizar Item
+							} else {
+								Crear Item
+							}
+						</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+	<!-- Upload Modal -->
+	@ImageUploadModal()
+		@PDFUploadModal()
+}

@@ -1,0 +1,74 @@
+package view
+
+// AdminLoginPage es la página de inicio de sesión
+templ AdminLoginPage(errorMsg string) {
+	@AdminBase("Iniciar Sesión") {
+		<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary to-secondary p-4">
+			<div class="card w-full max-w-md bg-base-100 shadow-2xl">
+				<div class="card-body">
+					<div class="text-center mb-6">
+						<h1 class="text-3xl font-bold text-primary">JR del Perú</h1>
+						<p class="text-base-content/70">Panel de Administración</p>
+					</div>
+					@AdminLoginForm(errorMsg)
+					<div class="divider">O</div>
+					<div class="text-center">
+						<a href="/" class="link link-hover text-sm">Volver al sitio web</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// AdminLoginForm es el formulario de login (para HTMX swap)
+templ AdminLoginForm(errorMsg string) {
+	@AdminLoginFormWithValues("", "", errorMsg)
+}
+
+// AdminLoginFormWithValues es el formulario con valores preservados
+templ AdminLoginFormWithValues(password, identifier, errorMsg string) {
+	<form id="login-form" hx-post="/admin/login" hx-target="#login-form" hx-swap="outerHTML">
+		if errorMsg != "" {
+			<div class="alert alert-error mb-4">
+				<svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+				</svg>
+				<span>{ errorMsg }</span>
+			</div>
+		}
+		<div class="form-control">
+			<label class="label">
+				<span class="label-text">Usuario o Email</span>
+			</label>
+			<input
+				type="text"
+				name="identifier"
+				placeholder="admin@jrdelperu.com"
+				class="input input-bordered"
+				value={ identifier }
+				required
+				autocomplete="username"
+			/>
+		</div>
+		<div class="form-control mt-4">
+			<label class="label">
+				<span class="label-text">Contraseña</span>
+			</label>
+			<input
+				type="password"
+				name="password"
+				placeholder="••••••••"
+				class="input input-bordered"
+				value={ password }
+				required
+				autocomplete="current-password"
+			/>
+		</div>
+		<div class="form-control mt-6">
+			<button type="submit" class="btn btn-primary">
+				Iniciar Sesión
+			</button>
+		</div>
+	</form>
+}
