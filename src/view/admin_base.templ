@@ -180,6 +180,13 @@ templ AdminBase(title string) {
 					const filename = fileInput.files[0].name;
 					displayNameInput.value = generateDisplayNameFromFile(filename);
 				}
+			} else if (e.target.id === 'project_image_file_input') {
+				const fileInput = e.target;
+				const displayNameInput = document.getElementById('project_image_display_name');
+				if (fileInput.files.length > 0 && displayNameInput) {
+					const filename = fileInput.files[0].name;
+					displayNameInput.value = generateDisplayNameFromFile(filename);
+				}
 			}
 		});
 		</script>

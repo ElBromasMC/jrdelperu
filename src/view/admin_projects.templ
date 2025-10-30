@@ -392,6 +392,7 @@ templ AdminProjectDetailPage(username string, proj repository.Project, images []
 										<span class="label-text font-semibold">Seleccionar Archivo *</span>
 									</label>
 									<input
+										id="project_image_file_input"
 										type="file"
 										name="file"
 										accept="image/*"
@@ -404,6 +405,7 @@ templ AdminProjectDetailPage(username string, proj repository.Project, images []
 										<span class="label-text font-semibold">Nombre de Visualización</span>
 									</label>
 									<input
+										id="project_image_display_name"
 										type="text"
 										name="display_name"
 										class="input input-bordered"
