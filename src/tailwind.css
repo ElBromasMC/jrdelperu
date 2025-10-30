@@ -30,3 +30,13 @@
 html {
   color: #0f151b;
 }
+
+/* Hide scrollbar for horizontal slider */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

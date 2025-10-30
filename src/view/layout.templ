@@ -13,6 +13,8 @@ templ Base(title string) {
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 			<title>{ title }</title>
+			<!-- Swiper CSS -->
+			<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
 			if os.Getenv("ENV") == "development" {
 				<!-- Live reload -->
 				<script src="/static/js/live-reload.js"></script>
@@ -23,6 +25,8 @@ templ Base(title string) {
 				<link href={ fmt.Sprintf("/static/css/tailwind.css?v=%s", os.Getenv("REL")) } rel="stylesheet"/>
 			}
 			<link rel="icon" href="/static/img/favicon.webp"/>
+			<!-- Swiper JS -->
+			<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 		</head>
 		<body class="has-[dialog[open]]:overflow-hidden">
 			{ children... }
