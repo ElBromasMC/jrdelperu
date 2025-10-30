@@ -118,11 +118,17 @@ func (h *Handler) HandleAdminDashboard(c echo.Context) error {
 	}
 	filesCount := imagesCount + pdfsCount
 
+	projectsCount, err := h.queries.CountProjects(ctx)
+	if err != nil {
+		projectsCount = 0
+	}
+
 	return Render(c, http.StatusOK, view.AdminDashboard(
 		sessionData.Username,
 		int(categoriesCount),
 		int(itemsCount),
 		int(messagesCount),
 		int(filesCount),
+		int(projectsCount),
 	))
 }

@@ -14,8 +14,11 @@ func getFileURL(file repository.StaticFile) string {
 		return "/static/img/placeholder.webp"
 	}
 	fileType := file.FileType.String
-	if fileType == "image" || fileType == "pdf" {
-		return fmt.Sprintf("/uploads/%ss/%s", fileType, file.FileName)
+	if fileType == "image" {
+		return path.Join(config.IMAGES_PATH, file.FileName)
+	}
+	if fileType == "pdf" {
+		return path.Join(config.PDFS_PATH, file.FileName)
 	}
 	return "/static/img/placeholder.webp"
 }

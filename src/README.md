@@ -279,6 +279,48 @@ const (
 - **SEO**: Tiempos de carga optimizados
 - **Ancho de banda**: Menor consumo de recursos
 
+## Configuración de Rutas de Archivos
+
+Todas las rutas de archivos subidos están centralizadas en `config/path.go` para facilitar el mantenimiento:
+
+### Configuración (config/path.go)
+
+```go
+const (
+    // Rutas base para uploads
+    UPLOADS_PATH    = "/uploads"       // URL pública base
+    UPLOADS_SAVEDIR = "./uploads"      // Directorio en filesystem
+
+    // Rutas para imágenes
+    IMAGES_PATH    = "/uploads/images"    // URL pública de imágenes
+    IMAGES_SAVEDIR = "./uploads/images"   // Directorio de imágenes
+
+    // Rutas para PDFs
+    PDFS_PATH    = "/uploads/pdfs"      // URL pública de PDFs
+    PDFS_SAVEDIR = "./uploads/pdfs"     // Directorio de PDFs
+)
+```
+
+### Uso en el Código
+
+Estas constantes se utilizan en toda la aplicación:
+
+- **Handlers**: Para servir archivos estáticos (`cmd/server/main.go`)
+- **Services**: Para generar URLs de archivos (`service/file.go`)
+- **Templates**: Para construir rutas en las vistas (`view/*.templ`)
+
+**IMPORTANTE**: Nunca usar rutas hardcoded. Siempre importar y usar las constantes de `alc/config`.
+
+```go
+import (
+    "alc/config"
+    "path"  // Para URLs (siempre usa /)
+)
+
+// Ejemplo: Construir URL de imagen
+imageURL := path.Join(config.IMAGES_PATH, fileName)
+```
+
 ## Variables de Entorno
 
 ### Requeridas

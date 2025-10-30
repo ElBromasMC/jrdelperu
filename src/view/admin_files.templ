@@ -1,8 +1,10 @@
 package view
 
 import (
+	"alc/config"
 	"alc/repository"
 	"fmt"
+	"path"
 )
 
 // AdminFilesIndex muestra la página de gestión de archivos
@@ -81,7 +83,7 @@ templ FileCard(file repository.StaticFile, fileType string) {
 		<div class="card-body p-4">
 			if fileType == "image" {
 				<div class="aspect-video bg-base-300 rounded flex items-center justify-center overflow-hidden">
-					<img src={ fmt.Sprintf("/uploads/images/%s", file.FileName) } alt={ file.FileName } class="w-full h-full object-cover"/>
+					<img src={ path.Join(config.IMAGES_PATH, file.FileName) } alt={ file.FileName } class="w-full h-full object-cover"/>
 				</div>
 			} else {
 				<div class="aspect-video bg-base-300 rounded flex items-center justify-center">
@@ -118,11 +120,11 @@ templ FileCard(file repository.StaticFile, fileType string) {
 					Renombrar
 				</button>
 				if fileType == "image" {
-					<a href={ templ.URL(fmt.Sprintf("/uploads/images/%s", file.FileName)) } target="_blank" class="btn btn-xs btn-ghost">
+					<a href={ templ.URL(path.Join(config.IMAGES_PATH, file.FileName)) } target="_blank" class="btn btn-xs btn-ghost">
 						Ver
 					</a>
 				} else {
-					<a href={ templ.URL(fmt.Sprintf("/uploads/pdfs/%s", file.FileName)) } target="_blank" class="btn btn-xs btn-ghost">
+					<a href={ templ.URL(path.Join(config.PDFS_PATH, file.FileName)) } target="_blank" class="btn btn-xs btn-ghost">
 						Descargar
 					</a>
 				}
@@ -146,7 +148,7 @@ templ FileCardEdit(file repository.StaticFile, fileType string) {
 		<div class="card-body p-4">
 			if fileType == "image" {
 				<div class="aspect-video bg-base-300 rounded flex items-center justify-center overflow-hidden">
-					<img src={ fmt.Sprintf("/uploads/images/%s", file.FileName) } alt={ file.FileName } class="w-full h-full object-cover"/>
+					<img src={ path.Join(config.IMAGES_PATH, file.FileName) } alt={ file.FileName } class="w-full h-full object-cover"/>
 				</div>
 			} else {
 				<div class="aspect-video bg-base-300 rounded flex items-center justify-center">
@@ -258,7 +260,7 @@ templ FileCardOOB(file repository.StaticFile, fileType string) {
 			<div class="card bg-base-200 shadow" id={ fmt.Sprintf("file-card-%d", file.FileID) }>
 				<div class="card-body p-4">
 					<div class="aspect-video bg-base-300 rounded flex items-center justify-center overflow-hidden">
-						<img src={ fmt.Sprintf("/uploads/images/%s", file.FileName) } alt={ file.FileName } class="w-full h-full object-cover"/>
+						<img src={ path.Join(config.IMAGES_PATH, file.FileName) } alt={ file.FileName } class="w-full h-full object-cover"/>
 					</div>
 					<div class="mt-2">
 						if file.DisplayName.Valid {
@@ -287,7 +289,7 @@ templ FileCardOOB(file repository.StaticFile, fileType string) {
 						>
 							Renombrar
 						</button>
-						<a href={ templ.URL(fmt.Sprintf("/uploads/images/%s", file.FileName)) } target="_blank" class="btn btn-xs btn-ghost">
+						<a href={ templ.URL(path.Join(config.IMAGES_PATH, file.FileName)) } target="_blank" class="btn btn-xs btn-ghost">
 							Ver
 						</a>
 						<button
@@ -339,7 +341,7 @@ templ FileCardOOB(file repository.StaticFile, fileType string) {
 						>
 							Renombrar
 						</button>
-						<a href={ templ.URL(fmt.Sprintf("/uploads/pdfs/%s", file.FileName)) } target="_blank" class="btn btn-xs btn-ghost">
+						<a href={ templ.URL(path.Join(config.PDFS_PATH, file.FileName)) } target="_blank" class="btn btn-xs btn-ghost">
 							Descargar
 						</a>
 						<button

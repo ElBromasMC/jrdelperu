@@ -1,8 +1,11 @@
 package view
 
-import "fmt"
+import (
+	"alc/repository"
+	"fmt"
+)
 
-templ Index() {
+templ Index(projects []repository.Project, projectImages map[int32]repository.ListProjectImagesRow) {
 	@BasePage("Corporación JR Del Perú") {
 		<main>
 			<div>
@@ -177,24 +180,7 @@ templ Index() {
 						</div>
 					</div>
 				</section>
-				<section id="galeria">
-					<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
-						<h2 class="text-center font-semibold text-3xl uppercase">
-							Obras realizadas por JR DEL PERÚ
-						</h2>
-						<div class="flex flex-row justify-center flex-wrap gap-12 mt-12 lg:flex-row lg:mt-16">
-							<div class="border border-black aspect-video max-w-96">
-								<img class="object-cover w-full h-full" src="/static/img/placeholder.webp" alt="vidrios"/>
-							</div>
-							<div class="border border-black aspect-video max-w-96">
-								<img class="object-cover w-full h-full" src="/static/img/placeholder.webp" alt="vidrios"/>
-							</div>
-							<div class="border border-black aspect-video max-w-96">
-								<img class="object-cover w-full h-full" src="/static/img/placeholder.webp" alt="vidrios"/>
-							</div>
-						</div>
-					</div>
-				</section>
+				@ProjectsSection(projects, projectImages)
 				<!-- Formulario -->
 				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
 					@Form()

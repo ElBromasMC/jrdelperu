@@ -1,11 +1,13 @@
 package handler
 
 import (
+	"alc/config"
 	"alc/model"
 	"alc/repository"
 	"alc/service"
 	"alc/view"
 	"net/http"
+	"path"
 
 	"github.com/labstack/echo/v4"
 )
@@ -169,7 +171,7 @@ func (h *Handler) HandleAluminioCategoryShow(c echo.Context) error {
 	if dbCat.PdfID.Valid {
 		pdf, err := h.queries.GetStaticFile(ctx, dbCat.PdfID.Int32)
 		if err == nil {
-			pdfURL = "/uploads/pdfs/" + pdf.FileName
+			pdfURL = path.Join(config.PDFS_PATH, pdf.FileName)
 		}
 	}
 
@@ -305,7 +307,7 @@ func (h *Handler) HandleUPVCCategoryShow(c echo.Context) error {
 	if dbCat.PdfID.Valid {
 		pdf, err := h.queries.GetStaticFile(ctx, dbCat.PdfID.Int32)
 		if err == nil {
-			pdfURL = "/uploads/pdfs/" + pdf.FileName
+			pdfURL = path.Join(config.PDFS_PATH, pdf.FileName)
 		}
 	}
 

@@ -1,0 +1,573 @@
+package view
+
+import (
+	"alc/config"
+	"alc/repository"
+	"fmt"
+	"path"
+
+	"github.com/jackc/pgx/v5/pgtype"
+)
+
+// formatAreaM2 converts pgtype.Numeric to formatted string with m² suffix
+func formatAreaM2(area pgtype.Numeric) string {
+	if !area.Valid {
+		return "-"
+	}
+	// Convert to float64 using the Value() method and type assertion
+	var f float64
+	val, _ := area.Float64Value()
+	if val.Valid {
+		f = val.Float64
+	}
+	return fmt.Sprintf("%.2f m²", f)
+}
+
+// formatAreaM2Value converts pgtype.Numeric to just the number value
+func formatAreaM2Value(area pgtype.Numeric) string {
+	if !area.Valid {
+		return ""
+	}
+	var f float64
+	val, _ := area.Float64Value()
+	if val.Valid {
+		f = val.Float64
+	}
+	return fmt.Sprintf("%.2f", f)
+}
+
+// AdminProjectsPage muestra la lista de proyectos
+templ AdminProjectsPage(username string, projects []repository.Project) {
+	@AdminLayout("Proyectos", username) {
+		<div class="space-y-6">
+			<div class="flex justify-between items-center">
+				<h1 class="text-3xl font-bold">Gestión de Proyectos</h1>
+				<a href="/admin/projects/new" class="btn btn-primary">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+					</svg>
+					Nuevo Proyecto
+				</a>
+			</div>
+			<!-- Projects Table -->
+			<div class="overflow-x-auto bg-base-100 rounded-lg shadow">
+				<table class="table table-zebra">
+					<thead>
+						<tr>
+							<th>Orden</th>
+							<th>Descripción</th>
+							<th>Ubicación</th>
+							<th>Periodo</th>
+							<th>M²</th>
+							<th>Visible</th>
+							<th>Acciones</th>
+						</tr>
+					</thead>
+					<tbody id="projects-list">
+						if len(projects) == 0 {
+							<tr>
+								<td colspan="7" class="text-center text-base-content/60">
+									No hay proyectos registrados. Crea uno nuevo para comenzar.
+								</td>
+							</tr>
+						} else {
+							for _, proj := range projects {
+								@AdminProjectRow(proj)
+							}
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	}
+}
+
+// AdminProjectRow representa una fila de proyecto en la tabla
+templ AdminProjectRow(proj repository.Project) {
+	<tr>
+		<td>{ fmt.Sprint(proj.DisplayOrder) }</td>
+		<td>{ proj.Description }</td>
+		<td>{ proj.Location }</td>
+		<td>{ proj.Period }</td>
+		<td>
+			{ formatAreaM2(proj.AreaM2) }
+		</td>
+		<td>
+			if proj.IsVisible.Valid && proj.IsVisible.Bool {
+				<span class="badge badge-success">Sí</span>
+			} else {
+				<span class="badge badge-ghost">No</span>
+			}
+		</td>
+		<td class="space-x-2">
+			<a href={ templ.URL(fmt.Sprintf("/admin/projects/%d", proj.ProjectID)) } class="btn btn-sm btn-info">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+				</svg>
+				Ver
+			</a>
+			<a href={ templ.URL(fmt.Sprintf("/admin/projects/%d/edit", proj.ProjectID)) } class="btn btn-sm btn-warning">
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+				</svg>
+				Editar
+			</a>
+			<button
+				hx-delete={ fmt.Sprintf("/admin/projects/%d", proj.ProjectID) }
+				hx-confirm="¿Estás seguro de eliminar este proyecto?"
+				hx-target="body"
+				class="btn btn-sm btn-error"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+				</svg>
+				Eliminar
+			</button>
+		</td>
+	</tr>
+}
+
+// AdminProjectFormPage muestra el formulario para crear/editar un proyecto
+templ AdminProjectFormPage(username string, proj repository.Project, isEdit bool, pageTitle string) {
+	@AdminLayout(pageTitle, username) {
+		<div class="space-y-6">
+			<div class="flex items-center gap-4">
+				<a href="/admin/projects" class="btn btn-ghost btn-sm">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+					</svg>
+				</a>
+				<h1 class="text-3xl font-bold">
+					if isEdit {
+						Editar Proyecto
+					} else {
+						Nuevo Proyecto
+					}
+				</h1>
+			</div>
+			<div class="card bg-base-100 shadow-xl">
+				<div class="card-body">
+					<form
+						if isEdit {
+							hx-put={ fmt.Sprintf("/admin/projects/%d", proj.ProjectID) }
+						} else {
+							hx-post="/admin/projects"
+						}
+						hx-target="body"
+						class="space-y-4"
+					>
+						<!-- Descripción (Nombre del proyecto) -->
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">Descripción (Nombre) *</span>
+								<span class="label-text-alt">Ejemplo: Hotel Real Palace</span>
+							</label>
+							<input
+								type="text"
+								name="description"
+								class="input input-bordered"
+								placeholder="Hotel Real Palace"
+								if isEdit {
+									value={ proj.Description }
+								}
+								required
+							/>
+						</div>
+						<!-- Slug -->
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">Slug (URL) *</span>
+								<span class="label-text-alt">Solo letras minúsculas, números y guiones</span>
+							</label>
+							<input
+								type="text"
+								name="slug"
+								class="input input-bordered"
+								placeholder="hotel-real-palace"
+								pattern="[a-z0-9\-]+"
+								if isEdit {
+									value={ proj.Slug }
+								}
+								required
+							/>
+						</div>
+						<!-- Ubicación -->
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">Ubicación *</span>
+								<span class="label-text-alt">Ejemplo: Churín - Oyón</span>
+							</label>
+							<input
+								type="text"
+								name="location"
+								class="input input-bordered"
+								placeholder="Churín - Oyón"
+								if isEdit {
+									value={ proj.Location }
+								}
+								required
+							/>
+						</div>
+						<!-- Periodo -->
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">Periodo *</span>
+								<span class="label-text-alt">Ejemplo: 2019 o 2019-2020</span>
+							</label>
+							<input
+								type="text"
+								name="period"
+								class="input input-bordered"
+								placeholder="2019"
+								if isEdit {
+									value={ proj.Period }
+								}
+								required
+							/>
+						</div>
+						<!-- Área M² -->
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">Área (m²)</span>
+								<span class="label-text-alt">Ejemplo: 214.00</span>
+							</label>
+							<input
+								type="number"
+								name="area_m2"
+								step="0.01"
+								min="0"
+								class="input input-bordered"
+								placeholder="214.00"
+								if isEdit {
+									value={ formatAreaM2Value(proj.AreaM2) }
+								}
+							/>
+						</div>
+						<!-- Servicio -->
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">Servicio *</span>
+								<span class="label-text-alt">Descripción detallada del servicio prestado</span>
+							</label>
+							<textarea
+								name="service"
+								class="textarea textarea-bordered"
+								rows="4"
+								placeholder="Suministro e Instalación de Muro Cortina con Diseño Personalizado"
+								required
+							>
+								if isEdit {
+									{ proj.Service }
+								}
+							</textarea>
+						</div>
+						<!-- Orden de visualización -->
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">Orden de Visualización</span>
+								<span class="label-text-alt">Número menor aparece primero</span>
+							</label>
+							<input
+								type="number"
+								name="display_order"
+								class="input input-bordered"
+								min="0"
+								if isEdit {
+									value={ fmt.Sprint(proj.DisplayOrder) }
+								} else {
+									value="0"
+								}
+							/>
+						</div>
+						<!-- Visible -->
+						<div class="form-control">
+							<label class="label cursor-pointer justify-start gap-4">
+								<input
+									type="checkbox"
+									name="is_visible"
+									class="checkbox checkbox-primary"
+									if isEdit {
+										if proj.IsVisible.Valid && proj.IsVisible.Bool {
+											checked
+										}
+									} else {
+										checked
+									}
+								/>
+								<span class="label-text font-semibold">Visible en la página pública</span>
+							</label>
+						</div>
+						<!-- Botones -->
+						<div class="flex gap-2 justify-end pt-4">
+							<a href="/admin/projects" class="btn btn-ghost">Cancelar</a>
+							<button type="submit" class="btn btn-primary">
+								if isEdit {
+									Guardar Cambios
+								} else {
+									Crear Proyecto
+								}
+							</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// AdminProjectDetailPage muestra el detalle del proyecto con gestión de imágenes
+templ AdminProjectDetailPage(username string, proj repository.Project, images []repository.ListProjectImagesRow, allImages []repository.StaticFile) {
+	@AdminLayout("Detalle del Proyecto", username) {
+		<div class="space-y-6">
+			<div class="flex items-center gap-4">
+				<a href="/admin/projects" class="btn btn-ghost btn-sm">
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+					</svg>
+				</a>
+				<h1 class="text-3xl font-bold">{ proj.Description }</h1>
+			</div>
+			<!-- Project Info Card -->
+			<div class="card bg-base-100 shadow-xl">
+				<div class="card-body">
+					<div class="flex justify-between items-start">
+						<h2 class="card-title text-2xl">Información del Proyecto</h2>
+						<a href={ templ.URL(fmt.Sprintf("/admin/projects/%d/edit", proj.ProjectID)) } class="btn btn-warning btn-sm">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+							</svg>
+							Editar
+						</a>
+					</div>
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+						<div>
+							<span class="font-semibold text-base-content/70">Ubicación:</span>
+							<p>{ proj.Location }</p>
+						</div>
+						<div>
+							<span class="font-semibold text-base-content/70">Periodo:</span>
+							<p>{ proj.Period }</p>
+						</div>
+						<div>
+							<span class="font-semibold text-base-content/70">Área:</span>
+							<p>{ formatAreaM2(proj.AreaM2) }</p>
+						</div>
+						<div>
+							<span class="font-semibold text-base-content/70">Visible:</span>
+							<p>
+								if proj.IsVisible.Valid && proj.IsVisible.Bool {
+									<span class="badge badge-success">Sí</span>
+								} else {
+									<span class="badge badge-ghost">No</span>
+								}
+							</p>
+						</div>
+						<div class="md:col-span-2">
+							<span class="font-semibold text-base-content/70">Servicio:</span>
+							<p class="mt-1">{ proj.Service }</p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- Images Management -->
+			<div class="card bg-base-100 shadow-xl">
+				<div class="card-body">
+					<h2 class="card-title text-2xl">Imágenes del Proyecto</h2>
+					<!-- Tabs for Upload or Select -->
+					<div role="tablist" class="tabs tabs-bordered">
+						<input type="radio" name="image_tabs" role="tab" class="tab" aria-label="Subir Nueva" checked/>
+						<div role="tabpanel" class="tab-content border-2 border-dashed border-base-300 rounded-lg p-6 mt-4">
+							<h3 class="font-semibold mb-4">Subir Nueva Imagen</h3>
+							<form
+								hx-post={ fmt.Sprintf("/admin/projects/%d/images/upload", proj.ProjectID) }
+								hx-encoding="multipart/form-data"
+								hx-target="#project-images-grid"
+								hx-swap="innerHTML"
+								hx-on::after-request="this.reset()"
+								class="space-y-4"
+							>
+								<div class="form-control">
+									<label class="label">
+										<span class="label-text font-semibold">Seleccionar Archivo *</span>
+									</label>
+									<input
+										type="file"
+										name="file"
+										accept="image/*"
+										class="file-input file-input-bordered w-full"
+										required
+									/>
+								</div>
+								<div class="form-control">
+									<label class="label">
+										<span class="label-text font-semibold">Nombre de Visualización</span>
+									</label>
+									<input
+										type="text"
+										name="display_name"
+										class="input input-bordered"
+										placeholder="Se generará automáticamente si se deja vacío"
+									/>
+								</div>
+								<div class="flex gap-4 items-end">
+									<div class="form-control flex-1">
+										<label class="label">
+											<span class="label-text">Orden</span>
+										</label>
+										<input type="number" name="display_order" class="input input-bordered" value="0" min="0"/>
+									</div>
+									<div class="form-control">
+										<label class="label cursor-pointer gap-2">
+											<input type="checkbox" name="is_featured" class="checkbox"/>
+											<span class="label-text">Destacada</span>
+										</label>
+									</div>
+									<button type="submit" class="btn btn-primary">Subir y Agregar</button>
+								</div>
+							</form>
+						</div>
+						<input type="radio" name="image_tabs" role="tab" class="tab" aria-label="Seleccionar Existente"/>
+						<div role="tabpanel" class="tab-content border-2 border-dashed border-base-300 rounded-lg p-6 mt-4">
+							<h3 class="font-semibold mb-4">Seleccionar de Imágenes Existentes</h3>
+							<form
+								hx-post={ fmt.Sprintf("/admin/projects/%d/images", proj.ProjectID) }
+								hx-target="#project-images-grid"
+								hx-swap="innerHTML"
+								hx-on::after-request="this.reset()"
+								class="flex gap-4 items-end"
+							>
+								<div class="form-control flex-1">
+									<label class="label">
+										<span class="label-text">Seleccionar Imagen</span>
+									</label>
+									<select name="image_id" class="select select-bordered" required>
+										<option value="">Elegir imagen...</option>
+										for _, img := range allImages {
+											<option value={ fmt.Sprint(img.FileID) }>
+												if img.DisplayName.Valid && img.DisplayName.String != "" {
+													{ img.DisplayName.String }
+												} else {
+													{ img.FileName }
+												}
+											</option>
+										}
+									</select>
+								</div>
+								<div class="form-control w-32">
+									<label class="label">
+										<span class="label-text">Orden</span>
+									</label>
+									<input type="number" name="display_order" class="input input-bordered" value="0" min="0"/>
+								</div>
+								<div class="form-control">
+									<label class="label cursor-pointer gap-2">
+										<input type="checkbox" name="is_featured" class="checkbox checkbox-sm"/>
+										<span class="label-text">Destacada</span>
+									</label>
+								</div>
+								<button type="submit" class="btn btn-primary">Agregar</button>
+							</form>
+						</div>
+					</div>
+					<!-- Images Grid -->
+					<div id="project-images-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+						if len(images) == 0 {
+							<div id="images-empty-state" class="col-span-full text-center text-base-content/60 py-8">
+								No hay imágenes asociadas a este proyecto.
+							</div>
+						} else {
+							for _, img := range images {
+								@AdminProjectImageCard(proj.ProjectID, img)
+							}
+						}
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// AdminProjectImageCard representa una tarjeta de imagen del proyecto
+templ AdminProjectImageCard(projectID int32, img repository.ListProjectImagesRow) {
+	<div class="card bg-base-200 shadow" id={ fmt.Sprintf("project-image-%d", img.ImageID) }>
+		<figure class="aspect-square bg-base-300">
+			<img src={ path.Join(config.IMAGES_PATH, img.FileName) } alt={ img.DisplayName.String } class="object-cover w-full h-full"/>
+		</figure>
+		<div class="card-body p-4">
+			<div class="flex-1 min-w-0">
+				<p class="text-sm font-medium truncate">
+					if img.DisplayName.Valid && img.DisplayName.String != "" {
+						{ img.DisplayName.String }
+					} else {
+						{ img.FileName }
+					}
+				</p>
+				<div class="flex gap-2 mt-2 items-center">
+					<!-- Editable Order -->
+					<div id={ fmt.Sprintf("order-display-%d", img.ImageID) } class="flex items-center gap-1">
+						<span class="text-xs text-base-content/70">Orden:</span>
+						<input
+							type="number"
+							name="display_order"
+							value={ fmt.Sprint(img.DisplayOrder) }
+							min="0"
+							class="input input-xs input-bordered w-16"
+							hx-put={ fmt.Sprintf("/admin/projects/%d/images/%d/order", projectID, img.ImageID) }
+							hx-trigger="change, blur"
+							hx-target="#project-images-grid"
+							hx-swap="innerHTML"
+						/>
+					</div>
+					<!-- Featured Toggle -->
+					<label class="flex items-center gap-1 cursor-pointer">
+						<input
+							type="checkbox"
+							class="checkbox checkbox-xs checkbox-primary"
+							if img.IsFeatured.Valid && img.IsFeatured.Bool {
+								checked
+							}
+							hx-put={ fmt.Sprintf("/admin/projects/%d/images/%d/featured", projectID, img.ImageID) }
+							hx-vals={ fmt.Sprintf("{\"is_featured\": %t}", !(img.IsFeatured.Valid && img.IsFeatured.Bool)) }
+							hx-target="#project-images-grid"
+							hx-swap="innerHTML"
+						/>
+						<span class="text-xs text-base-content/70">Destacada</span>
+					</label>
+				</div>
+			</div>
+			<div class="card-actions justify-end mt-2">
+				<button
+					hx-delete={ fmt.Sprintf("/admin/projects/%d/images/%d", projectID, img.ImageID) }
+					hx-confirm="¿Eliminar esta imagen del proyecto?"
+					hx-target="#project-images-grid"
+					hx-swap="innerHTML"
+					class="btn btn-sm btn-error"
+				>
+					Eliminar
+				</button>
+			</div>
+		</div>
+	</div>
+}
+
+// AdminProjectImageCardOOB envuelve la tarjeta con atributo OOB
+templ AdminProjectImageCardOOB(projectID int32, img repository.ListProjectImagesRow) {
+	<div hx-swap-oob="beforeend:#project-images-grid">
+		@AdminProjectImageCard(projectID, img)
+	</div>
+	<div id="images-empty-state" hx-swap-oob="true"></div>
+}
+
+// AdminProjectImagesGrid renderiza el contenido completo del grid de imágenes
+templ AdminProjectImagesGrid(projectID int32, images []repository.ListProjectImagesRow) {
+	if len(images) == 0 {
+		<div id="images-empty-state" class="col-span-full text-center text-base-content/60 py-8">
+			No hay imágenes asociadas a este proyecto.
+		</div>
+	} else {
+		for _, img := range images {
+			@AdminProjectImageCard(projectID, img)
+		}
+	}
+}

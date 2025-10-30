@@ -1,6 +1,7 @@
 package service
 
 import (
+	"alc/config"
 	"alc/repository"
 	"context"
 	"crypto/sha256"
@@ -419,11 +420,22 @@ func (s *FileService) GetFileURL(ctx context.Context, fileID int32) (string, err
 		return "", ErrFileNotFound
 	}
 
-	fileType := "others"
-	if file.FileType.Valid {
-		fileType = file.FileType.String + "s"
+	// Get file type
+	if !file.FileType.Valid {
+		return "", fmt.Errorf("tipo de archivo no válido")
 	}
 
-	// URL pública: /uploads/{type}s/{filename}
-	return fmt.Sprintf("/uploads/%s/%s", fileType, file.FileName), nil
+	// Build URL based on file type
+	var fileURL string
+	switch file.FileType.String {
+	case "image":
+		fileURL = filepath.Join(config.IMAGES_PATH, file.FileName)
+	case "pdf":
+		fileURL = filepath.Join(config.PDFS_PATH, file.FileName)
+	default:
+		return "", fmt.Errorf("tipo de archivo no soportado")
+	}
+
+	// Normalize path separators to forward slashes for URLs
+	return filepath.ToSlash(fileURL), nil
 }

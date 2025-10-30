@@ -2,10 +2,12 @@ package main
 
 import (
 	"alc/assets"
+	"alc/config"
 	"alc/handler"
 	"alc/repository"
 	"alc/service"
 	"context"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -65,7 +67,7 @@ func main() {
 	e.StaticFS("/static", echo.MustSubFS(assets.Assets, "static"))
 
 	// Uploaded files directory
-	e.Static("/uploads", "uploads")
+	e.Static(config.UPLOADS_PATH, config.UPLOADS_SAVEDIR)
 
 	// Page routes
 	e.GET("/", h.HandleIndexShow)
@@ -73,6 +75,10 @@ func main() {
 	e.GET("/descargas", h.HandleDescargasShow)
 	e.GET("/galeria", h.HandleGaleriaShow)
 	e.GET("/contacto", h.HandleContactoShow)
+
+	// Projects routes
+	e.GET("/proyectos", h.HandleProjectsShow)
+	e.GET("/proyectos/:slug", h.HandleProjectDetailShow)
 
 	// Store routes
 	e.GET("/servicio", h.HandleStoreIndexShow)
@@ -134,6 +140,20 @@ func main() {
 	admin.GET("/categories/:id/items/:itemId/edit", h.HandleItemEditForm)
 	admin.PUT("/categories/:id/items/:itemId", h.HandleItemUpdate)
 	admin.DELETE("/categories/:id/items/:itemId", h.HandleItemDelete)
+
+	// Projects management
+	admin.GET("/projects", h.HandleAdminProjectsIndex)
+	admin.GET("/projects/new", h.HandleAdminProjectNewForm)
+	admin.POST("/projects", h.HandleAdminProjectCreate)
+	admin.GET("/projects/:id", h.HandleAdminProjectDetail)
+	admin.GET("/projects/:id/edit", h.HandleAdminProjectEditForm)
+	admin.PUT("/projects/:id", h.HandleAdminProjectUpdate)
+	admin.DELETE("/projects/:id", h.HandleAdminProjectDelete)
+	admin.POST("/projects/:id/images", h.HandleAdminProjectImageAdd)
+	admin.POST("/projects/:id/images/upload", h.HandleAdminProjectImageUpload)
+	admin.PUT("/projects/:id/images/:imageId/order", h.HandleProjectImageUpdateOrder)
+	admin.PUT("/projects/:id/images/:imageId/featured", h.HandleProjectImageUpdateFeatured)
+	admin.DELETE("/projects/:id/images/:imageId", h.HandleAdminProjectImageDelete)
 
 	// Start server
 	log.Println("Starting server on :8080")

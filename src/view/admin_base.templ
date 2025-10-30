@@ -1,9 +1,11 @@
 package view
 
 import (
+	"alc/config"
 	"alc/repository"
 	"fmt"
 	"os"
+	"path"
 	"time"
 )
 
@@ -16,8 +18,11 @@ func getAdminFileURL(file repository.StaticFile) string {
 		return "/static/img/placeholder.webp"
 	}
 	fileType := file.FileType.String
-	if fileType == "image" || fileType == "pdf" {
-		return fmt.Sprintf("/uploads/%ss/%s", fileType, file.FileName)
+	if fileType == "image" {
+		return path.Join(config.IMAGES_PATH, file.FileName)
+	}
+	if fileType == "pdf" {
+		return path.Join(config.PDFS_PATH, file.FileName)
 	}
 	return "/static/img/placeholder.webp"
 }
@@ -106,17 +111,18 @@ templ AdminBase(title string) {
 				.replace(/-+/g, '-'); // Replace multiple hyphens with single
 		}
 
-		// Auto-generate slug when name changes
+		// Auto-generate slug when name or description changes
 		document.addEventListener('DOMContentLoaded', function() {
-			const nameInputs = document.querySelectorAll('input[name="name"]');
-			nameInputs.forEach(nameInput => {
-				const form = nameInput.closest('form');
+			// Support both name and description fields (for projects)
+			const sourceInputs = document.querySelectorAll('input[name="name"], input[name="description"]');
+			sourceInputs.forEach(sourceInput => {
+				const form = sourceInput.closest('form');
 				if (!form) return;
 
 				const slugInput = form.querySelector('input[name="slug"]');
 				if (!slugInput) return;
 
-				nameInput.addEventListener('input', function() {
+				sourceInput.addEventListener('input', function() {
 					// Only auto-generate if slug is empty or was auto-generated before
 					if (!slugInput.dataset.manuallyEdited) {
 						slugInput.value = generateSlug(this.value);
@@ -242,6 +248,14 @@ templ AdminLayout(title, username string) {
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
 								</svg>
 								Etiquetas
+							</a>
+						</li>
+						<li>
+							<a href="/admin/projects" class="hover:bg-primary hover:text-primary-content">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+								</svg>
+								Proyectos
 							</a>
 						</li>
 						<li>

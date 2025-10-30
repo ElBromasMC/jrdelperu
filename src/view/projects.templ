@@ -1,0 +1,190 @@
+package view
+
+import (
+	"alc/repository"
+	"fmt"
+	"github.com/jackc/pgx/v5/pgtype"
+)
+
+// formatProjectAreaM2 converts pgtype.Numeric to formatted string
+func formatProjectAreaM2(area pgtype.Numeric) string {
+	if !area.Valid {
+		return ""
+	}
+	var f float64
+	val, _ := area.Float64Value()
+	if val.Valid {
+		f = val.Float64
+	}
+	return fmt.Sprintf("%.2f m²", f)
+}
+
+// ProjectsSection muestra una sección de proyectos (para incluir en páginas)
+templ ProjectsSection(projects []repository.Project, projectImages map[int32]repository.ListProjectImagesRow) {
+	<section id="galeria">
+		<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+			<h2 class="text-center font-semibold text-3xl uppercase">
+				Obras realizadas por JR DEL PERÚ
+			</h2>
+			<div class="flex flex-row justify-center flex-wrap gap-12 mt-12 lg:flex-row lg:mt-16">
+				if len(projects) == 0 {
+					<div class="border border-black aspect-video max-w-96">
+						<img class="object-cover w-full h-full" src="/static/img/placeholder.webp" alt="placeholder"/>
+					</div>
+					<div class="border border-black aspect-video max-w-96">
+						<img class="object-cover w-full h-full" src="/static/img/placeholder.webp" alt="placeholder"/>
+					</div>
+					<div class="border border-black aspect-video max-w-96">
+						<img class="object-cover w-full h-full" src="/static/img/placeholder.webp" alt="placeholder"/>
+					</div>
+				} else {
+					for _, proj := range projects {
+						@ProjectCard(proj, projectImages[proj.ProjectID])
+					}
+				}
+			</div>
+			if len(projects) > 3 {
+				<div class="text-center mt-12">
+					<a href="/proyectos" class="inline-block px-6 py-3 bg-livid text-white font-semibold hover:bg-livid/90">
+						Ver Todos los Proyectos
+					</a>
+				</div>
+			}
+		</div>
+	</section>
+}
+
+// ProjectCard muestra una tarjeta de proyecto individual
+templ ProjectCard(project repository.Project, featuredImage repository.ListProjectImagesRow) {
+	<a href={ templ.URL(fmt.Sprintf("/proyectos/%s", project.Slug)) } class="border border-black aspect-video max-w-96 group hover:shadow-lg transition-shadow">
+		<div class="relative w-full h-full overflow-hidden">
+			if featuredImage.ImageID != 0 {
+				<img
+					class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+					src={ fmt.Sprintf("/static/img/%s", featuredImage.FileName) }
+					alt={ project.Description }
+				/>
+			} else {
+				<img class="object-cover w-full h-full" src="/static/img/placeholder.webp" alt={ project.Description }/>
+			}
+			<div class="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-4">
+				<h3 class="font-semibold text-lg">{ project.Description }</h3>
+				<p class="text-sm">{ project.Location } • { project.Period }</p>
+			</div>
+		</div>
+	</a>
+}
+
+// ProjectsPage muestra la página completa de proyectos
+templ ProjectsPage(projects []repository.Project, projectImages map[int32]repository.ListProjectImagesRow) {
+	@BasePage("Proyectos") {
+		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
+			<section>
+				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+					<h1 class="text-center font-semibold text-3xl uppercase mb-12">
+						Nuestros Proyectos
+					</h1>
+					<div class="grid grid-cols-[repeat(auto-fit,minmax(20rem,1fr))] gap-12 justify-items-center">
+						if len(projects) == 0 {
+							<div class="col-span-full text-center text-base-content/60 py-8">
+								No hay proyectos disponibles en este momento.
+							</div>
+						} else {
+							for _, proj := range projects {
+								@ProjectCard(proj, projectImages[proj.ProjectID])
+							}
+						}
+					</div>
+				</div>
+			</section>
+			<!-- Formulario -->
+			<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+				@Form()
+			</div>
+		</main>
+	}
+}
+
+// ProjectDetailPage muestra el detalle completo de un proyecto
+templ ProjectDetailPage(project repository.Project, images []repository.ListProjectImagesRow) {
+	@BasePage(project.Description) {
+		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
+			<section>
+				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+					<!-- Breadcrumb -->
+					<div class="mb-8 text-sm">
+						<a href="/" class="hover:underline">Inicio</a>
+						<span class="mx-2">/</span>
+						<a href="/proyectos" class="hover:underline">Proyectos</a>
+						<span class="mx-2">/</span>
+						<span class="text-base-content/60">{ project.Description }</span>
+					</div>
+					<!-- Project Header -->
+					<div class="mb-12">
+						<h1 class="text-3xl font-bold mb-4 lg:text-4xl">{ project.Description }</h1>
+						<div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-lg">
+							<div>
+								<span class="font-semibold">Ubicación:</span> { project.Location }
+							</div>
+							<div>
+								<span class="font-semibold">Periodo:</span> { project.Period }
+							</div>
+							if project.AreaM2.Valid {
+								<div>
+									<span class="font-semibold">Área:</span> { formatProjectAreaM2(project.AreaM2) }
+								</div>
+							}
+						</div>
+					</div>
+					<!-- Project Images Gallery -->
+					if len(images) > 0 {
+						<div class="mb-12">
+							<h2 class="text-2xl font-semibold mb-6">Galería de Imágenes</h2>
+							<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+								for _, img := range images {
+									<div class="border border-black overflow-hidden cursor-pointer hover:shadow-lg transition-shadow" onclick="handleImageFullscreen(event)">
+										<div class="flex justify-center items-center img-div bg-black aspect-video">
+											<img
+												class="object-cover w-full h-full"
+												src={ fmt.Sprintf("/static/img/%s", img.FileName) }
+												alt="Project image"
+											/>
+										</div>
+									</div>
+								}
+							</div>
+							<script>
+								function handleImageFullscreen(event) {
+									const el = event.currentTarget;
+									const mydiv = el.querySelector(".img-div");
+									if (document.fullscreenElement) {
+										document.exitFullscreen();
+									} else {
+										mydiv.requestFullscreen();
+									}
+								}
+							</script>
+						</div>
+					}
+					<!-- Project Service Description -->
+					<div class="mb-12">
+						<h2 class="text-2xl font-semibold mb-4">Servicio Prestado</h2>
+						<div class="p-6 border border-black rounded-lg bg-cloud/30">
+							<p class="text-lg">{ project.Service }</p>
+						</div>
+					</div>
+					<!-- Back to Projects -->
+					<div class="text-center mt-12">
+						<a href="/proyectos" class="inline-block px-6 py-3 border-2 border-black font-semibold hover:bg-black hover:text-white transition-colors">
+							← Volver a Proyectos
+						</a>
+					</div>
+				</div>
+			</section>
+			<!-- Formulario -->
+			<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+				@Form()
+			</div>
+		</main>
+	}
+}

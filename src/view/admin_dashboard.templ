@@ -3,7 +3,7 @@ package view
 import "fmt"
 
 // AdminDashboard es la página principal del dashboard
-templ AdminDashboard(username string, categoriesCount, itemsCount, messagesCount, filesCount int) {
+templ AdminDashboard(username string, categoriesCount, itemsCount, messagesCount, filesCount, projectsCount int) {
 	@AdminLayout("Dashboard", username) {
 		<div class="space-y-6">
 			<!-- Welcome section -->
@@ -14,7 +14,7 @@ templ AdminDashboard(username string, categoriesCount, itemsCount, messagesCount
 				</div>
 			</div>
 			<!-- Stats -->
-			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
 				<div class="stats shadow">
 					<div class="stat">
 						<div class="stat-figure text-primary">
@@ -59,17 +59,34 @@ templ AdminDashboard(username string, categoriesCount, itemsCount, messagesCount
 						<div class="stat-value text-info">{ fmt.Sprint(filesCount) }</div>
 					</div>
 				</div>
+				<div class="stats shadow">
+					<div class="stat">
+						<div class="stat-figure text-success">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+							</svg>
+						</div>
+						<div class="stat-title">Proyectos</div>
+						<div class="stat-value text-success">{ fmt.Sprint(projectsCount) }</div>
+					</div>
+				</div>
 			</div>
 			<!-- Quick actions -->
 			<div class="card bg-base-100 shadow-xl">
 				<div class="card-body">
 					<h3 class="card-title">Acciones Rápidas</h3>
-					<div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+					<div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
 						<a href="/admin/categories/new" class="btn btn-outline btn-primary">
 							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
 							</svg>
 							Nueva Categoría
+						</a>
+						<a href="/admin/projects/new" class="btn btn-outline btn-success">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+							</svg>
+							Nuevo Proyecto
 						</a>
 						<a href="/admin/files" class="btn btn-outline btn-accent">
 							<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
