@@ -7,9 +7,30 @@ Sistema web para gestión de productos de vidrio, aluminio y uPVC con panel admi
 - **Backend**: Go 1.23+ con Echo v4 framework
 - **Base de datos**: PostgreSQL con sqlc para generación de código
 - **Templating**: Templ (tipo-seguro, compila a Go)
-- **Frontend**: HTMX 2.x + Tailwind CSS
+- **Frontend**: HTMX 2.x + Tailwind CSS v4 + DaisyUI
+- **Optimización de Imágenes**: h2non/bimg (libvips) con conversión automática a WebP
 - **Email**: wneessen/go-mail
 - **Build**: Makefile (orquesta Templ, Tailwind, esbuild, sqlc)
+
+## Dependencias del Sistema
+
+### Requeridas
+
+- **Go 1.23+**
+- **PostgreSQL** (versión 12 o superior)
+- **Node.js** (para Tailwind CSS y esbuild)
+- **libvips 8.12+** - Biblioteca de procesamiento de imágenes
+  - Ubuntu/Debian: `sudo apt-get install libvips-dev`
+  - macOS: `brew install vips`
+  - Alpine Linux: `apk add vips-dev gcc musl-dev`
+- **GCC** - Compilador C (requerido para CGO y bimg)
+  - Ubuntu/Debian: `sudo apt-get install build-essential`
+  - Alpine Linux: `apk add gcc musl-dev`
+
+### Opcionales
+
+- **migrate** - Para aplicar migraciones de base de datos
+  - Instalación: https://github.com/golang-migrate/migrate
 
 ## Estructura del Proyecto
 
@@ -170,6 +191,94 @@ Múltiples imágenes para cada producto.
 - `idx_items_slug` - Búsqueda de items por slug
 - `idx_item_images_position` - Ordenamiento de galerías
 
+## Panel de Administración
+
+El sistema incluye un panel administrativo completo con las siguientes funcionalidades:
+
+### Gestión de Contenido
+
+- **Categorías**
+  - Crear, editar y eliminar categorías de productos
+  - Organizar por tipo de material (Vidrio, Aluminio, uPVC)
+  - Asignar imágenes principales y PDFs técnicos
+  - Agregar etiquetas (Destacado, Nuevo, etc.)
+  - Definir características técnicas por categoría
+
+- **Productos (Items)**
+  - Crear productos dentro de cada categoría
+  - Generación automática de slugs desde el nombre
+  - Asignar imagen principal
+  - Descripciones cortas y largas
+  - Galería de imágenes por producto
+
+- **Etiquetas**
+  - Crear y gestionar tags para categorías
+  - Ordenar por posición
+  - Edición inline con HTMX
+
+### Gestión de Archivos
+
+- **Subida de Imágenes**
+  - Formatos soportados: JPG, PNG, WebP, GIF
+  - Tamaño máximo: 10 MB
+  - **Optimización automática**: Conversión a WebP con calidad 80
+  - **Redimensionamiento**: Máximo 2000x2000px manteniendo aspecto
+  - Nombres de visualización personalizables
+
+- **Subida de PDFs**
+  - Tamaño máximo: 20 MB
+  - Nombres de visualización personalizables
+
+- **Gestión**
+  - Renombrar archivos con edición inline HTMX
+  - Eliminar archivos con confirmación
+  - Contador de archivos en tiempo real
+
+### Dashboard
+
+- **Estadísticas en tiempo real**
+  - Total de categorías
+  - Total de productos
+  - Mensajes sin leer
+  - Total de archivos (imágenes + PDFs)
+
+### Características Técnicas
+
+- **Interfaz completamente HTMX**: Sin JavaScript personalizado
+- **Actualizaciones en tiempo real**: Out of Band (OOB) swaps
+- **Validación de formularios**: Client-side y server-side
+- **Diseño responsive**: Mobile-first con DaisyUI
+
+## Optimización de Imágenes
+
+El sistema implementa optimización automática de imágenes al momento de la subida:
+
+### Configuración (service/file.go)
+
+```go
+const (
+    MaxImageWidth    = 2000  // Ancho máximo en píxeles
+    MaxImageHeight   = 2000  // Alto máximo en píxeles
+    WebPQuality      = 80    // Calidad WebP (1-100)
+    StripMetadata    = true  // Eliminar datos EXIF
+)
+```
+
+### Proceso
+
+1. **Validación**: Verifica tipo MIME y tamaño máximo
+2. **Conversión**: Todas las imágenes se convierten a formato WebP
+3. **Redimensionamiento**: Reduce dimensiones si exceden límites (mantiene aspecto)
+4. **Compresión**: Aplica calidad WebP 80 para balance tamaño/calidad
+5. **Limpieza**: Elimina metadatos EXIF para privacidad y menor tamaño
+
+### Beneficios
+
+- **Reducción de tamaño**: 30-80% menor que PNG/JPG
+- **Carga más rápida**: Mejor experiencia de usuario
+- **SEO**: Tiempos de carga optimizados
+- **Ancho de banda**: Menor consumo de recursos
+
 ## Variables de Entorno
 
 ### Requeridas
@@ -247,19 +356,21 @@ RECAPTCHA_SECRET_KEY="tu-secret-key"
 
 ## Comandos de Build
 
+**IMPORTANTE**: Los builds requieren `CGO_ENABLED=1` debido a la optimización de imágenes con libvips.
+
 ### Desarrollo
 ```bash
 # Build en modo desarrollo (con hot reload)
-ENV=development make build/server
+CGO_ENABLED=1 ENV=development make build/server
 
 # Live reload (watch mode)
-ENV=development make live
+CGO_ENABLED=1 ENV=development make live
 ```
 
 ### Producción
 ```bash
 # Build optimizado para producción
-ENV=production make build/server
+CGO_ENABLED=1 ENV=production make build/server
 ```
 
 ### Limpieza
