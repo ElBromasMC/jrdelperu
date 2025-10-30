@@ -44,30 +44,30 @@ templ AdminFilesIndex(username string, images []repository.StaticFile, pdfs []re
 			<div class="card bg-base-100 shadow-xl">
 				<div class="card-body">
 					<h2 class="card-title">Imágenes</h2>
-					if len(images) == 0 {
-						<p class="text-base-content/70">No hay imágenes subidas.</p>
-					} else {
-						<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="images-grid">
+					<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="images-grid">
+						if len(images) == 0 {
+							<p class="text-base-content/70 col-span-full" id="images-empty-state">No hay imágenes subidas.</p>
+						} else {
 							for _, img := range images {
 								@FileCard(img, "image")
 							}
-						</div>
-					}
+						}
+					</div>
 				</div>
 			</div>
 			<!-- PDFs Section -->
 			<div class="card bg-base-100 shadow-xl">
 				<div class="card-body">
 					<h2 class="card-title">PDFs</h2>
-					if len(pdfs) == 0 {
-						<p class="text-base-content/70">No hay PDFs subidos.</p>
-					} else {
-						<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="pdfs-grid">
+					<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="pdfs-grid">
+						if len(pdfs) == 0 {
+							<p class="text-base-content/70 col-span-full" id="pdfs-empty-state">No hay PDFs subidos.</p>
+						} else {
 							for _, pdf := range pdfs {
 								@FileCard(pdf, "pdf")
 							}
-						</div>
-					}
+						}
+					</div>
 				</div>
 			</div>
 		</div>
@@ -305,6 +305,8 @@ templ FileCardOOB(file repository.StaticFile, fileType string) {
 				</div>
 			</div>
 		</div>
+		<!-- Remove empty state if it exists -->
+		<div id="images-empty-state" hx-swap-oob="true"></div>
 	} else {
 		<div hx-swap-oob="afterbegin:#pdfs-grid">
 			<div class="card bg-base-200 shadow" id={ fmt.Sprintf("file-card-%d", file.FileID) }>
@@ -357,6 +359,8 @@ templ FileCardOOB(file repository.StaticFile, fileType string) {
 				</div>
 			</div>
 		</div>
+		<!-- Remove empty state if it exists -->
+		<div id="pdfs-empty-state" hx-swap-oob="true"></div>
 	}
 }
 
