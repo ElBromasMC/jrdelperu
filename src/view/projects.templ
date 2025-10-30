@@ -161,28 +161,221 @@ templ ProjectCard(project repository.Project, featuredImage repository.ListProje
 	</a>
 }
 
+// ProjectGridItem muestra un proyecto con información y carousel de imágenes
+templ ProjectGridItem(project repository.Project, images []repository.ListProjectImagesRow, index int) {
+	<div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+		<!-- Left side: Project Information -->
+		<div class="flex flex-col space-y-4">
+			<div>
+				<span class="font-semibold text-lg">Descripción:</span>
+				<span class="text-lg ml-2">{ project.Description }</span>
+			</div>
+			<div>
+				<span class="font-semibold text-lg">Ubicación:</span>
+				<span class="text-lg ml-2">{ project.Location }</span>
+			</div>
+			<div>
+				<span class="font-semibold text-lg">Periodo:</span>
+				<span class="text-lg ml-2">{ project.Period }</span>
+			</div>
+			if project.AreaM2.Valid {
+				<div>
+					<span class="font-semibold text-lg">M2:</span>
+					<span class="text-lg ml-2">{ formatProjectAreaM2(project.AreaM2) }</span>
+				</div>
+			}
+			<div>
+				<span class="font-semibold text-lg">Servicio:</span>
+				<span class="text-lg ml-2">{ project.Service }</span>
+			</div>
+		</div>
+		<!-- Right side: Image Carousel -->
+		<div class="relative">
+			<div class={ fmt.Sprintf("swiper project-swiper project-swiper-%d", index) } data-index={ fmt.Sprintf("%d", index) }>
+				<div class="swiper-wrapper">
+					if len(images) == 0 {
+						<div class="swiper-slide">
+							<div class="border border-black aspect-square">
+								<img class="object-cover w-full h-full" src="/static/img/placeholder.webp" alt="placeholder"/>
+							</div>
+						</div>
+					} else {
+						for _, img := range images {
+							<div class="swiper-slide">
+								<div class="border border-black aspect-square overflow-hidden cursor-pointer carousel-click" data-carousel-index={ fmt.Sprintf("%d", index) }>
+									<img
+										class="object-cover w-full h-full"
+										src={ path.Join(config.IMAGES_PATH, img.FileName) }
+										alt={ project.Description }
+									/>
+								</div>
+							</div>
+						}
+					}
+				</div>
+				<!-- Navigation arrows -->
+				<div class={ fmt.Sprintf("swiper-button-next swiper-button-next-%d", index) }></div>
+				<div class={ fmt.Sprintf("swiper-button-prev swiper-button-prev-%d", index) }></div>
+			</div>
+		</div>
+		<!-- Fullscreen Modal -->
+		<div id={ fmt.Sprintf("fullscreen-modal-%d", index) } class="hidden fixed inset-0 bg-black bg-opacity-95 z-50">
+			<button class="absolute top-4 right-4 text-white text-4xl z-50 hover:text-gray-300 close-fullscreen" data-carousel-index={ fmt.Sprintf("%d", index) }>
+				×
+			</button>
+			<div class={ fmt.Sprintf("swiper fullscreen-swiper-%d w-full h-full", index) } data-index={ fmt.Sprintf("%d", index) }>
+				<div class="swiper-wrapper">
+					if len(images) > 0 {
+						for _, img := range images {
+							<div class="swiper-slide">
+								<div class="w-full h-full flex items-center justify-center">
+									<img
+										class="max-w-full max-h-full object-contain"
+										src={ path.Join(config.IMAGES_PATH, img.FileName) }
+										alt={ project.Description }
+									/>
+								</div>
+							</div>
+						}
+					}
+				</div>
+				<!-- Navigation arrows -->
+				<div class={ fmt.Sprintf("swiper-button-next swiper-button-next-fs-%d", index) }></div>
+				<div class={ fmt.Sprintf("swiper-button-prev swiper-button-prev-fs-%d", index) }></div>
+			</div>
+		</div>
+	</div>
+}
+
 // ProjectsPage muestra la página completa de proyectos
-templ ProjectsPage(projects []repository.Project, projectImages map[int32]repository.ListProjectImagesRow) {
+templ ProjectsPage(projects []repository.Project, projectImages map[int32][]repository.ListProjectImagesRow) {
 	@BasePage("Proyectos") {
 		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
 			<section>
 				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
 					<h1 class="text-center font-semibold text-3xl uppercase mb-12">
-						Nuestros Proyectos
+						PRINCIPALES OBRAS EJECUTADAS
 					</h1>
-					<div class="grid grid-cols-[repeat(auto-fit,minmax(20rem,1fr))] gap-12 justify-items-center">
-						if len(projects) == 0 {
-							<div class="col-span-full text-center text-base-content/60 py-8">
-								No hay proyectos disponibles en este momento.
-							</div>
-						} else {
-							for _, proj := range projects {
-								@ProjectCard(proj, projectImages[proj.ProjectID])
+					if len(projects) == 0 {
+						<div class="text-center text-base-content/60 py-8">
+							No hay proyectos disponibles en este momento.
+						</div>
+					} else {
+						<div class="flex flex-col gap-12 lg:grid lg:grid-cols-2 lg:gap-16">
+							for i, proj := range projects {
+								@ProjectGridItem(proj, projectImages[proj.ProjectID], i)
 							}
-						}
-					</div>
+						</div>
+					}
 				</div>
 			</section>
+			<!-- Initialize all project swipers -->
+			<script>
+				// Store swiper instances
+				const projectSwipers = {};
+				const fullscreenSwipers = {};
+
+				document.addEventListener('DOMContentLoaded', function() {
+					// Initialize regular carousels
+					document.querySelectorAll('.project-swiper').forEach(function(swiperEl) {
+						const index = swiperEl.getAttribute('data-index');
+						projectSwipers[index] = new Swiper('.project-swiper-' + index, {
+							slidesPerView: 1,
+							spaceBetween: 0,
+							loop: false,
+							autoplay: {
+								delay: 3000,
+								disableOnInteraction: true,
+								pauseOnMouseEnter: true
+							},
+							navigation: {
+								nextEl: '.swiper-button-next-' + index,
+								prevEl: '.swiper-button-prev-' + index,
+							}
+						});
+					});
+
+					// Attach click handlers to carousel images
+					document.querySelectorAll('.carousel-click').forEach(function(el) {
+						el.addEventListener('click', function() {
+							const index = this.getAttribute('data-carousel-index');
+							openFullscreenCarousel(parseInt(index));
+						});
+					});
+
+					// Attach click handlers to close buttons
+					document.querySelectorAll('.close-fullscreen').forEach(function(el) {
+						el.addEventListener('click', function() {
+							const index = this.getAttribute('data-carousel-index');
+							closeFullscreenCarousel(parseInt(index));
+						});
+					});
+
+					// Handle Esc key
+					document.addEventListener('keydown', function(e) {
+						if (e.key === 'Escape') {
+							closeAllFullscreenCarousels();
+						}
+					});
+				});
+
+				function openFullscreenCarousel(index) {
+					const modal = document.getElementById('fullscreen-modal-' + index);
+					if (modal) {
+						// Get current slide index from regular carousel
+						const currentIndex = projectSwipers[index] ? projectSwipers[index].activeIndex : 0;
+
+						// Show modal
+						modal.classList.remove('hidden');
+
+						// Initialize fullscreen swiper if not already done (lazy initialization)
+						if (!fullscreenSwipers[index]) {
+							fullscreenSwipers[index] = new Swiper('.fullscreen-swiper-' + index, {
+								slidesPerView: 1,
+								spaceBetween: 0,
+								loop: false,
+								autoplay: {
+									delay: 3000,
+									disableOnInteraction: true,
+									pauseOnMouseEnter: true
+								},
+								navigation: {
+									nextEl: '.swiper-button-next-fs-' + index,
+									prevEl: '.swiper-button-prev-fs-' + index,
+								}
+							});
+						}
+
+						// Sync fullscreen carousel to same slide
+						if (fullscreenSwipers[index]) {
+							fullscreenSwipers[index].slideTo(currentIndex, 0);
+							fullscreenSwipers[index].update();
+							// Start autoplay
+							if (fullscreenSwipers[index].autoplay) {
+								fullscreenSwipers[index].autoplay.start();
+							}
+						}
+
+						// Prevent body scroll
+						document.body.style.overflow = 'hidden';
+					}
+				}
+
+				function closeFullscreenCarousel(index) {
+					const modal = document.getElementById('fullscreen-modal-' + index);
+					if (modal) {
+						modal.classList.add('hidden');
+						document.body.style.overflow = '';
+					}
+				}
+
+				function closeAllFullscreenCarousels() {
+					document.querySelectorAll('[id^="fullscreen-modal-"]').forEach(function(modal) {
+						modal.classList.add('hidden');
+					});
+					document.body.style.overflow = '';
+				}
+			</script>
 			<!-- Formulario -->
 			<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
 				@Form()

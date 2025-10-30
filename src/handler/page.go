@@ -71,22 +71,12 @@ func (h *Handler) HandleProjectsShow(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Error al obtener proyectos")
 	}
 
-	// Get featured images for each project
-	projectImages := make(map[int32]repository.ListProjectImagesRow)
+	// Get all images for each project
+	projectImages := make(map[int32][]repository.ListProjectImagesRow)
 	for _, proj := range projects {
-		featuredImg, err := h.queries.GetFeaturedProjectImage(ctx, proj.ProjectID)
+		images, err := h.queries.ListProjectImages(ctx, proj.ProjectID)
 		if err == nil {
-			// Convert GetFeaturedProjectImageRow to ListProjectImagesRow
-			projectImages[proj.ProjectID] = repository.ListProjectImagesRow{
-				ProjectID:    featuredImg.ProjectID,
-				ImageID:      featuredImg.ImageID,
-				DisplayOrder: featuredImg.DisplayOrder,
-				IsFeatured:   featuredImg.IsFeatured,
-				FileName:     featuredImg.FileName,
-				FileType:     featuredImg.FileType,
-				MimeType:     featuredImg.MimeType,
-				DisplayName:  featuredImg.DisplayName,
-			}
+			projectImages[proj.ProjectID] = images
 		}
 	}
 
