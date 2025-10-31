@@ -39,13 +39,16 @@ FROM base AS production
 USER runner
 WORKDIR /home/runner/src
 COPY --chown=runner:runner . .
+ARG CGO_ENABLED=1
 RUN make clean
 RUN make ./build/server
+RUN make ./build/seeder
 
 # Create required folders and change to app directory
 RUN mkdir -p /home/runner/app \
     /home/runner/app/uploads \
     && cp /home/runner/src/build/server \
+    /home/runner/src/build/seeder \
     /home/runner/app/
 WORKDIR /home/runner/app
 
