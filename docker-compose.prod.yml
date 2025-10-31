@@ -9,4 +9,9 @@ services:
       - ENV=production
     expose:
       - "8080"
+    volumes:
+      - jrdelperu-images:/home/runner/app/uploads
+
+volumes:
+  jrdelperu-images:
 

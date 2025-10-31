@@ -43,7 +43,8 @@ RUN make clean
 RUN make ./build/server
 
 # Create required folders and change to app directory
-RUN mkdir /home/runner/app \
+RUN mkdir -p /home/runner/app \
+    /home/runner/app/uploads \
     && cp /home/runner/src/build/server \
     /home/runner/app/
 WORKDIR /home/runner/app
