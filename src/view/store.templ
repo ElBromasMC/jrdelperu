@@ -26,46 +26,46 @@ func getFileURL(file repository.StaticFile) string {
 templ StoreIndex() {
 	@BasePage("Servicios") {
 		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
-			<div class="w-full h-96">
-				<img
-					class="w-full h-full object-cover"
-					src="/static/img/placeholder.webp"
-					alt="Nuestros servicios"
-				/>
-			</div>
+			<div
+				class="w-full h-96 bg-[url('/static/img/servicio.webp')] bg-cover bg-[center_18%] bg-fixed"
+			></div>
+			<!-- Servicios -->
 			<section id="servicios">
 				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
-					<h2 class="text-center font-semibold text-3xl uppercase">
-						Somos tu aliado en materiales de alta calidad
+					<h2 class="text-center font-medium text-2xl lg:text-3xl">
+						Conócenos, Somos Líderes en Instalación de Sistemas de Cerramiento
 					</h2>
-					<div class="flex flex-row justify-center flex-wrap gap-12 mt-12 lg:gap-16 lg:mt-16">
-						<a class="border border-black w-full aspect-square max-w-80" href="/servicio/vidrios">
-							<div class="h-4/5">
-								<img class="object-cover w-full h-full" src="/static/img/vidrios.webp" alt="vidrios"/>
-							</div>
-							<div class="flex justify-center items-center h-1/5 border-t border-black">
-								<div class="text-center font-semibold text-2xl">
-									VIDRIOS
-								</div>
-							</div>
-						</a>
+					<p class="text-center font-medium text-2xl text-livid lg:text-3xl lg:mt-1">
+						Tecnología, diseño y resistencia con materiales de calidad.
+					</p>
+					<div class="flex flex-row justify-center flex-wrap gap-12 mt-12 lg:flex-row lg:gap-16 lg:mt-16">
 						<a class="border border-black w-full aspect-square max-w-80" href="/servicio/aluminios">
 							<div class="h-4/5">
-								<img class="object-cover w-full h-full" src="/static/img/aluminios.webp" alt="vidrios"/>
+								<img class="object-cover mx-auto h-full" src="/static/img/aluminios.webp" alt="vidrios"/>
 							</div>
-							<div class="flex justify-center items-center h-1/5 border-t border-black">
-								<div class="text-center font-semibold text-2xl">
+							<div class="flex justify-center items-center h-1/5">
+								<div class="text-center font-medium text-2xl text-apple">
 									ALUMINIOS
 								</div>
 							</div>
 						</a>
 						<a class="border border-black w-full aspect-square max-w-80" href="/servicio/upvc">
 							<div class="h-4/5">
-								<img class="object-cover w-full h-full" src="/static/img/pvc.webp" alt="vidrios"/>
+								<img class="object-cover mx-auto h-full" src="/static/img/pvc.webp" alt="vidrios"/>
 							</div>
-							<div class="flex justify-center items-center h-1/5 border-t border-black">
-								<div class="text-center font-semibold text-2xl">
-									U PVC
+							<div class="flex justify-center items-center h-1/5">
+								<div class="text-center font-medium text-2xl text-apple">
+									uPVC
+								</div>
+							</div>
+						</a>
+						<a class="border border-black w-full aspect-square max-w-80" href="/servicio/vidrios">
+							<div class="h-4/5">
+								<img class="object-cover mx-auto h-full" src="/static/img/vidrios.webp" alt="vidrios"/>
+							</div>
+							<div class="flex justify-center items-center h-1/5">
+								<div class="text-center font-medium text-2xl text-apple">
+									VIDRIOS
 								</div>
 							</div>
 						</a>
@@ -83,54 +83,58 @@ templ StoreIndex() {
 templ StoreVidrioIndex(cats []model.Category) {
 	@BasePage("Vidrios") {
 		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
+			<div
+				class="w-full h-96 bg-[url('/static/img/vidrios_fondo.webp')] bg-cover bg-[center_18%] bg-fixed"
+			></div>
+			<!-- Descripción -->
 			<section>
-				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
-					<div class="space-y-16">
-						<h2 class="text-center font-semibold text-4xl uppercase">
+				<div class="px-4 py-8 max-w-7xl mx-auto">
+					<div class="space-y-8">
+						<h2 class="text-center font-medium text-3xl uppercase">
 							Vidrios
 						</h2>
-						<div class="flex flex-col items-center gap-9 lg:flex-row lg:items-start">
-							<div class="space-y-3">
-								<div class="border border-black w-full aspect-square max-w-80" href="/servicio/vidrios">
-									<div class="h-4/5">
-										<img class="object-cover w-full h-full" src="/static/img/vidrios.webp" alt="vidrios"/>
-									</div>
-									<div class="flex justify-center items-center h-1/5 border-t border-black">
-										<div class="text-center font-semibold text-2xl">
-											VIDRIOS
-										</div>
-									</div>
-								</div>
-								<a
-									class="block w-full py-2 bg-cloud text-center hover:bg-livid hover:text-white"
-								>
-									Catálogo de Vidrios
-									<br/>
-									Descargar PDF
-								</a>
-								<a class="block w-full py-2 border border-black font-bold bg-white text-center">
-									Certificados
-									<br/>
-									de calidad
-								</a>
-							</div>
-							<div class="flex-1 space-y-6">
-								<ul class="space-y-6">
-									for _, cat := range cats {
-										<li class="flex flex-col gap-3 items-center lg:flex-row lg:gap-6">
-											<a
-												class="flex-none w-60 py-2 bg-cloud text-center hover:bg-livid hover:text-white"
-												href={ templ.URL(fmt.Sprintf("/servicio/vidrios/%s", cat.Slug)) }
-											>
-												{ cat.Name }
-											</a>
-											<div>{ cat.Description }</div>
-										</li>
-									}
-								</ul>
-							</div>
-						</div>
+						<p class="text-justify lg:text-lg">
+							En JR del Perú, ofrecemos una amplia línea de vidrios arquitectónicos y de seguridad, desarrollados bajo normas internacionales de calidad y orientados 
+							a cubrir las necesidades de todo tipo de proyectos: desde obras residenciales y comerciales, hasta infraestructuras públicas e industriales.
+							Nuestro catálogo presenta los principales tipos de vidrio que fabricamos y distribuimos, cada uno con características y aplicaciones específicas, 
+							cumpliendo con los estándares ASTM, EN, UNE e ISO, además de la Norma Técnica Peruana E.040.
+						</p>
+						<p class="text-center font-medium lg:text-lg">
+							A continuación, te brindamos una descripción general de los tipos de vidrio que encontrarás en el catálogo descargable:
+						</p>
 					</div>
+				</div>
+			</section>
+			<!-- Listado de vidrios -->
+			<section>
+				<div class="px-4 py-8 max-w-7xl mx-auto">
+					<ul class="text-justify lg:text-lg space-y-3">
+						if len(cats) == 0 {
+							<li>
+								<strong>Vidrio Monolítico:</strong>
+								<span>Vidrio simple de una sola capa, disponible en varios espesores y colores, ideal para ventanas, mamparas y aplicaciones interiores.</span>
+							</li>
+						} else {
+							for _, cat := range cats {
+								<li>
+									<strong>{ cat.Name }:</strong>
+									<span>{ cat.Description }</span>
+								</li>
+							}
+						}
+					</ul>
+				</div>
+			</section>
+			<!-- Descarga de catálogo -->
+			<section>
+				<div class="px-4 py-8 max-w-7xl mx-auto">
+					<a
+						href="/static/pdf/4. CATALOGO DE VIDRIOS - JR DEL PERU OFICIAL.pdf"
+						target="_blank"
+						class="block py-4 border-4 border-apple font-bold text-xl text-center"
+					>
+						CATÁLOGO DE VIDRIOS - Corporación JR Del Perú S.A.C
+					</a>
 				</div>
 			</section>
 			<!-- Formulario -->
@@ -248,21 +252,29 @@ templ StoreVidrioCategory(cat model.Category, is []model.Item, fs []model.Catego
 templ StoreAluminioIndex(cats []model.Category) {
 	@BasePage("Aluminios") {
 		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
+			<!-- Descripción -->
 			<section>
-				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
-					<div class="space-y-16">
-						<h2 class="text-center font-semibold text-4xl uppercase">
+				<div class="px-4 py-8 max-w-7xl mx-auto">
+					<div class="space-y-8">
+						<h2 class="text-center font-medium text-3xl uppercase">
 							Aluminios
 						</h2>
-						<div class="flex flex-row justify-center flex-wrap gap-12 mt-12">
+					</div>
+				</div>
+			</section>
+			<!-- Listado de aluminios -->
+			<section>
+				<div class="px-4 py-8 max-w-7xl mx-auto">
+					<div class="space-y-16">
+						<div class="flex flex-row justify-center flex-wrap gap-12 lg:gap-x-48 lg:gap-y-24">
 							for _, cat := range cats {
 								<a
 									class="border border-black w-full max-w-96"
 									href={ templ.SafeURL(fmt.Sprintf("/servicio/aluminios/%s", cat.Slug)) }
 								>
-									<div class="w-full aspect-[5/4]">
+									<div class="w-full aspect-[5/4] flex justify-center">
 										<img
-											class="object-cover w-full h-full"
+											class="object-cover h-full"
 											if cat.Img.Id != 0 {
 												src={ path.Join(config.IMAGES_PATH, cat.Img.Filename) }
 											} else {
@@ -270,29 +282,27 @@ templ StoreAluminioIndex(cats []model.Category) {
 											}
 										/>
 									</div>
-									<div class="flex justify-center items-center py-3 border-t border-black">
-										<div class="text-center font-semibold text-2xl px-2">
+									<div class="flex justify-center items-center py-3">
+										<div class="text-center font-semibold text-2xl px-2 text-apple">
 											{ cat.Name }
 										</div>
 									</div>
 								</a>
 							}
 						</div>
-						<div class="flex flex-col items-center">
-							<div class="max-w-72 w-full space-y-3">
-								<a class="w-full block py-2 bg-cloud text-center hover:bg-livid hover:text-white">
-									Catálogo de Aluminios
-									<br/>
-									Descargar PDF
-								</a>
-								<a class="w-full block py-2 border border-black font-bold bg-white text-center">
-									Certificados
-									<br/>
-									de calidad
-								</a>
-							</div>
-						</div>
 					</div>
+				</div>
+			</section>
+			<!-- Descarga de catálogo -->
+			<section>
+				<div class="px-4 py-8 max-w-7xl mx-auto">
+					<a
+						href="/static/pdf/1. CATALOGO DE ALUMINIO - JR DEL PERU OFICIAL.pdf"
+						target="_blank"
+						class="block py-4 border-4 border-apple font-bold text-xl text-center"
+					>
+						CATÁLOGO DE ALUMINIO - Corporación JR Del Perú S.A.C
+					</a>
 				</div>
 			</section>
 			<!-- Formulario -->

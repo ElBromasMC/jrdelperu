@@ -12,6 +12,9 @@ repository/
 # Repository
 uploads/
 
+# Large files
+assets/static/pdf/BROCHURE JR DEL PERÚ PAGINA WEB.pdf
+
 # Claude files
 .claude/
 
