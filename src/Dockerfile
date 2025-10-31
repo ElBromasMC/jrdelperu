@@ -25,7 +25,7 @@ WORKDIR /home/runner/src
 
 # Install run-time and compile-time project dependencies
 COPY --chown=runner:runner package.json package-lock.json ./
-RUN npm install --omit=dev
+RUN npm install
 COPY --chown=runner:runner go.mod go.sum ./
 RUN go mod download
 
