@@ -72,7 +72,7 @@ RUN apk add --no-cache \
     ripgrep
 
 # Fix npm -g installation
-RUN install -d -m 0775 -o runner -g runner /usr/local/lib/node_modules \\
+RUN install -d -m 0775 -o runner -g runner /usr/local/lib/node_modules \
     && chown -R runner:runner /usr/local/bin
 
 # Change to non-root user
