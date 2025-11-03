@@ -26,14 +26,14 @@ var (
 
 const (
 	MaxImageSize = 10 * 1024 * 1024  // 10 MB
-	MaxPDFSize   = 20 * 1024 * 1024  // 20 MB
+	MaxPDFSize   = 200 * 1024 * 1024 // 200 MB
 	UploadDir    = "uploads"         // Directorio base para archivos
 
 	// Configuración de optimización de imágenes
-	MaxImageWidth    = 2000 // Ancho máximo en píxeles
-	MaxImageHeight   = 2000 // Alto máximo en píxeles
-	WebPQuality      = 80   // Calidad WebP (1-100) - 80 ofrece excelente compresión
-	StripMetadata    = true // Eliminar datos EXIF
+	MaxImageWidth  = 2000 // Ancho máximo en píxeles
+	MaxImageHeight = 2000 // Alto máximo en píxeles
+	WebPQuality    = 80   // Calidad WebP (1-100) - 80 ofrece excelente compresión
+	StripMetadata  = true // Eliminar datos EXIF
 )
 
 // FileService maneja la subida, almacenamiento y eliminación de archivos
@@ -77,19 +77,32 @@ func generateDisplayName(filename string) string {
 	// Normalize unicode (remove accents)
 	displayName = strings.Map(func(r rune) rune {
 		switch r {
-		case 'á', 'à', 'ä', 'â': return 'a'
-		case 'é', 'è', 'ë', 'ê': return 'e'
-		case 'í', 'ì', 'ï', 'î': return 'i'
-		case 'ó', 'ò', 'ö', 'ô': return 'o'
-		case 'ú', 'ù', 'ü', 'û': return 'u'
-		case 'ñ': return 'n'
-		case 'Á', 'À', 'Ä', 'Â': return 'A'
-		case 'É', 'È', 'Ë', 'Ê': return 'E'
-		case 'Í', 'Ì', 'Ï', 'Î': return 'I'
-		case 'Ó', 'Ò', 'Ö', 'Ô': return 'O'
-		case 'Ú', 'Ù', 'Ü', 'Û': return 'U'
-		case 'Ñ': return 'N'
-		default: return r
+		case 'á', 'à', 'ä', 'â':
+			return 'a'
+		case 'é', 'è', 'ë', 'ê':
+			return 'e'
+		case 'í', 'ì', 'ï', 'î':
+			return 'i'
+		case 'ó', 'ò', 'ö', 'ô':
+			return 'o'
+		case 'ú', 'ù', 'ü', 'û':
+			return 'u'
+		case 'ñ':
+			return 'n'
+		case 'Á', 'À', 'Ä', 'Â':
+			return 'A'
+		case 'É', 'È', 'Ë', 'Ê':
+			return 'E'
+		case 'Í', 'Ì', 'Ï', 'Î':
+			return 'I'
+		case 'Ó', 'Ò', 'Ö', 'Ô':
+			return 'O'
+		case 'Ú', 'Ù', 'Ü', 'Û':
+			return 'U'
+		case 'Ñ':
+			return 'N'
+		default:
+			return r
 		}
 	}, displayName)
 

@@ -168,14 +168,16 @@ func (h *Handler) HandleAluminioCategoryShow(c echo.Context) error {
 
 	// Get PDF URL if exists
 	pdfURL := ""
+	pdfName := ""
 	if dbCat.PdfID.Valid {
 		pdf, err := h.queries.GetStaticFile(ctx, dbCat.PdfID.Int32)
 		if err == nil {
 			pdfURL = path.Join(config.PDFS_PATH, pdf.FileName)
+			pdfName = pdf.DisplayName.String
 		}
 	}
 
-	return renderOK(c, view.StoreAluminioCategory(cat, items, pdfURL))
+	return renderOK(c, view.StoreAluminioCategory(cat, items, pdfURL, pdfName))
 }
 
 func (h *Handler) HandleAluminioItemShow(c echo.Context) error {
@@ -221,18 +223,10 @@ func (h *Handler) HandleAluminioItemShow(c echo.Context) error {
 
 	item := service.MapItemToModel(dbItem, dbCat, itemImage, catImage)
 
-	// Get item images (gallery)
-	dbItemImages, err := h.queries.ListItemImages(ctx, dbItem.ItemID)
-	if err != nil {
-		return c.String(http.StatusInternalServerError, "Error al cargar galería")
-	}
+	pdfURL := ""
+	pdfName := ""
 
-	images := make([]model.Image, 0, len(dbItemImages))
-	for _, dbImg := range dbItemImages {
-		images = append(images, service.MapImageToModel(dbImg))
-	}
-
-	return renderOK(c, view.StoreAluminioItem(item, images))
+	return renderOK(c, view.StoreAluminioItem(item, pdfURL, pdfName))
 }
 
 func (h *Handler) HandleUPVCIndexShow(c echo.Context) error {
