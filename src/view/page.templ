@@ -122,66 +122,7 @@ templ Index(projects []repository.Project, projectImages map[int32]repository.Li
 							</div>
 						</div>
 					</div>
-					<div class="bg-neutral-500">
-						<div class="px-4 py-12 max-w-7xl mx-auto">
-							<div class="flex flex-col items-center gap-9 text-justify lg:flex-row lg:gap-16">
-								<div class="grid grid-cols-7 gap-5 items-center max-w-96">
-									<div class="col-span-3 aspect-square">
-										<img
-											class="object-cover w-full h-full"
-											src="/static/img/experiencia.webp"
-											alt="La empresa"
-										/>
-									</div>
-									<div class="col-span-4">
-										<h3 class="font-bold">Experiencia y confianza:</h3>
-										<p>
-											Contamos con un equipo
-											altamente calificado y años
-											de trayectoria en la
-											industria de la construcción.
-										</p>
-									</div>
-								</div>
-								<div class="grid grid-cols-7 gap-5 items-center max-w-96">
-									<div class="col-span-3 aspect-square">
-										<img
-											class="object-cover w-full h-full"
-											src="/static/img/calidad.webp"
-											alt="La empresa"
-										/>
-									</div>
-									<div class="col-span-4">
-										<h3 class="font-bold">Calidad y precisión:</h3>
-										<p>
-											Ofrecemos vidrios, aluminio
-											y uPVC con los más altos
-											estándares para garantizar
-											durabilidad y eficiencia.
-										</p>
-									</div>
-								</div>
-								<div class="grid grid-cols-7 gap-5 items-center max-w-96">
-									<div class="col-span-3 aspect-square">
-										<img
-											class="object-cover w-full h-full"
-											src="/static/img/atencion.webp"
-											alt="La empresa"
-										/>
-									</div>
-									<div class="col-span-4">
-										<h3 class="font-bold">Atención integral:</h3>
-										<p>
-											Brindamos asesoría,
-											manufactura e instalación
-											con un servicio
-											personalizado y eficiente.
-										</p>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
+					@Cinta()
 				</section>
 				<!-- Proyectos realizados -->
 				@ProjectsSection(projects, projectImages)
@@ -288,90 +229,108 @@ templ Contacto() {
 templ Descargas() {
 	@BasePage("Descargas") {
 		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
-			<section id="descargas">
-				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
-					<div class="grid text-center gap-9 lg:grid-cols-3 lg:grid-rows-2">
-						<div class="space-y-6">
-							<h2 class="font-semibold text-xl">Vidrios</h2>
-							<div class="space-y-2">
-								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
-									Catálogo de Vidrio
-									<br/>
-									Descargar PDF
-								</a>
-							</div>
-						</div>
-						<div class="space-y-6 lg:row-span-2">
-							<h2 class="font-semibold text-xl">Aluminio</h2>
-							<div class="space-y-2">
-								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
-									Catálogo de Aluminio
-									<br/>
-									Descargar PDF
-								</a>
-								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
-									Aluminio / Sistema de Fachadas Ligeras
-									<br/>
-									Descargar PDF
-								</a>
-								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
-									Aluminio / Sistema de Carpintería Técnica
-									<br/>
-									Descargar PDF
-								</a>
-								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
-									Aluminio / Sistema de Carpintería Perimetral
-									<br/>
-									Descargar PDF
-								</a>
-								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
-									Aluminio / Sistema de Carpintería Practicable
-									<br/>
-									Descargar PDF
-								</a>
-							</div>
-						</div>
-						<div class="space-y-6 lg:row-span-2">
-							<h2 class="font-semibold text-xl">uPVC</h2>
-							<div class="space-y-2">
-								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
-									Catálogo de uPVC
-									<br/>
-									Descargar PDF
-								</a>
-								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
-									uPVC / Lumina 60 Ventanas Articuladas
-									<br/>
-									Descargar PDF
-								</a>
-								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
-									uPVC / Lumina 104 Puerta
-									<br/>
-									Descargar PDF
-								</a>
-								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
-									uPVC / Natura 66 Ventanas Correderas
-									<br/>
-									Descargar PDF
-								</a>
-								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
-									uPVC / Natura 92 Mamparas Correderas
-									<br/>
-									Descargar PDF
-								</a>
-							</div>
-						</div>
-						<div class="space-y-6">
-							<h2 class="font-semibold text-xl">La Empresa</h2>
-							<div class="space-y-2">
-								<a class="block w-full py-2 bg-cloud hover:bg-livid hover:text-white">
-									Brochure Corporación JR Del Perú S.A.C.
-									<br/>
-									Descargar PDF
-								</a>
-							</div>
-						</div>
-					</div>
+			<!-- Descargas La empresa -->
+			<section id="nosotros">
+				<div class="px-4 pt-8 pb-4 max-w-7xl mx-auto space-y-6">
+					<h2 class="font-medium text-2xl text-center uppercase lg:text-3xl">La empresa</h2>
+					<ul class="border-4 border-apple divide-y-4 divide-apple">
+						<li>
+							<a
+								href="/static/pdf/BROCHURE JR DEL PERÚ PAGINA WEB.pdf"
+								target="_blank"
+								class="block py-4 font-bold text-xl text-center"
+							>
+								BROCHURE DE LA EMPRESA - Corporación JR Del Perú S.A.C
+							</a>
+						</li>
+					</ul>
+				</div>
+			</section>
+			<!-- Descargas aluminio -->
+			<section id="aluminio">
+				<div class="px-4 py-4 max-w-7xl mx-auto space-y-6">
+					<h2 class="font-medium text-2xl text-center uppercase lg:text-3xl">Aluminio</h2>
+					<ul class="border-4 border-apple divide-y-4 divide-apple">
+						<li>
+							<a
+								href="/static/pdf/1. CATALOGO DE ALUMINIO - JR DEL PERU OFICIAL.pdf"
+								target="_blank"
+								class="block py-4 font-bold text-xl text-center"
+							>
+								CATÁLOGO DE ALUMINIO - Corporación JR Del Perú S.A.C
+							</a>
+						</li>
+						<li>
+							<a
+								href="#"
+								target="_blank"
+								class="block py-4 font-bold text-xl text-center"
+							>
+								CATÁLOGO DE CORREDERA / ALUMINIO - Corporación JR Del Perú S.A.C
+							</a>
+						</li>
+						<li>
+							<a
+								href="#"
+								target="_blank"
+								class="block py-4 font-bold text-xl text-center"
+							>
+								SERIE 3825 / CORREDERA / ALUMINIO - Corporación JR Del Perú S.A.C
+							</a>
+						</li>
+					</ul>
+				</div>
+			</section>
+			<!-- Descargas upvc -->
+			<section id="upvc">
+				<div class="px-4 py-4 max-w-7xl mx-auto space-y-6">
+					<h2 class="font-medium text-2xl text-center lg:text-3xl">uPVC</h2>
+					<ul class="border-4 border-apple divide-y-4 divide-apple">
+						<li>
+							<a
+								href="/static/pdf/2. CATALOGO DE PVC - JR DEL PERU OFICIAL.pdf"
+								target="_blank"
+								class="block py-4 font-bold text-xl text-center"
+							>
+								CATÁLOGO DE uPVC - Corporación JR Del Perú S.A.C
+							</a>
+						</li>
+						<li>
+							<a
+								href="#"
+								target="_blank"
+								class="block py-4 font-bold text-xl text-center"
+							>
+								AFICHE DE LOS BENEFICIOS DEL uPVC - Corporación JR Del Perú S.A.C
+							</a>
+						</li>
+						<li>
+							<a
+								href="#"
+								target="_blank"
+								class="block py-4 font-bold text-xl text-center"
+							>
+								CATÁLOGO LUMINA 60 / uPVC - Corporación JR Del Perú S.A.C
+							</a>
+						</li>
+					</ul>
+				</div>
+			</section>
+			<!-- Descargas vidrio -->
+			<section id="vidrio">
+				<div class="px-4 py-4 max-w-7xl mx-auto space-y-6">
+					<h2 class="font-medium text-2xl text-center uppercase lg:text-3xl">Vidrio</h2>
+					<ul class="border-4 border-apple divide-y-4 divide-apple">
+						<li>
+							<a
+								href="/static/pdf/4. CATALOGO DE VIDRIOS - JR DEL PERU OFICIAL.pdf"
+								target="_blank"
+								class="block py-4 font-bold text-xl text-center"
+							>
+								CATÁLOGO DE VIDRIO - Corporación JR Del Perú S.A.C
+							</a>
+						</li>
+					</ul>
 				</div>
 			</section>
 			<!-- Formulario -->
@@ -424,118 +383,175 @@ templ Galeria() {
 	}
 }
 
-templ Nosotros() {
+templ Nosotros(projects []repository.Project, projectImages map[int32]repository.ListProjectImagesRow) {
 	@BasePage("La empresa") {
 		<main>
 			<div
-				class="w-full h-96 bg-[url('/static/img/nosotros.webp')] bg-fixed bg-[center_18%] bg-[size:110%] bg-fixed"
+				class="w-full h-48 bg-[url('/static/img/nosotros.webp')] bg-fixed bg-[size:110%] bg-[center_20%] lg:bg-[center_18%] lg:h-96"
 			></div>
+			<!-- La empresa -->
 			<section id="nosotros">
-				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
-					<div class="space-y-16">
-						<div class="flex flex-col items-center gap-9 lg:flex-row">
-							<div>
-								<div class="w-full max-w-[36rem] aspect-video">
-									<img
-										class="object-cover w-full h-full"
-										src="/static/img/placeholder.webp"
-										alt="La empresa"
-									/>
-								</div>
-							</div>
-							<div class="flex-1 space-y-6">
-								<p>
-									CORPORACIÓN JR. DEL PERÚ S.A.C. es una empresa especializada en el suministro de bienes y
-									servicios para la industria de la construcción, tanto en el sector público como privado.
-									Nos enfocamos en la comercialización de vidrio, aluminio y uPVC, ofreciendo además mano de
-									obra altamente calificada para su transformación y fabricación, garantizando un producto
-									final de alta calidad y precisión para su instalación en obra.
-								</p>
-								<p>
-									Asimismo, estamos firmemente comprometidos con la sostenibilidad y el respeto por el medio
-									ambiente, implementando un riguroso plan de calidad empresarial que garantiza prácticas
-									responsables y alineadas con las normativas ambientales vigentes.
-								</p>
+				<div class="px-4 pt-10 pb-8 max-w-7xl mx-auto space-y-6">
+					<h2 class="text-2xl font-medium text-center uppercase lg:text-3xl">CORPORACIÓN JR DEL PERÚ S.A.C</h2>
+					<p class="text-justify lg:text-lg">
+						Somos una empresa especializada en la fabricación e instalación de sistemas de cerramiento y acristalamiento para la industria de la construcción, 
+						tanto en el sector público como privado. Estructuramos nuestras operaciones en función de sistemas de cerramiento en aluminio, uPVC y vidrio, 
+						realizando el armado técnico con personal altamente calificado y garantizando un producto final de alta calidad y precisión para su instalación en obra. 
+						Asimismo, estamos firmemente comprometidos con la sostenibilidad y el respeto por el medio ambiente, implementando un riguroso plan de calidad 
+						empresarial que garantiza prácticas responsables y alineadas con las normativas ambientales vigentes.
+					</p>
+				</div>
+			</section>
+			<!-- Misión y Visión -->
+			<section id="mision-vision">
+				<div class="px-4 pt-10 pb-8 max-w-7xl mx-auto space-y-6">
+					<!-- Misión -->
+					<div class="grid gap-6 lg:grid-cols-9 lg:gap-9 lg:items-center">
+						<div class="space-y-5 lg:col-span-4 lg:order-2">
+							<h2 class="font-medium text-2xl text-center">Misión</h2>
+							<p class="text-justify lg:text-lg">
+								Ofrecer soluciones de alta calidad en la fabricación e instalación 
+								de sistemas de cerramiento en Aluminio, uPVC y vidrio, adaptadas 
+								a cada proyecto arquitectónico. Brindamos un servicio técnico 
+								especializado, con procesos eficientes, garantizando la 
+								satisfacción de nuestros clientes a través de una atención 
+								integral antes, durante y después de cada instalación. Asimismo, 
+								promovemos el crecimiento humano y profesional de nuestros 
+								colaboradores, fortaleciendo el desarrollo de la empresa y de 
+								quienes la integran.
+							</p>
+						</div>
+						<div class="lg:col-span-5 lg:order-1">
+							<div class="w-full aspect-[5/2]">
+								<img class="object-cover w-full h-full object-[50%_35%]" src="/static/img/mision.webp"/>
 							</div>
 						</div>
 					</div>
-				</div>
-			</section>
-			<section class="bg-cloud">
-				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
-					<div class="space-y-16">
-						<div class="space-y-4">
-							<h2 class="text-center font-semibold text-xl uppercase">Misión</h2>
-							<div class="p-4 border border-black rounded-3xl">
-								<p>
-									Ofrecer la mejor calidad en el suministro, elaboración y transformación del vidrio, aluminio y uPVC en sus diferentes
-									formas de presentación, para todo tipo de construcción arquitectónica con precios altamente competitivos, garantizando
-									ser una mejor alternativa para nuestros clientes en términos de formalidad, innovación y tecnología de punta, ofrecemos
-									un excelente servicio de pre y post venta para garantizar la satisfacción y lealtad de nuestros clientes y con ello
-									promover el crecimiento humano y profesional de nuestros colaboradores, afianzando el crecimiento de la empresa y de
-									quienes la conforman.
-								</p>
-							</div>
+					<!-- Visión -->
+					<div class="grid gap-6 lg:grid-cols-9 lg:gap-9 lg:items-center">
+						<div class="space-y-5 lg:col-span-4">
+							<h2 class="font-medium text-2xl text-center">Visión</h2>
+							<p class="text-justify lg:text-lg">
+								Proyectarnos como una empresa referente en la fabricación e 
+								instalación de sistemas de cerramiento innovadores, incorporando 
+								tecnologías avanzadas como el vidrio fotovoltaico y promoviendo 
+								soluciones sostenibles, seguras y energéticamente eficientes.
+								Aspiramos a ampliar nuestra presencia en el sector construcción, 
+								contribuyendo a edificaciones responsables con el entorno y 
+								generando un impacto positivo en nuestros clientes, el sector y 
+								nuestra organización.
+							</p>
 						</div>
-						<div class="space-y-4">
-							<h2 class="text-center font-semibold text-xl uppercase">Visión</h2>
-							<div class="p-4 border border-black rounded-3xl">
-								<p>
-									Buscamos diferenciarnos mediante la incorporación de nuevas tecnologías, incluyendo el vidrio fotovoltaico, promoviendo
-									soluciones sostenibles y eficientes para edificaciones modernas. Nos proyectamos a expandir nuestro alcance en el mercado,
-									ofreciendo productos de alta calidad, eficiencia energética y respeto al medio ambiente, garantizando así la plena
-									satisfacción de nuestros clientes y contribuyendo al desarrollo de una construcción más sostenible, segura e innovadora.
-								</p>
+						<div class="lg:col-span-5">
+							<div class="w-full aspect-[5/2]">
+								<img class="object-cover w-full h-full object-[50%_50%]" src="/static/img/vision.webp"/>
 							</div>
 						</div>
 					</div>
 				</div>
 			</section>
 			<section>
-				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
-					<div>
-						<div>
-							<div class="flex flex-col justify-between items-center gap-9 lg:flex-row">
-								<div class="flex-1">
-									<div class="max-w-[35rem] space-y-6">
-										<div class="space-y-4">
-											<h3 class="font-semibold text-xl uppercase">Valores</h3>
-											<p>
-												Honestidad, Respeto, Cumplimiento, Pasión, Innovación, Responsabilidad
-											</p>
-										</div>
-										<div class="space-y-4">
-											<h3 class="font-semibold text-xl uppercase">Target</h3>
-											<p>
-												Privado: Constructoras, edificaciones empresariales, residenciales y multifamiliares,
-												casas de playa, instituciones educativas, hospitalarias, y culinarias.
-											</p>
-											<p>
-												Publico: Edificaciones educativas, hospitalarias, regionales y municipales.
-											</p>
-										</div>
-									</div>
-								</div>
-								<div>
-									<div class="w-full max-w-96 aspect-square">
-										<img
-											class="object-cover w-full h-full"
-											src="/static/img/placeholder.webp"
-											alt="La empresa"
-										/>
-									</div>
-								</div>
+				<div class="px-4 py-10 max-w-7xl mx-auto space-y-6">
+					<div class="grid gap-6 lg:grid-cols-9 lg:gap-9 lg:items-center">
+						<div class="space-y-5 lg:col-span-4 lg:order-2">
+							<h2 class="font-medium text-2xl">Valores:</h2>
+							<p class="text-justify lg:text-lg">
+								Honestidad, Respeto, Cumplimiento, Pasión, Innovación, Responsabilidad
+							</p>
+							<h2 class="font-medium text-2xl">Target:</h2>
+							<p class="text-justify lg:text-lg">
+								<strong>Privado:</strong> Constructoras, edificaciones empresariales, residenciales y 
+								multifamiliares, casas de playa, instituciones educativas, 
+								hospitalarias, y culinarias.
+							</p>
+							<p class="text-justify lg:text-lg">
+								<strong>Público:</strong> Edificaciones educativas, hospitalarias, regionales y municipales.
+							</p>
+						</div>
+						<div class="flex flex-col items-center lg:flex-row lg:col-span-5 lg:order-1">
+							<div class="w-full aspect-[5/4] max-w-96">
+								<img class="object-cover w-full h-full" src="/static/img/trabajador-1.webp"/>
+							</div>
+							<div class="w-full aspect-[5/4] max-w-96">
+								<img class="object-cover w-full h-full" src="/static/img/trabajador-2.webp"/>
 							</div>
 						</div>
 					</div>
 				</div>
 			</section>
+			<section>
+				@Cinta()
+			</section>
+			@ProjectsSection(projects, projectImages)
 			<!-- Formulario -->
 			<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
 				@Form()
 			</div>
 		</main>
 	}
+}
+
+templ Cinta() {
+	<div class="bg-neutral-500">
+		<div class="px-4 py-12 max-w-7xl mx-auto">
+			<div class="flex flex-col items-center gap-9 text-justify lg:flex-row lg:gap-16">
+				<div class="grid grid-cols-7 gap-5 items-center max-w-96">
+					<div class="col-span-3 aspect-square">
+						<img
+							class="object-cover w-full h-full"
+							src="/static/img/experiencia.webp"
+							alt="La empresa"
+						/>
+					</div>
+					<div class="col-span-4">
+						<h3 class="font-bold">Experiencia y confianza:</h3>
+						<p>
+							Contamos con un equipo
+							altamente calificado y años
+							de trayectoria en la
+							industria de la construcción.
+						</p>
+					</div>
+				</div>
+				<div class="grid grid-cols-7 gap-5 items-center max-w-96">
+					<div class="col-span-3 aspect-square">
+						<img
+							class="object-cover w-full h-full"
+							src="/static/img/calidad.webp"
+							alt="La empresa"
+						/>
+					</div>
+					<div class="col-span-4">
+						<h3 class="font-bold">Calidad y precisión:</h3>
+						<p>
+							Ofrecemos vidrios, aluminio
+							y uPVC con los más altos
+							estándares para garantizar
+							durabilidad y eficiencia.
+						</p>
+					</div>
+				</div>
+				<div class="grid grid-cols-7 gap-5 items-center max-w-96">
+					<div class="col-span-3 aspect-square">
+						<img
+							class="object-cover w-full h-full"
+							src="/static/img/atencion.webp"
+							alt="La empresa"
+						/>
+					</div>
+					<div class="col-span-4">
+						<h3 class="font-bold">Atención integral:</h3>
+						<p>
+							Brindamos asesoría,
+							manufactura e instalación
+							con un servicio
+							personalizado y eficiente.
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 }
 
 templ Form() {

@@ -11,16 +11,10 @@ import (
 func (h *Handler) HandleIndexShow(c echo.Context) error {
 	ctx := c.Request().Context()
 
-	// Get visible projects (limit to 3 for homepage)
-	allProjects, err := h.queries.ListVisibleProjects(ctx)
+	// Get visible projects
+	projects, err := h.queries.ListVisibleProjects(ctx)
 	if err != nil {
-		allProjects = []repository.Project{}
-	}
-
-	// Limit to 3 projects for homepage
-	projects := allProjects
-	if len(projects) > 3 {
-		projects = projects[:3]
+		projects = []repository.Project{}
 	}
 
 	// Get featured images for each project
@@ -46,7 +40,34 @@ func (h *Handler) HandleIndexShow(c echo.Context) error {
 }
 
 func (h *Handler) HandleNosotrosShow(c echo.Context) error {
-	return renderOK(c, view.Nosotros())
+	ctx := c.Request().Context()
+
+	// Get visible projects (limit to 3 for homepage)
+	projects, err := h.queries.ListVisibleProjects(ctx)
+	if err != nil {
+		projects = []repository.Project{}
+	}
+
+	// Get featured images for each project
+	projectImages := make(map[int32]repository.ListProjectImagesRow)
+	for _, proj := range projects {
+		featuredImg, err := h.queries.GetFeaturedProjectImage(ctx, proj.ProjectID)
+		if err == nil {
+			// Convert GetFeaturedProjectImageRow to ListProjectImagesRow
+			projectImages[proj.ProjectID] = repository.ListProjectImagesRow{
+				ProjectID:    featuredImg.ProjectID,
+				ImageID:      featuredImg.ImageID,
+				DisplayOrder: featuredImg.DisplayOrder,
+				IsFeatured:   featuredImg.IsFeatured,
+				FileName:     featuredImg.FileName,
+				FileType:     featuredImg.FileType,
+				MimeType:     featuredImg.MimeType,
+				DisplayName:  featuredImg.DisplayName,
+			}
+		}
+	}
+
+	return renderOK(c, view.Nosotros(projects, projectImages))
 }
 
 func (h *Handler) HandleDescargasShow(c echo.Context) error {
