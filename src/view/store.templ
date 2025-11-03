@@ -466,21 +466,29 @@ templ StoreAluminioItem(i model.Item, pdfURL string, pdfName string) {
 templ StoreUPVCIndex(cats []model.Category) {
 	@BasePage("uPVC") {
 		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
+			<!-- Descripción -->
 			<section>
-				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
-					<div class="space-y-16">
-						<h2 class="text-center font-semibold text-4xl">
+				<div class="px-4 py-8 max-w-7xl mx-auto">
+					<div class="space-y-8">
+						<h2 class="text-center font-medium text-3xl">
 							uPVC
 						</h2>
-						<div class="flex flex-row justify-center flex-wrap gap-12 mt-12">
+					</div>
+				</div>
+			</section>
+			<!-- Listado de uPVC -->
+			<section>
+				<div class="px-4 py-8 max-w-7xl mx-auto">
+					<div class="space-y-16">
+						<div class="flex flex-row justify-center flex-wrap gap-12 lg:gap-x-48 lg:gap-y-24">
 							for _, cat := range cats {
 								<a
 									class="border border-black w-full max-w-96"
 									href={ templ.SafeURL(fmt.Sprintf("/servicio/upvc/%s", cat.Slug)) }
 								>
-									<div class="w-full aspect-[5/4]">
+									<div class="w-full aspect-[5/4] flex justify-center">
 										<img
-											class="object-cover w-full h-full"
+											class="object-cover h-full"
 											if cat.Img.Id != 0 {
 												src={ path.Join(config.IMAGES_PATH, cat.Img.Filename) }
 											} else {
@@ -488,29 +496,34 @@ templ StoreUPVCIndex(cats []model.Category) {
 											}
 										/>
 									</div>
-									<div class="flex justify-center items-center py-3 border-t border-black">
-										<div class="text-center font-semibold text-2xl px-2">
+									<div class="flex justify-center items-center py-3">
+										<div class="text-center font-semibold text-2xl px-2 text-apple">
 											{ cat.Name }
 										</div>
 									</div>
 								</a>
 							}
 						</div>
-						<div class="flex flex-col items-center">
-							<div class="max-w-72 w-full space-y-3">
-								<a class="w-full block py-2 bg-cloud text-center hover:bg-livid hover:text-white">
-									Catálogo de uPVC
-									<br/>
-									Descargar PDF
-								</a>
-								<a class="w-full block py-2 border border-black font-bold bg-white text-center">
-									Certificados
-									<br/>
-									de calidad
-								</a>
-							</div>
-						</div>
 					</div>
+				</div>
+			</section>
+			<!-- Descarga de catálogo -->
+			<section>
+				<div class="px-4 py-8 max-w-7xl mx-auto space-y-4">
+					<a
+						href="/static/pdf/2. CATALOGO DE PVC - JR DEL PERU OFICIAL.pdf"
+						target="_blank"
+						class="block py-4 border-4 border-apple font-bold text-xl text-center"
+					>
+						CATÁLOGO DE uPVC - Corporación JR Del Perú S.A.C
+					</a>
+					<a
+						href="#"
+						target="_blank"
+						class="block py-4 border-4 border-apple font-bold text-xl text-center"
+					>
+						AFICHE DE LOS BENEFICIOS DEL uPVC - Corporación JR Del Perú S.A.C
+					</a>
 				</div>
 			</section>
 			<!-- Formulario -->
@@ -521,13 +534,13 @@ templ StoreUPVCIndex(cats []model.Category) {
 	}
 }
 
-templ StoreUPVCCategory(cat model.Category, is []model.Item, pdf string) {
+templ StoreUPVCCategory(cat model.Category, is []model.Item, pdfURL string, pdfName string) {
 	@BasePage(cat.Name) {
 		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
 			<section>
-				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+				<div class="px-4 py-8 max-w-7xl mx-auto">
 					<div class="space-y-16">
-						<h2 class="text-center font-bold text-4xl">
+						<h2 class="text-center font-medium text-3xl uppercase">
 							<a
 								class="text-apple hover:text-livid"
 								href="/servicio/upvc"
@@ -545,9 +558,9 @@ templ StoreUPVCCategory(cat model.Category, is []model.Item, pdf string) {
 									class="border border-black w-full max-w-96"
 									href={ templ.SafeURL(fmt.Sprintf("/servicio/upvc/%s/%s", cat.Slug, i.Slug)) }
 								>
-									<div class="w-full aspect-[5/4]">
+									<div class="w-full aspect-[5/4] flex justify-center">
 										<img
-											class="object-cover w-full h-full"
+											class="object-cover h-full"
 											if i.Img.Id != 0 {
 												src={ path.Join(config.IMAGES_PATH, i.Img.Filename) }
 											} else {
@@ -555,39 +568,31 @@ templ StoreUPVCCategory(cat model.Category, is []model.Item, pdf string) {
 											}
 										/>
 									</div>
-									<div class="flex justify-center items-center py-3 border-t border-black">
-										<div class="text-center font-semibold text-2xl">
+									<div class="flex justify-center items-center py-3">
+										<div class="text-center font-semibold text-2xl text-apple">
 											{ i.Name }
 										</div>
 									</div>
 								</a>
 							}
 						</div>
-						<div class="flex flex-col items-center w-full gap-6">
-							<div class="grid gap-6 items-center lg:grid-cols-2">
-								<a class="max-w-72 block py-2 bg-cloud text-center hover:bg-livid hover:text-white">
-									Catálogo de uPVC
-									<br/>
-									Descargar PDF
-								</a>
-								<a
-									class="max-w-72 block py-2 bg-cloud text-center hover:bg-livid hover:text-white"
-									href={ templ.URL(pdf) }
-								>
-									{ "uPVC / " + cat.Name }
-									<br/>
-									Descargar PDF
-								</a>
-							</div>
-							<a class="w-full max-w-72 block py-2 border border-black font-bold bg-white text-center">
-								Certificados
-								<br/>
-								de calidad
-							</a>
-						</div>
 					</div>
 				</div>
 			</section>
+			if pdfURL != "" {
+				<!-- Descarga de catálogo -->
+				<section>
+					<div class="px-4 py-8 max-w-7xl mx-auto">
+						<a
+							href={ templ.URL(pdfURL) }
+							target="_blank"
+							class="block py-4 border-4 border-apple font-bold text-xl text-center"
+						>
+							{ pdfName }
+						</a>
+					</div>
+				</section>
+			}
 			<!-- Formulario -->
 			<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
 				@Form()
@@ -596,13 +601,13 @@ templ StoreUPVCCategory(cat model.Category, is []model.Item, pdf string) {
 	}
 }
 
-templ StoreUPVCItem(i model.Item, imgs []model.Image) {
+templ StoreUPVCItem(i model.Item, pdfURL string, pdfName string) {
 	@BasePage(i.Name) {
 		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
 			<section>
-				<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+				<div class="px-4 py-8 max-w-7xl mx-auto">
 					<div class="space-y-16">
-						<h2 class="text-center font-bold text-4xl">
+						<h2 class="text-center font-medium text-3xl">
 							<a
 								class="text-apple hover:text-livid"
 								href="/servicio/upvc"
@@ -622,9 +627,9 @@ templ StoreUPVCItem(i model.Item, imgs []model.Image) {
 						<div class="flex flex-col items-center gap-9 lg:flex-row lg:items-start">
 							<div class="space-y-3">
 								<div class="border border-black w-full aspect-square max-w-80">
-									<div class="h-4/5">
+									<div class="h-full flex justify-center">
 										<img
-											class="object-cover w-full h-full"
+											class="object-cover h-full"
 											alt={ i.Slug }
 											if i.Img.Id != 0 {
 												src={ path.Join(config.IMAGES_PATH, i.Img.Filename) }
@@ -633,121 +638,44 @@ templ StoreUPVCItem(i model.Item, imgs []model.Image) {
 											}
 										/>
 									</div>
-									<div class="flex justify-center items-center h-1/5 border-t border-black">
-										<div class="text-center font-semibold text-2xl">
-											{ i.Name }
-										</div>
-									</div>
 								</div>
 							</div>
-							<div class="flex-1 space-y-6">
-								{ i.LongDescription }
-							</div>
-						</div>
-						<div class="flex flex-row justify-center flex-wrap gap-x-12 gap-y-16 mt-12">
-							for _, img := range imgs {
-								<div
-									class="border border-black w-full max-w-96"
-								>
-									<div class="w-full aspect-[5/4]">
+							<div class="space-y-3">
+								<div class="border border-black w-full aspect-square max-w-80">
+									<div class="h-full flex justify-center">
 										<img
-											class="object-cover w-full h-full"
-											if img.Id != 0 {
-												src={ path.Join(config.IMAGES_PATH, img.Filename) }
+											class="object-cover h-full"
+											alt={ i.Slug }
+											if i.Img.Id != 0 {
+												src={ path.Join(config.IMAGES_PATH, i.Img.Filename) }
 											} else {
 												src="/static/img/placeholder.webp"
 											}
 										/>
 									</div>
-									<div class="flex justify-center items-center py-3 border-t border-black">
-										<div class="text-center font-semibold text-2xl">
-											{ i.Name }
-										</div>
-									</div>
-								</div>
-							}
-						</div>
-						<div class="flex justify-center">
-							<table class="table-auto border-collapse border border-black max-w-3xl">
-								<caption class="border border-black font-bold uppercase bg-livid text-white">Cuadro de beneficios del uPVC</caption>
-								<thead>
-									<tr>
-										<th class="border border-black bg-cloud">Beneficio</th>
-										<th class="border border-black bg-cloud">Descripción Detallada</th>
-									</tr>
-								</thead>
-								<tbody>
-									<tr>
-										<td class="border border-black bg-cloud font-semibold">Resistente al Salitre</td>
-										<td class="border border-black">El uPVC es altamente resistente a la corrosión causada por el salitre, lo que lo hace ideal para zonas costeras y lugares con alta humedad. A diferencia del aluminio o la madera, no se oxida ni se degrada con el tiempo, manteniendo su apariencia y funcionalidad por muchos años.</td>
-									</tr>
-									<tr>
-										<td class="border border-black bg-cloud font-semibold">Aislamiento Térmico</td>
-										<td class="border border-black">Los perfiles de uPVC tienen una baja conductividad térmica, lo que significa que reducen la transferencia de calor entre el exterior y el interior de la vivienda. Esto permite mantener una temperatura estable en los espacios interiores, reduciendo la necesidad de calefacción en invierno y aire acondicionado en verano, lo que se traduce en ahorro energético.</td>
-									</tr>
-									<tr>
-										<td class="border border-black bg-cloud font-semibold">Aislamiento Acústico</td>
-										<td class="border border-black">Gracias a la estructura multicámara del uPVC y el uso de vidrios adecuados, estos perfiles pueden reducir significativamente el ruido exterior. Son ideales para viviendas en zonas urbanas con alto tráfico, aeropuertos o cualquier entorno ruidoso, proporcionando mayor confort y tranquilidad.</td>
-									</tr>
-									<tr>
-										<td class="border border-black bg-cloud font-semibold">No Inflamable</td>
-										<td class="border border-black">El uPVC es un material autoextinguible que no contribuye a la propagación del fuego. En caso de incendio, no genera llamas ni emite gases tóxicos, lo que mejora la seguridad del hogar y minimiza riesgos en comparación con otros materiales como la madera o ciertos tipos de plásticos.</td>
-									</tr>
-									<tr>
-										<td class="border border-black bg-cloud font-semibold">Bajo Mantenimiento</td>
-										<td class="border border-black">A diferencia de la madera, que necesita barniz o pintura periódicamente, el uPVC no requiere tratamientos especiales. Su superficie lisa y no porosa evita la acumulación de suciedad y permite una limpieza sencilla con agua y jabón. Además, no se decolora ni se ve afectado por la exposición al sol y la lluvia.</td>
-									</tr>
-									<tr>
-										<td class="border border-black bg-cloud font-semibold">Resistencia</td>
-										<td class="border border-black">El uPVC es un material robusto y duradero que no se deforma con los cambios de temperatura ni se agrieta con el paso del tiempo. Resiste golpes, impactos y torsiones sin perder su estructura, ofreciendo una larga vida útil sin necesidad de refuerzos adicionales.</td>
-									</tr>
-									<tr>
-										<td class="border border-black bg-cloud font-semibold">Versatilidad</td>
-										<td class="border border-black">Los perfiles de uPVC permiten fabricar una amplia variedad de diseños, desde ventanas correderas hasta puertas abatibles y mamparas. Se pueden personalizar con diferentes colores y acabados, además de adaptarse a distintos tipos de vidrios, como laminados, templados o insulados, según las necesidades del proyecto.</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-						<div class="flex flex-col justify-center gap-x-12 gap-y-8 lg:flex-row">
-							<div class="w-full max-w-80 space-y-3 self-center">
-								<a class="block w-full h-full py-2 border border-black font-bold bg-white text-center">
-									Certificados
-									<br/>
-									de calidad
-								</a>
-							</div>
-							<div class="space-y-2">
-								<div class="font-bold text-xl">Colores</div>
-								<div class="flex flex-col items-center gap-8 lg:flex-row">
-									for i := 0; i < 4; i++ {
-										<div
-											class="border border-black w-24"
-										>
-											<div class="w-full aspect-square"></div>
-											<div class="flex justify-center items-center aspect-[4/1] border-t border-black"></div>
-										</div>
-									}
 								</div>
 							</div>
-						</div>
-						<div class="grid gap-6 justify-items-center">
-							<a class="w-full max-w-72 block py-2 bg-cloud text-center hover:bg-livid hover:text-white">
-								Catálogo de uPVC
-								<br/>
-								Descargar PDF
-							</a>
-							<a
-								class="w-full max-w-72 block py-2 bg-cloud text-center hover:bg-livid hover:text-white"
-								href=""
-							>
-								{ "uPVC / " + i.Category.Name }
-								<br/>
-								Descargar PDF
-							</a>
+							<div class="flex-1 space-y-6 text-justify">
+								{ i.LongDescription }
+							</div>
 						</div>
 					</div>
 				</div>
 			</section>
+			if pdfURL != "" {
+				<!-- Descarga de catálogo -->
+				<section>
+					<div class="px-4 py-8 max-w-7xl mx-auto">
+						<a
+							href={ templ.URL(pdfURL) }
+							target="_blank"
+							class="block py-4 border-4 border-apple font-bold text-xl text-center"
+						>
+							{ pdfName }
+						</a>
+					</div>
+				</section>
+			}
 			<!-- Formulario -->
 			<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
 				@Form()

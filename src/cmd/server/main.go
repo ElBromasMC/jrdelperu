@@ -7,13 +7,13 @@ import (
 	"alc/repository"
 	"alc/service"
 	"context"
-
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -56,15 +56,21 @@ func main() {
 	h := handler.New(authService, fileService, queries)
 
 	// Middleware
+	e.Pre(middleware.RemoveTrailingSlashWithConfig(middleware.TrailingSlashConfig{
+		RedirectCode: http.StatusMovedPermanently,
+		Skipper: func(c echo.Context) bool {
+			return strings.HasPrefix(c.Path(), "/static")
+		},
+	}))
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
-	e.Use(middleware.RemoveTrailingSlashWithConfig(middleware.TrailingSlashConfig{
-		RedirectCode: http.StatusMovedPermanently,
-	}))
 	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{Level: 5}))
 
 	// Static files
 	e.StaticFS("/static", echo.MustSubFS(assets.Assets, "static"))
+	e.GET("/favicon.ico", func(c echo.Context) error {
+		return c.Redirect(http.StatusMovedPermanently, "/static/img/favicon.ico")
+	})
 
 	// Uploaded files directory
 	e.Static(config.UPLOADS_PATH, config.UPLOADS_SAVEDIR)
