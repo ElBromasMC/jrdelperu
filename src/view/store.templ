@@ -80,7 +80,7 @@ templ StoreIndex() {
 	}
 }
 
-templ StoreVidrioIndex(cats []model.Category) {
+templ StoreVidrioIndex(cats []model.Category, pdfURL string, pdfName string) {
 	@BasePage("Vidrios") {
 		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
 			<div
@@ -126,17 +126,19 @@ templ StoreVidrioIndex(cats []model.Category) {
 				</div>
 			</section>
 			<!-- Descarga de catálogo -->
-			<section>
-				<div class="px-4 py-8 max-w-7xl mx-auto">
-					<a
-						href="/static/pdf/4. CATALOGO DE VIDRIOS - JR DEL PERU OFICIAL.pdf"
-						target="_blank"
-						class="block py-4 border-4 border-apple font-bold text-xl text-center"
-					>
-						CATÁLOGO DE VIDRIOS - Corporación JR Del Perú S.A.C
-					</a>
-				</div>
-			</section>
+			if pdfURL != "" {
+				<section>
+					<div class="px-4 py-8 max-w-7xl mx-auto">
+						<a
+							href={ templ.SafeURL(pdfURL) }
+							target="_blank"
+							class="block py-4 border-4 border-apple font-bold text-xl text-center"
+						>
+							{ pdfName }
+						</a>
+					</div>
+				</section>
+			}
 			<!-- Formulario -->
 			<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
 				@Form()
@@ -425,7 +427,9 @@ templ StoreAluminioItem(i model.Item, pdfURL string, pdfName string) {
 										<img
 											class="object-cover h-full"
 											alt={ i.Slug }
-											if i.Img.Id != 0 {
+											if i.SecondaryImg.Id != 0 {
+												src={ path.Join(config.IMAGES_PATH, i.SecondaryImg.Filename) }
+											} else if i.Img.Id != 0 {
 												src={ path.Join(config.IMAGES_PATH, i.Img.Filename) }
 											} else {
 												src="/static/img/placeholder.webp"
@@ -463,7 +467,7 @@ templ StoreAluminioItem(i model.Item, pdfURL string, pdfName string) {
 	}
 }
 
-templ StoreUPVCIndex(cats []model.Category) {
+templ StoreUPVCIndex(cats []model.Category, pdfURL string, pdfName string, aficheURL string, aficheName string) {
 	@BasePage("uPVC") {
 		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
 			<!-- Descripción -->
@@ -508,24 +512,30 @@ templ StoreUPVCIndex(cats []model.Category) {
 				</div>
 			</section>
 			<!-- Descarga de catálogo -->
-			<section>
-				<div class="px-4 py-8 max-w-7xl mx-auto space-y-4">
-					<a
-						href="/static/pdf/2. CATALOGO DE PVC - JR DEL PERU OFICIAL.pdf"
-						target="_blank"
-						class="block py-4 border-4 border-apple font-bold text-xl text-center"
-					>
-						CATÁLOGO DE uPVC - Corporación JR Del Perú S.A.C
-					</a>
-					<a
-						href="#"
-						target="_blank"
-						class="block py-4 border-4 border-apple font-bold text-xl text-center"
-					>
-						AFICHE DE LOS BENEFICIOS DEL uPVC - Corporación JR Del Perú S.A.C
-					</a>
-				</div>
-			</section>
+			if pdfURL != "" || aficheURL != "" {
+				<section>
+					<div class="px-4 py-8 max-w-7xl mx-auto space-y-4">
+						if pdfURL != "" {
+							<a
+								href={ templ.SafeURL(pdfURL) }
+								target="_blank"
+								class="block py-4 border-4 border-apple font-bold text-xl text-center"
+							>
+								{ pdfName }
+							</a>
+						}
+						if aficheURL != "" {
+							<a
+								href={ templ.SafeURL(aficheURL) }
+								target="_blank"
+								class="block py-4 border-4 border-apple font-bold text-xl text-center"
+							>
+								{ aficheName }
+							</a>
+						}
+					</div>
+				</section>
+			}
 			<!-- Formulario -->
 			<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
 				@Form()
@@ -646,7 +656,9 @@ templ StoreUPVCItem(i model.Item, pdfURL string, pdfName string) {
 										<img
 											class="object-cover h-full"
 											alt={ i.Slug }
-											if i.Img.Id != 0 {
+											if i.SecondaryImg.Id != 0 {
+												src={ path.Join(config.IMAGES_PATH, i.SecondaryImg.Filename) }
+											} else if i.Img.Id != 0 {
 												src={ path.Join(config.IMAGES_PATH, i.Img.Filename) }
 											} else {
 												src="/static/img/placeholder.webp"

@@ -26,6 +26,7 @@ type Item struct {
 	Description     string
 	LongDescription string
 	Img             Image
+	SecondaryImg    Image
 }
 
 type CategoryFeature struct {
@@ -33,4 +34,19 @@ type CategoryFeature struct {
 	Category    Category
 	Name        string
 	Description string
+}
+
+// SiteDocumentInfo represents a site-wide document with its URL
+type SiteDocumentInfo struct {
+	Key         string
+	DisplayName string
+	URL         string
+	HasFile     bool
+}
+
+// PDFInfo represents a PDF from a category or item
+type PDFInfo struct {
+	Name        string // Category or item name
+	DisplayName string // PDF display name
+	URL         string
 }

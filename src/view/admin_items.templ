@@ -103,20 +103,20 @@ templ AdminItemRow(categoryID int32, item repository.Item, img repository.Static
 }
 
 // AdminItemFormPage muestra el formulario para crear/editar items
-templ AdminItemFormPage(username string, category repository.Category, item repository.Item, images []repository.StaticFile, isEdit bool) {
+templ AdminItemFormPage(username string, category repository.Category, item repository.Item, images []repository.StaticFile, pdfs []repository.StaticFile, isEdit bool) {
 	if isEdit {
 		@AdminLayout("Editar Item - " + category.Name, username) {
-			@adminItemFormContent(category, item, images, isEdit)
+			@adminItemFormContent(category, item, images, pdfs, isEdit)
 		}
 	} else {
 		@AdminLayout("Nuevo Item - " + category.Name, username) {
-			@adminItemFormContent(category, item, images, isEdit)
+			@adminItemFormContent(category, item, images, pdfs, isEdit)
 		}
 	}
 }
 
 // adminItemFormContent contiene el contenido del formulario
-templ adminItemFormContent(category repository.Category, item repository.Item, images []repository.StaticFile, isEdit bool) {
+templ adminItemFormContent(category repository.Category, item repository.Item, images []repository.StaticFile, pdfs []repository.StaticFile, isEdit bool) {
 	<div class="mb-6">
 		<div class="breadcrumbs text-sm">
 			<ul>
@@ -207,7 +207,7 @@ templ adminItemFormContent(category repository.Category, item repository.Item, i
 						<span class="label-text-alt">Descripción detallada para la página del item</span>
 					</label>
 				</div>
-				<!-- Imagen -->
+				<!-- Imagen Principal -->
 				<div class="form-control">
 					<label class="label">
 						<span class="label-text font-semibold">Imagen Principal</span>
@@ -233,7 +233,67 @@ templ adminItemFormContent(category repository.Category, item repository.Item, i
 						<span class="label-text-alt">
 							<a href="/admin/files" class="link" target="_blank">Gestionar archivos</a>
 							{ " | " }
-							<button type="button" class="link" onclick="image_upload_modal.showModal()">Subir nuevo</button>
+							<button type="button" class="link" onclick="openImageUploadModal('image_id')">Subir nuevo</button>
+						</span>
+					</label>
+				</div>
+				<!-- Imagen Secundaria -->
+				<div class="form-control">
+					<label class="label">
+						<span class="label-text font-semibold">Imagen Secundaria</span>
+					</label>
+					<select name="secondary_image_id" class="select select-bordered">
+						<option value="">Sin imagen secundaria</option>
+						for _, img := range images {
+							<option
+								value={ fmt.Sprint(img.FileID) }
+								if item.SecondaryImageID.Valid && item.SecondaryImageID.Int32 == img.FileID {
+									selected
+								}
+							>
+								if img.DisplayName.Valid {
+									{ img.DisplayName.String }
+								} else {
+									{ img.FileName }
+								}
+							</option>
+						}
+					</select>
+					<label class="label">
+						<span class="label-text-alt">
+							<a href="/admin/files" class="link" target="_blank">Gestionar archivos</a>
+							{ " | " }
+							<button type="button" class="link" onclick="openImageUploadModal('secondary_image_id')">Subir nuevo</button>
+						</span>
+					</label>
+				</div>
+				<!-- PDF -->
+				<div class="form-control">
+					<label class="label">
+						<span class="label-text font-semibold">Archivo PDF</span>
+					</label>
+					<select name="pdf_id" class="select select-bordered">
+						<option value="">Sin PDF</option>
+						for _, pdf := range pdfs {
+							<option
+								value={ fmt.Sprint(pdf.FileID) }
+								if item.PdfID.Valid && item.PdfID.Int32 == pdf.FileID {
+									selected
+								}
+							>
+								if pdf.DisplayName.Valid {
+									{ pdf.DisplayName.String }
+								} else {
+									{ pdf.FileName }
+								}
+							</option>
+						}
+					</select>
+					<label class="label">
+						<span class="label-text-alt">
+							<a href="/admin/files" class="link" target="_blank">Gestionar archivos</a>
+							{ " | " }
+							<button type="button" class="link" onclick="openPdfUploadModal('pdf_id')">Subir nuevo PDF</button>
 						</span>
 					</label>
 				</div>

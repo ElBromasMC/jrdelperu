@@ -67,3 +67,11 @@ WHERE category_id = $1;
 -- name: CountCategories :one
 SELECT COUNT(*) FROM categories;
 
+-- Listar categorías con PDF por tipo de material
+-- name: ListCategoriesWithPDFByMaterialType :many
+SELECT c.*, sf.file_id as pdf_file_id, sf.file_name as pdf_file_name, sf.display_name as pdf_display_name
+FROM categories c
+JOIN static_files sf ON c.pdf_id = sf.file_id
+WHERE c.material_type = $1 AND c.pdf_id IS NOT NULL
+ORDER BY c.name;
+

@@ -268,7 +268,7 @@ templ adminCategoryFormContent(cat *repository.Category, images []repository.Sta
 								<span class="label-text-alt">
 									<a href="/admin/files" class="link" target="_blank">Gestionar archivos</a>
 									{ " | " }
-									<button type="button" class="link" onclick="image_upload_modal.showModal()">Subir nuevo</button>
+									<button type="button" class="link" onclick="openImageUploadModal('image_id')">Subir nuevo</button>
 								</span>
 							</label>
 						</div>
@@ -317,7 +317,7 @@ templ adminCategoryFormContent(cat *repository.Category, images []repository.Sta
 								<span class="label-text-alt">
 									<a href="/admin/files?type=pdf" class="link" target="_blank">Gestionar archivos</a>
 									{ " | " }
-									<button type="button" class="link" onclick="pdf_upload_modal.showModal()">Subir nuevo</button>
+									<button type="button" class="link" onclick="openPdfUploadModal('pdf_id')">Subir nuevo</button>
 								</span>
 							</label>
 						</div>

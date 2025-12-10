@@ -1,9 +1,20 @@
 package view
 
 import (
+	"alc/model"
 	"alc/repository"
 	"fmt"
 )
+
+// getDocByKey returns the document info for a given key from the slice
+func getDocByKey(docs []model.SiteDocumentInfo, key string) model.SiteDocumentInfo {
+	for _, doc := range docs {
+		if doc.Key == key {
+			return doc
+		}
+	}
+	return model.SiteDocumentInfo{}
+}
 
 templ Index(projects []repository.Project, projectImages map[int32]repository.ListProjectImagesRow) {
 	@BasePage("Corporación JR Del Perú") {
@@ -226,7 +237,7 @@ templ Contacto() {
 	}
 }
 
-templ Descargas() {
+templ Descargas(docs []model.SiteDocumentInfo, aluminioCatPDFs []model.PDFInfo, aluminioItemPDFs []model.PDFInfo, upvcCatPDFs []model.PDFInfo, upvcItemPDFs []model.PDFInfo, vidrioCatPDFs []model.PDFInfo, vidrioItemPDFs []model.PDFInfo) {
 	@BasePage("Descargas") {
 		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
 			<!-- Descargas La empresa -->
@@ -234,15 +245,17 @@ templ Descargas() {
 				<div class="px-4 pt-8 pb-4 max-w-7xl mx-auto space-y-6">
 					<h2 class="font-medium text-2xl text-center uppercase lg:text-3xl">La empresa</h2>
 					<ul class="border-4 border-apple divide-y-4 divide-apple">
-						<li>
-							<a
-								href="/static/pdf/BROCHURE JR DEL PERÚ PAGINA WEB.pdf"
-								target="_blank"
-								class="block py-4 font-bold text-xl text-center"
-							>
-								BROCHURE DE LA EMPRESA - Corporación JR Del Perú S.A.C
-							</a>
-						</li>
+						if doc := getDocByKey(docs, "brochure_empresa"); doc.HasFile {
+							<li>
+								<a
+									href={ templ.SafeURL(doc.URL) }
+									target="_blank"
+									class="block py-4 font-bold text-xl text-center"
+								>
+									{ doc.DisplayName }
+								</a>
+							</li>
+						}
 					</ul>
 				</div>
 			</section>
@@ -251,33 +264,39 @@ templ Descargas() {
 				<div class="px-4 py-4 max-w-7xl mx-auto space-y-6">
 					<h2 class="font-medium text-2xl text-center uppercase lg:text-3xl">Aluminio</h2>
 					<ul class="border-4 border-apple divide-y-4 divide-apple">
-						<li>
-							<a
-								href="/static/pdf/1. CATALOGO DE ALUMINIO - JR DEL PERU OFICIAL.pdf"
-								target="_blank"
-								class="block py-4 font-bold text-xl text-center"
-							>
-								CATÁLOGO DE ALUMINIO - Corporación JR Del Perú S.A.C
-							</a>
-						</li>
-						<li>
-							<a
-								href="#"
-								target="_blank"
-								class="block py-4 font-bold text-xl text-center"
-							>
-								CATÁLOGO DE CORREDERA / ALUMINIO - Corporación JR Del Perú S.A.C
-							</a>
-						</li>
-						<li>
-							<a
-								href="#"
-								target="_blank"
-								class="block py-4 font-bold text-xl text-center"
-							>
-								SERIE 3825 / CORREDERA / ALUMINIO - Corporación JR Del Perú S.A.C
-							</a>
-						</li>
+						if doc := getDocByKey(docs, "catalogo_aluminios"); doc.HasFile {
+							<li>
+								<a
+									href={ templ.SafeURL(doc.URL) }
+									target="_blank"
+									class="block py-4 font-bold text-xl text-center"
+								>
+									{ doc.DisplayName }
+								</a>
+							</li>
+						}
+						for _, pdf := range aluminioCatPDFs {
+							<li>
+								<a
+									href={ templ.SafeURL(pdf.URL) }
+									target="_blank"
+									class="block py-4 font-bold text-xl text-center"
+								>
+									{ pdf.DisplayName }
+								</a>
+							</li>
+						}
+						for _, pdf := range aluminioItemPDFs {
+							<li>
+								<a
+									href={ templ.SafeURL(pdf.URL) }
+									target="_blank"
+									class="block py-4 font-bold text-xl text-center"
+								>
+									{ pdf.DisplayName }
+								</a>
+							</li>
+						}
 					</ul>
 				</div>
 			</section>
@@ -286,33 +305,50 @@ templ Descargas() {
 				<div class="px-4 py-4 max-w-7xl mx-auto space-y-6">
 					<h2 class="font-medium text-2xl text-center lg:text-3xl">uPVC</h2>
 					<ul class="border-4 border-apple divide-y-4 divide-apple">
-						<li>
-							<a
-								href="/static/pdf/2. CATALOGO DE PVC - JR DEL PERU OFICIAL.pdf"
-								target="_blank"
-								class="block py-4 font-bold text-xl text-center"
-							>
-								CATÁLOGO DE uPVC - Corporación JR Del Perú S.A.C
-							</a>
-						</li>
-						<li>
-							<a
-								href="#"
-								target="_blank"
-								class="block py-4 font-bold text-xl text-center"
-							>
-								AFICHE DE LOS BENEFICIOS DEL uPVC - Corporación JR Del Perú S.A.C
-							</a>
-						</li>
-						<li>
-							<a
-								href="#"
-								target="_blank"
-								class="block py-4 font-bold text-xl text-center"
-							>
-								CATÁLOGO LUMINA 60 / uPVC - Corporación JR Del Perú S.A.C
-							</a>
-						</li>
+						if doc := getDocByKey(docs, "catalogo_upvc"); doc.HasFile {
+							<li>
+								<a
+									href={ templ.SafeURL(doc.URL) }
+									target="_blank"
+									class="block py-4 font-bold text-xl text-center"
+								>
+									{ doc.DisplayName }
+								</a>
+							</li>
+						}
+						if doc := getDocByKey(docs, "afiche_upvc"); doc.HasFile {
+							<li>
+								<a
+									href={ templ.SafeURL(doc.URL) }
+									target="_blank"
+									class="block py-4 font-bold text-xl text-center"
+								>
+									{ doc.DisplayName }
+								</a>
+							</li>
+						}
+						for _, pdf := range upvcCatPDFs {
+							<li>
+								<a
+									href={ templ.SafeURL(pdf.URL) }
+									target="_blank"
+									class="block py-4 font-bold text-xl text-center"
+								>
+									{ pdf.DisplayName }
+								</a>
+							</li>
+						}
+						for _, pdf := range upvcItemPDFs {
+							<li>
+								<a
+									href={ templ.SafeURL(pdf.URL) }
+									target="_blank"
+									class="block py-4 font-bold text-xl text-center"
+								>
+									{ pdf.DisplayName }
+								</a>
+							</li>
+						}
 					</ul>
 				</div>
 			</section>
@@ -321,15 +357,39 @@ templ Descargas() {
 				<div class="px-4 py-4 max-w-7xl mx-auto space-y-6">
 					<h2 class="font-medium text-2xl text-center uppercase lg:text-3xl">Vidrio</h2>
 					<ul class="border-4 border-apple divide-y-4 divide-apple">
-						<li>
-							<a
-								href="/static/pdf/4. CATALOGO DE VIDRIOS - JR DEL PERU OFICIAL.pdf"
-								target="_blank"
-								class="block py-4 font-bold text-xl text-center"
-							>
-								CATÁLOGO DE VIDRIO - Corporación JR Del Perú S.A.C
-							</a>
-						</li>
+						if doc := getDocByKey(docs, "catalogo_vidrios"); doc.HasFile {
+							<li>
+								<a
+									href={ templ.SafeURL(doc.URL) }
+									target="_blank"
+									class="block py-4 font-bold text-xl text-center"
+								>
+									{ doc.DisplayName }
+								</a>
+							</li>
+						}
+						for _, pdf := range vidrioCatPDFs {
+							<li>
+								<a
+									href={ templ.SafeURL(pdf.URL) }
+									target="_blank"
+									class="block py-4 font-bold text-xl text-center"
+								>
+									{ pdf.DisplayName }
+								</a>
+							</li>
+						}
+						for _, pdf := range vidrioItemPDFs {
+							<li>
+								<a
+									href={ templ.SafeURL(pdf.URL) }
+									target="_blank"
+									class="block py-4 font-bold text-xl text-center"
+								>
+									{ pdf.DisplayName }
+								</a>
+							</li>
+						}
 					</ul>
 				</div>
 			</section>

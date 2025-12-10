@@ -40,7 +40,19 @@ func (h *Handler) HandleVidrioIndexShow(c echo.Context) error {
 		cats = append(cats, service.MapCategoryToModel(dbCat, dbImage))
 	}
 
-	return renderOK(c, view.StoreVidrioIndex(cats))
+	// Get catalog PDF from site documents
+	pdfURL := ""
+	pdfName := ""
+	doc, err := h.queries.GetSiteDocumentByKey(ctx, "catalogo_vidrios")
+	if err == nil && doc.FileID.Valid {
+		pdf, err := h.queries.GetStaticFile(ctx, doc.FileID.Int32)
+		if err == nil {
+			pdfURL = path.Join(config.PDFS_PATH, pdf.FileName)
+			pdfName = doc.DisplayName
+		}
+	}
+
+	return renderOK(c, view.StoreVidrioIndex(cats, pdfURL, pdfName))
 }
 
 func (h *Handler) HandleVidrioCategoryShow(c echo.Context) error {
@@ -82,7 +94,7 @@ func (h *Handler) HandleVidrioCategoryShow(c echo.Context) error {
 				itemImage = &img
 			}
 		}
-		items = append(items, service.MapItemToModel(dbItem, dbCat, itemImage, catImage))
+		items = append(items, service.MapItemToModel(dbItem, dbCat, itemImage, nil, catImage))
 	}
 
 	// Get features for this category
@@ -163,7 +175,7 @@ func (h *Handler) HandleAluminioCategoryShow(c echo.Context) error {
 				itemImage = &img
 			}
 		}
-		items = append(items, service.MapItemToModel(dbItem, dbCat, itemImage, catImage))
+		items = append(items, service.MapItemToModel(dbItem, dbCat, itemImage, nil, catImage))
 	}
 
 	// Get PDF URL if exists
@@ -221,10 +233,27 @@ func (h *Handler) HandleAluminioItemShow(c echo.Context) error {
 		}
 	}
 
-	item := service.MapItemToModel(dbItem, dbCat, itemImage, catImage)
+	// Get secondary item image
+	var secondaryImage *repository.StaticFile
+	if dbItem.SecondaryImageID.Valid {
+		img, err := h.queries.GetStaticFile(ctx, dbItem.SecondaryImageID.Int32)
+		if err == nil {
+			secondaryImage = &img
+		}
+	}
 
+	item := service.MapItemToModel(dbItem, dbCat, itemImage, secondaryImage, catImage)
+
+	// Get item PDF URL if exists
 	pdfURL := ""
 	pdfName := ""
+	if dbItem.PdfID.Valid {
+		pdf, err := h.queries.GetStaticFile(ctx, dbItem.PdfID.Int32)
+		if err == nil {
+			pdfURL = path.Join(config.PDFS_PATH, pdf.FileName)
+			pdfName = pdf.DisplayName.String
+		}
+	}
 
 	return renderOK(c, view.StoreAluminioItem(item, pdfURL, pdfName))
 }
@@ -251,7 +280,31 @@ func (h *Handler) HandleUPVCIndexShow(c echo.Context) error {
 		cats = append(cats, service.MapCategoryToModel(dbCat, dbImage))
 	}
 
-	return renderOK(c, view.StoreUPVCIndex(cats))
+	// Get catalog PDF from site documents
+	pdfURL := ""
+	pdfName := ""
+	doc, err := h.queries.GetSiteDocumentByKey(ctx, "catalogo_upvc")
+	if err == nil && doc.FileID.Valid {
+		pdf, err := h.queries.GetStaticFile(ctx, doc.FileID.Int32)
+		if err == nil {
+			pdfURL = path.Join(config.PDFS_PATH, pdf.FileName)
+			pdfName = doc.DisplayName
+		}
+	}
+
+	// Get afiche PDF from site documents
+	aficheURL := ""
+	aficheName := ""
+	aficheDoc, err := h.queries.GetSiteDocumentByKey(ctx, "afiche_upvc")
+	if err == nil && aficheDoc.FileID.Valid {
+		pdf, err := h.queries.GetStaticFile(ctx, aficheDoc.FileID.Int32)
+		if err == nil {
+			aficheURL = path.Join(config.PDFS_PATH, pdf.FileName)
+			aficheName = aficheDoc.DisplayName
+		}
+	}
+
+	return renderOK(c, view.StoreUPVCIndex(cats, pdfURL, pdfName, aficheURL, aficheName))
 }
 
 func (h *Handler) HandleUPVCCategoryShow(c echo.Context) error {
@@ -293,7 +346,7 @@ func (h *Handler) HandleUPVCCategoryShow(c echo.Context) error {
 				itemImage = &img
 			}
 		}
-		items = append(items, service.MapItemToModel(dbItem, dbCat, itemImage, catImage))
+		items = append(items, service.MapItemToModel(dbItem, dbCat, itemImage, nil, catImage))
 	}
 
 	// Get PDF URL if exists
@@ -351,10 +404,27 @@ func (h *Handler) HandleUPVCItemShow(c echo.Context) error {
 		}
 	}
 
-	item := service.MapItemToModel(dbItem, dbCat, itemImage, catImage)
+	// Get secondary item image
+	var secondaryImage *repository.StaticFile
+	if dbItem.SecondaryImageID.Valid {
+		img, err := h.queries.GetStaticFile(ctx, dbItem.SecondaryImageID.Int32)
+		if err == nil {
+			secondaryImage = &img
+		}
+	}
 
+	item := service.MapItemToModel(dbItem, dbCat, itemImage, secondaryImage, catImage)
+
+	// Get item PDF URL if exists
 	pdfURL := ""
 	pdfName := ""
+	if dbItem.PdfID.Valid {
+		pdf, err := h.queries.GetStaticFile(ctx, dbItem.PdfID.Int32)
+		if err == nil {
+			pdfURL = path.Join(config.PDFS_PATH, pdf.FileName)
+			pdfName = pdf.DisplayName.String
+		}
+	}
 
 	return renderOK(c, view.StoreUPVCItem(item, pdfURL, pdfName))
 }

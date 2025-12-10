@@ -117,6 +117,10 @@ func main() {
 	admin.PUT("/files/:id/display-name", h.HandleFileUpdateDisplayName)
 	admin.DELETE("/files/:id", h.HandleFileDelete)
 
+	// Site documents management
+	admin.GET("/documents", h.HandleDocumentsIndex)
+	admin.PUT("/documents/:id", h.HandleDocumentUpdate)
+
 	// Tags management
 	admin.GET("/tags", h.HandleTagsIndex)
 	admin.POST("/tags", h.HandleTagCreate)

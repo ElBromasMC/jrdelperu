@@ -52,6 +52,21 @@ templ AdminBase(title string) {
 			{ children... }
 			<script>
 
+		// Track which select element should be updated after upload
+		window.uploadTargetSelectName = null;
+
+		// Function to open image upload modal with target select name
+		function openImageUploadModal(targetSelectName) {
+			window.uploadTargetSelectName = targetSelectName || 'image_id';
+			document.getElementById('image_upload_modal').showModal();
+		}
+
+		// Function to open PDF upload modal with target select name
+		function openPdfUploadModal(targetSelectName) {
+			window.uploadTargetSelectName = targetSelectName || 'pdf_id';
+			document.getElementById('pdf_upload_modal').showModal();
+		}
+
 		// Auto-select uploaded file in form selects
 		document.body.addEventListener('fileUploaded', function(evt) {
 			const detail = evt.detail;
@@ -59,8 +74,13 @@ templ AdminBase(title string) {
 			const fileType = detail.fileType;
 			const displayName = detail.displayName;
 
-			// Find and update relevant select elements
-			const selectName = fileType === 'image' ? 'image_id' : 'pdf_id';
+			// Use tracked target select name, or fallback to default based on file type
+			let selectName = window.uploadTargetSelectName;
+			if (!selectName) {
+				selectName = fileType === 'image' ? 'image_id' : 'pdf_id';
+			}
+
+			// Find and update the target select element
 			const selects = document.querySelectorAll(`select[name="${selectName}"]`);
 
 			selects.forEach(select => {
@@ -78,6 +98,21 @@ templ AdminBase(title string) {
 				// Select the newly uploaded file
 				select.value = fileId;
 			});
+
+			// Also add the option to other image/pdf selects (without selecting)
+			if (fileType === 'image') {
+				document.querySelectorAll('select[name="image_id"], select[name="secondary_image_id"]').forEach(select => {
+					if (!select.querySelector(`option[value="${fileId}"]`)) {
+						const option = document.createElement('option');
+						option.value = fileId;
+						option.textContent = displayName;
+						select.appendChild(option);
+					}
+				});
+			}
+
+			// Reset target
+			window.uploadTargetSelectName = null;
 
 			// Close the appropriate upload modal
 			const imageModal = document.getElementById('image_upload_modal');
@@ -271,6 +306,14 @@ templ AdminLayout(title, username string) {
 									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
 								</svg>
 								Archivos
+							</a>
+						</li>
+						<li>
+							<a href="/admin/documents" class="hover:bg-primary hover:text-primary-content">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+								</svg>
+								Documentos
 							</a>
 						</li>
 						<li class="menu-title">

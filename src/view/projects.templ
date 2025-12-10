@@ -248,7 +248,7 @@ templ ProjectGridItem(project repository.Project, images []repository.ListProjec
 }
 
 // ProjectsPage muestra la página completa de proyectos
-templ ProjectsPage(projects []repository.Project, projectImages map[int32][]repository.ListProjectImagesRow) {
+templ ProjectsPage(projects []repository.Project, projectImages map[int32][]repository.ListProjectImagesRow, brochureURL string, brochureName string) {
 	@BasePage("Proyectos") {
 		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
 			<section>
@@ -377,17 +377,19 @@ templ ProjectsPage(projects []repository.Project, projectImages map[int32][]repo
 				}
 			</script>
 			<!-- Descarga de catálogo -->
-			<section>
-				<div class="px-4 pb-8 max-w-7xl mx-auto">
-					<a
-						href="/static/pdf/BROCHURE JR DEL PERÚ PAGINA WEB.pdf"
-						target="_blank"
-						class="block py-4 border-4 border-apple font-bold text-xl text-center"
-					>
-						BROCHURE DE LA EMPRESA - Corporación JR Del Perú S.A.C
-					</a>
-				</div>
-			</section>
+			if brochureURL != "" {
+				<section>
+					<div class="px-4 pb-8 max-w-7xl mx-auto">
+						<a
+							href={ templ.SafeURL(brochureURL) }
+							target="_blank"
+							class="block py-4 border-4 border-apple font-bold text-xl text-center"
+						>
+							{ brochureName }
+						</a>
+					</div>
+				</section>
+			}
 			<!-- Formulario -->
 			<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
 				@Form()

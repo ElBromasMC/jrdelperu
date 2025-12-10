@@ -1,0 +1,140 @@
+package view
+
+import (
+	"alc/repository"
+	"fmt"
+)
+
+// AdminDocumentsPage muestra la página de gestión de documentos del sitio
+templ AdminDocumentsPage(username string, documents []repository.SiteDocument, pdfs []repository.StaticFile, filesMap map[int32]repository.StaticFile) {
+	@AdminLayout("Documentos del Sitio", username) {
+		<div class="mb-6">
+			<h1 class="text-3xl font-bold">Documentos del Sitio</h1>
+			<p class="text-base-content/70 mt-2">
+				Gestiona los catálogos y documentos que se muestran en las páginas públicas.
+			</p>
+		</div>
+		<div class="card bg-base-100 shadow-xl">
+			<div class="card-body">
+				<div id="documents-table">
+					@AdminDocumentsTable(documents, pdfs, filesMap)
+				</div>
+			</div>
+		</div>
+		@PDFUploadModal()
+	}
+}
+
+// AdminDocumentsTable muestra la tabla de documentos
+templ AdminDocumentsTable(documents []repository.SiteDocument, pdfs []repository.StaticFile, filesMap map[int32]repository.StaticFile) {
+	<div class="overflow-x-auto">
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Documento</th>
+					<th>Nombre a Mostrar</th>
+					<th>PDF Asignado</th>
+					<th class="text-right">Acciones</th>
+				</tr>
+			</thead>
+			<tbody>
+				for _, doc := range documents {
+					@AdminDocumentRow(doc, pdfs, filesMap)
+				}
+			</tbody>
+		</table>
+	</div>
+}
+
+// getDocumentLabel devuelve una etiqueta legible para la clave del documento
+func getDocumentLabel(key string) string {
+	labels := map[string]string{
+		"catalogo_vidrios":   "Catálogo de Vidrios",
+		"catalogo_aluminios": "Catálogo de Aluminios",
+		"catalogo_upvc":      "Catálogo de uPVC",
+		"afiche_upvc":        "Afiche uPVC",
+		"brochure_empresa":   "Brochure Empresa",
+	}
+	if label, ok := labels[key]; ok {
+		return label
+	}
+	return key
+}
+
+// AdminDocumentRow muestra una fila de documento
+templ AdminDocumentRow(doc repository.SiteDocument, pdfs []repository.StaticFile, filesMap map[int32]repository.StaticFile) {
+	<tr id={ fmt.Sprintf("doc-%d", doc.DocumentID) }>
+		<td>
+			<div class="font-semibold">{ getDocumentLabel(doc.DocumentKey) }</div>
+			<code class="text-xs text-base-content/50">{ doc.DocumentKey }</code>
+		</td>
+		<td>
+			<form
+				hx-put={ fmt.Sprintf("/admin/documents/%d", doc.DocumentID) }
+				hx-target="#documents-table"
+				hx-swap="innerHTML"
+				class="flex flex-col gap-2"
+			>
+				<input
+					type="text"
+					name="display_name"
+					value={ doc.DisplayName }
+					class="input input-bordered input-sm w-full max-w-md"
+					required
+				/>
+				<div class="flex items-center gap-2">
+					<select name="file_id" class="select select-bordered select-sm flex-1 max-w-md">
+						<option value="">Sin PDF asignado</option>
+						for _, pdf := range pdfs {
+							<option
+								value={ fmt.Sprint(pdf.FileID) }
+								if doc.FileID.Valid && doc.FileID.Int32 == pdf.FileID {
+									selected
+								}
+							>
+								if pdf.DisplayName.Valid {
+									{ pdf.DisplayName.String }
+								} else {
+									{ pdf.FileName }
+								}
+							</option>
+						}
+					</select>
+					<button type="submit" class="btn btn-primary btn-sm">
+						Guardar
+					</button>
+				</div>
+			</form>
+		</td>
+		<td>
+			if doc.FileID.Valid {
+				if file, ok := filesMap[doc.FileID.Int32]; ok {
+					<div class="flex items-center gap-2">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-error" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+						</svg>
+						<div>
+							<p class="text-sm font-medium truncate max-w-xs">
+								if file.DisplayName.Valid {
+									{ file.DisplayName.String }
+								} else {
+									{ file.FileName }
+								}
+							</p>
+							<p class="text-xs text-base-content/50">{ file.FileName }</p>
+						</div>
+					</div>
+				}
+			} else {
+				<span class="badge badge-ghost">No asignado</span>
+			}
+		</td>
+		<td>
+			<div class="flex justify-end">
+				<button type="button" class="btn btn-sm btn-ghost" onclick="openPdfUploadModal('file_id')">
+					Subir PDF
+				</button>
+			</div>
+		</td>
+	</tr>
+}

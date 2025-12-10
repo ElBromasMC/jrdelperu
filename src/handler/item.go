@@ -72,7 +72,13 @@ func (h *Handler) HandleItemNewForm(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Error al obtener imágenes")
 	}
 
-	return Render(c, http.StatusOK, view.AdminItemFormPage(sessionData.Username, category, repository.Item{}, images, false))
+	// Obtener PDFs disponibles
+	pdfs, err := h.queries.ListPDFs(ctx)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Error al obtener PDFs")
+	}
+
+	return Render(c, http.StatusOK, view.AdminItemFormPage(sessionData.Username, category, repository.Item{}, images, pdfs, false))
 }
 
 // HandleItemEditForm muestra el formulario para editar un item
@@ -115,7 +121,13 @@ func (h *Handler) HandleItemEditForm(c echo.Context) error {
 		return c.String(http.StatusInternalServerError, "Error al obtener imágenes")
 	}
 
-	return Render(c, http.StatusOK, view.AdminItemFormPage(sessionData.Username, category, item, images, true))
+	// Obtener PDFs disponibles
+	pdfs, err := h.queries.ListPDFs(ctx)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Error al obtener PDFs")
+	}
+
+	return Render(c, http.StatusOK, view.AdminItemFormPage(sessionData.Username, category, item, images, pdfs, true))
 }
 
 // HandleItemCreate crea un nuevo item
@@ -153,14 +165,32 @@ func (h *Handler) HandleItemCreate(c echo.Context) error {
 		}
 	}
 
+	// Parsear secondary_image_id opcional
+	var secondaryImageID pgtype.Int4
+	if secondaryImageIDStr := c.FormValue("secondary_image_id"); secondaryImageIDStr != "" {
+		if id, err := strconv.ParseInt(secondaryImageIDStr, 10, 32); err == nil {
+			secondaryImageID = pgtype.Int4{Int32: int32(id), Valid: true}
+		}
+	}
+
+	// Parsear pdf_id opcional
+	var pdfID pgtype.Int4
+	if pdfIDStr := c.FormValue("pdf_id"); pdfIDStr != "" {
+		if id, err := strconv.ParseInt(pdfIDStr, 10, 32); err == nil {
+			pdfID = pgtype.Int4{Int32: int32(id), Valid: true}
+		}
+	}
+
 	// Crear item
 	_, err = h.queries.CreateItem(ctx, repository.CreateItemParams{
-		CategoryID:      int32(categoryID),
-		Slug:            slug,
-		Name:            name,
-		Description:     description,
-		LongDescription: longDescription,
-		ImageID:         imageID,
+		CategoryID:       int32(categoryID),
+		Slug:             slug,
+		Name:             name,
+		Description:      description,
+		LongDescription:  longDescription,
+		ImageID:          imageID,
+		SecondaryImageID: secondaryImageID,
+		PdfID:            pdfID,
 	})
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Error al crear item: %v", err))
@@ -216,14 +246,32 @@ func (h *Handler) HandleItemUpdate(c echo.Context) error {
 		}
 	}
 
+	// Parsear secondary_image_id opcional
+	var secondaryImageID pgtype.Int4
+	if secondaryImageIDStr := c.FormValue("secondary_image_id"); secondaryImageIDStr != "" {
+		if id, err := strconv.ParseInt(secondaryImageIDStr, 10, 32); err == nil {
+			secondaryImageID = pgtype.Int4{Int32: int32(id), Valid: true}
+		}
+	}
+
+	// Parsear pdf_id opcional
+	var pdfID pgtype.Int4
+	if pdfIDStr := c.FormValue("pdf_id"); pdfIDStr != "" {
+		if id, err := strconv.ParseInt(pdfIDStr, 10, 32); err == nil {
+			pdfID = pgtype.Int4{Int32: int32(id), Valid: true}
+		}
+	}
+
 	// Actualizar item
 	err = h.queries.UpdateItem(ctx, repository.UpdateItemParams{
-		ItemID:          int32(itemID),
-		Slug:            slug,
-		Name:            name,
-		Description:     description,
-		LongDescription: longDescription,
-		ImageID:         imageID,
+		ItemID:           int32(itemID),
+		Slug:             slug,
+		Name:             name,
+		Description:      description,
+		LongDescription:  longDescription,
+		ImageID:          imageID,
+		SecondaryImageID: secondaryImageID,
+		PdfID:            pdfID,
 	})
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Error al actualizar item: %v", err))

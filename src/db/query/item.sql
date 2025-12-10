@@ -1,8 +1,8 @@
 
 -- Crear un nuevo item
 -- name: CreateItem :one
-INSERT INTO items (category_id, slug, name, description, long_description, image_id)
-VALUES ($1, $2, $3, $4, $5, $6)
+INSERT INTO items (category_id, slug, name, description, long_description, image_id, secondary_image_id, pdf_id)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
 RETURNING *;
 
 -- Obtener un item por ID
@@ -34,6 +34,8 @@ SET slug = $2,
     description = $4,
     long_description = $5,
     image_id = $6,
+    secondary_image_id = $7,
+    pdf_id = $8,
     updated_at = NOW()
 WHERE item_id = $1;
 
@@ -41,6 +43,18 @@ WHERE item_id = $1;
 -- name: UpdateItemImage :exec
 UPDATE items
 SET image_id = $2, updated_at = NOW()
+WHERE item_id = $1;
+
+-- Actualizar la imagen secundaria de un item
+-- name: UpdateItemSecondaryImage :exec
+UPDATE items
+SET secondary_image_id = $2, updated_at = NOW()
+WHERE item_id = $1;
+
+-- Actualizar el PDF de un item
+-- name: UpdateItemPDF :exec
+UPDATE items
+SET pdf_id = $2, updated_at = NOW()
 WHERE item_id = $1;
 
 -- Eliminar un item
@@ -56,3 +70,12 @@ WHERE category_id = $1;
 -- Contar todos los items
 -- name: CountAllItems :one
 SELECT COUNT(*) FROM items;
+
+-- Listar items con PDF por tipo de material de la categoría
+-- name: ListItemsWithPDFByMaterialType :many
+SELECT i.*, c.name as category_name, sf.file_id as pdf_file_id, sf.file_name as pdf_file_name, sf.display_name as pdf_display_name
+FROM items i
+JOIN categories c ON i.category_id = c.category_id
+JOIN static_files sf ON i.pdf_id = sf.file_id
+WHERE c.material_type = $1 AND i.pdf_id IS NOT NULL
+ORDER BY c.name, i.name;

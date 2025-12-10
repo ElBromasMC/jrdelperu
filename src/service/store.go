@@ -37,7 +37,7 @@ func MapCategoryToModel(dbCat repository.Category, dbImage *repository.StaticFil
 }
 
 // MapItemToModel convierte un item de la base de datos al modelo
-func MapItemToModel(dbItem repository.Item, dbCat repository.Category, dbImage *repository.StaticFile, dbCatImage *repository.StaticFile) model.Item {
+func MapItemToModel(dbItem repository.Item, dbCat repository.Category, dbImage *repository.StaticFile, dbSecondaryImage *repository.StaticFile, dbCatImage *repository.StaticFile) model.Item {
 	item := model.Item{
 		Id:              int(dbItem.ItemID),
 		Slug:            dbItem.Slug,
@@ -52,6 +52,14 @@ func MapItemToModel(dbItem repository.Item, dbCat repository.Category, dbImage *
 		item.Img = model.Image{
 			Id:       int(dbImage.FileID),
 			Filename: dbImage.FileName,
+		}
+	}
+
+	// Map secondary image if exists
+	if dbSecondaryImage != nil {
+		item.SecondaryImg = model.Image{
+			Id:       int(dbSecondaryImage.FileID),
+			Filename: dbSecondaryImage.FileName,
 		}
 	}
 
