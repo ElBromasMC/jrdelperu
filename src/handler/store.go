@@ -133,7 +133,19 @@ func (h *Handler) HandleAluminioIndexShow(c echo.Context) error {
 		cats = append(cats, service.MapCategoryToModel(dbCat, dbImage))
 	}
 
-	return renderOK(c, view.StoreAluminioIndex(cats))
+	// Get catalog PDF from site documents
+	pdfURL := ""
+	pdfName := ""
+	doc, err := h.queries.GetSiteDocumentByKey(ctx, "catalogo_aluminios")
+	if err == nil && doc.FileID.Valid {
+		pdf, err := h.queries.GetStaticFile(ctx, doc.FileID.Int32)
+		if err == nil {
+			pdfURL = path.Join(config.PDFS_PATH, pdf.FileName)
+			pdfName = doc.DisplayName
+		}
+	}
+
+	return renderOK(c, view.StoreAluminioIndex(cats, pdfURL, pdfName))
 }
 
 func (h *Handler) HandleAluminioCategoryShow(c echo.Context) error {

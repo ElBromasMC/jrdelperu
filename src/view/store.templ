@@ -251,7 +251,7 @@ templ StoreVidrioCategory(cat model.Category, is []model.Item, fs []model.Catego
 	}
 }
 
-templ StoreAluminioIndex(cats []model.Category) {
+templ StoreAluminioIndex(cats []model.Category, pdfURL string, pdfName string) {
 	@BasePage("Aluminios") {
 		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
 			<!-- Descripción -->
@@ -296,17 +296,19 @@ templ StoreAluminioIndex(cats []model.Category) {
 				</div>
 			</section>
 			<!-- Descarga de catálogo -->
-			<section>
-				<div class="px-4 py-8 max-w-7xl mx-auto">
-					<a
-						href="/static/pdf/1. CATALOGO DE ALUMINIO - JR DEL PERU OFICIAL.pdf"
-						target="_blank"
-						class="block py-4 border-4 border-apple font-bold text-xl text-center"
-					>
-						CATÁLOGO DE ALUMINIO - Corporación JR Del Perú S.A.C
-					</a>
-				</div>
-			</section>
+			if pdfURL != "" {
+				<section>
+					<div class="px-4 py-8 max-w-7xl mx-auto">
+						<a
+							href={ templ.SafeURL(pdfURL) }
+							target="_blank"
+							class="block py-4 border-4 border-apple font-bold text-xl text-center"
+						>
+							{ pdfName }
+						</a>
+					</div>
+				</section>
+			}
 			<!-- Formulario -->
 			<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
 				@Form()

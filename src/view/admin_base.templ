@@ -75,13 +75,19 @@ templ AdminBase(title string) {
 			const displayName = detail.displayName;
 
 			// Use tracked target select name, or fallback to default based on file type
-			let selectName = window.uploadTargetSelectName;
-			if (!selectName) {
-				selectName = fileType === 'image' ? 'image_id' : 'pdf_id';
+			let selectTarget = window.uploadTargetSelectName;
+			if (!selectTarget) {
+				selectTarget = fileType === 'image' ? 'image_id' : 'pdf_id';
 			}
 
-			// Find and update the target select element
-			const selects = document.querySelectorAll(`select[name="${selectName}"]`);
+			// Find target select(s) - try by ID first, then by name
+			let selects = [];
+			const selectById = document.getElementById(selectTarget);
+			if (selectById) {
+				selects = [selectById];
+			} else {
+				selects = document.querySelectorAll(`select[name="${selectTarget}"]`);
+			}
 
 			selects.forEach(select => {
 				// Check if option already exists
