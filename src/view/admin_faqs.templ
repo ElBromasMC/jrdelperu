@@ -1,0 +1,256 @@
+package view
+
+import (
+	"alc/repository"
+	"fmt"
+)
+
+// AdminGlobalFAQsPage muestra la lista de preguntas frecuentes globales
+templ AdminGlobalFAQsPage(username string, faqs []repository.GlobalFaq, categories []string) {
+	@AdminLayout("Preguntas Frecuentes", username) {
+		<div class="space-y-6">
+			<div class="flex justify-between items-center">
+				<h1 class="text-3xl font-bold">Preguntas Frecuentes Globales</h1>
+			</div>
+			<p class="text-base-content/70">
+				Administra las preguntas frecuentes que se muestran en la página pública de FAQ.
+			</p>
+			<!-- Add FAQ Form -->
+			<div class="card bg-base-100 shadow-xl">
+				<div class="card-body">
+					<h2 class="card-title">Agregar Nueva Pregunta</h2>
+					<form
+						hx-post="/admin/faqs"
+						hx-target="#global-faqs-grid"
+						hx-swap="innerHTML"
+						hx-on::after-request="this.reset()"
+						class="space-y-4"
+					>
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div class="form-control">
+								<label class="label">
+									<span class="label-text font-semibold">Categoría</span>
+									<span class="label-text-alt">Opcional, para agrupar preguntas</span>
+								</label>
+								<input
+									type="text"
+									name="category"
+									class="input input-bordered"
+									placeholder="Ej: General, Servicios, Pagos"
+									list="category-list"
+								/>
+								<datalist id="category-list">
+									for _, cat := range categories {
+										<option value={ cat }></option>
+									}
+								</datalist>
+							</div>
+							<div class="form-control">
+								<label class="label">
+									<span class="label-text font-semibold">Orden</span>
+								</label>
+								<input
+									type="number"
+									name="display_order"
+									class="input input-bordered"
+									value="0"
+									min="0"
+								/>
+							</div>
+						</div>
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">Pregunta *</span>
+							</label>
+							<input
+								type="text"
+								name="question"
+								class="input input-bordered"
+								placeholder="¿Cuál es la pregunta?"
+								required
+							/>
+						</div>
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">Respuesta *</span>
+							</label>
+							<textarea
+								name="answer"
+								class="textarea textarea-bordered"
+								rows="3"
+								placeholder="La respuesta a la pregunta..."
+								required
+							></textarea>
+						</div>
+						<div class="flex gap-4 items-center justify-between">
+							<div class="form-control">
+								<label class="label cursor-pointer justify-start gap-4">
+									<input
+										type="checkbox"
+										name="is_visible"
+										class="checkbox checkbox-primary"
+										checked
+									/>
+									<span class="label-text">Visible en página pública</span>
+								</label>
+							</div>
+							<button type="submit" class="btn btn-primary">Agregar Pregunta</button>
+						</div>
+					</form>
+				</div>
+			</div>
+			<!-- FAQs List -->
+			<div class="card bg-base-100 shadow-xl">
+				<div class="card-body">
+					<h2 class="card-title">Preguntas Existentes</h2>
+					<div id="global-faqs-grid" class="space-y-4 mt-4">
+						@AdminGlobalFAQsGrid(faqs, categories)
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+}
+
+// AdminGlobalFAQsGrid renderiza la lista de FAQs globales
+templ AdminGlobalFAQsGrid(faqs []repository.GlobalFaq, categories []string) {
+	if len(faqs) == 0 {
+		<div class="text-center text-base-content/60 py-8">
+			No hay preguntas frecuentes registradas. Agrega una nueva para comenzar.
+		</div>
+	} else {
+		for _, faq := range faqs {
+			@AdminGlobalFAQCard(faq, categories)
+		}
+	}
+}
+
+// AdminGlobalFAQCard representa una tarjeta de FAQ global
+templ AdminGlobalFAQCard(faq repository.GlobalFaq, categories []string) {
+	<div class="card bg-base-200" id={ fmt.Sprintf("global-faq-%d", faq.FaqID) }>
+		<div class="card-body">
+			<form
+				hx-put={ fmt.Sprintf("/admin/faqs/%d", faq.FaqID) }
+				hx-target="#global-faqs-grid"
+				hx-swap="innerHTML"
+				class="space-y-4"
+			>
+				<div class="flex gap-4 items-start flex-wrap">
+					<div class="flex-1 min-w-[300px] space-y-4">
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div class="form-control">
+								<label class="label">
+									<span class="label-text font-semibold">Categoría</span>
+								</label>
+								<input
+									type="text"
+									name="category"
+									class="input input-bordered input-sm"
+									value={ getFaqCategoryString(faq) }
+									placeholder="Sin categoría"
+									list={ fmt.Sprintf("category-list-%d", faq.FaqID) }
+								/>
+								<datalist id={ fmt.Sprintf("category-list-%d", faq.FaqID) }>
+									for _, cat := range categories {
+										<option value={ cat }></option>
+									}
+								</datalist>
+							</div>
+							<div class="form-control">
+								<label class="label">
+									<span class="label-text font-semibold">Orden</span>
+								</label>
+								<input
+									type="number"
+									name="display_order"
+									class="input input-bordered input-sm"
+									value={ fmt.Sprint(faq.DisplayOrder) }
+									min="0"
+								/>
+							</div>
+						</div>
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">Pregunta</span>
+							</label>
+							<input
+								type="text"
+								name="question"
+								class="input input-bordered"
+								value={ faq.Question }
+								required
+							/>
+						</div>
+						<div class="form-control">
+							<label class="label">
+								<span class="label-text font-semibold">Respuesta</span>
+							</label>
+							<textarea
+								name="answer"
+								class="textarea textarea-bordered"
+								rows="2"
+								required
+							>{ faq.Answer }</textarea>
+						</div>
+					</div>
+					<div class="flex flex-col gap-2 items-end">
+						<div class="form-control">
+							<label class="label cursor-pointer justify-start gap-2">
+								<input
+									type="checkbox"
+									name="is_visible"
+									class="checkbox checkbox-primary checkbox-sm"
+									if faq.IsVisible {
+										checked
+									}
+								/>
+								<span class="label-text text-xs">Visible</span>
+							</label>
+						</div>
+						<div class="badge badge-sm">
+							if faq.IsVisible {
+								<span class="badge-success">Visible</span>
+							} else {
+								<span class="badge-ghost">Oculto</span>
+							}
+						</div>
+					</div>
+				</div>
+				<div class="flex gap-2 justify-end">
+					<button type="submit" class="btn btn-sm btn-primary">Guardar</button>
+					<button
+						type="button"
+						hx-post={ fmt.Sprintf("/admin/faqs/%d/toggle-visibility", faq.FaqID) }
+						hx-target="#global-faqs-grid"
+						hx-swap="innerHTML"
+						class="btn btn-sm btn-ghost"
+					>
+						if faq.IsVisible {
+							Ocultar
+						} else {
+							Mostrar
+						}
+					</button>
+					<button
+						type="button"
+						hx-delete={ fmt.Sprintf("/admin/faqs/%d", faq.FaqID) }
+						hx-confirm="¿Eliminar esta pregunta?"
+						hx-target="#global-faqs-grid"
+						hx-swap="innerHTML"
+						class="btn btn-sm btn-error"
+					>
+						Eliminar
+					</button>
+				</div>
+			</form>
+		</div>
+	</div>
+}
+
+// Helper function to get category value from a GlobalFaq
+func getFaqCategoryString(faq repository.GlobalFaq) string {
+	if faq.Category.Valid {
+		return faq.Category.String
+	}
+	return ""
+}

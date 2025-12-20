@@ -1,0 +1,378 @@
+package view
+
+import (
+	"alc/config"
+	"alc/model"
+	"alc/repository"
+	"fmt"
+	"path"
+)
+
+// BlogIndexPage muestra la página principal del blog
+templ BlogIndexPage(meta model.PageMeta, articles []repository.ListPublishedArticlesPaginatedRow, imagesMap map[int32]repository.StaticFile, currentPage int, totalPages int) {
+	@BasePageWithMeta(meta) {
+		<main class="bg-chalky">
+			<!-- Hero Section -->
+			<section class="bg-apple text-white py-16">
+				<div class="max-w-7xl mx-auto px-4">
+					<h1 class="text-4xl font-bold mb-4 lg:text-5xl">Blog</h1>
+					<p class="text-xl opacity-90">
+						Artículos, noticias y consejos sobre vidrio, aluminio y uPVC
+					</p>
+					<!-- Search Form -->
+					<form action="/blog/buscar" method="GET" class="mt-8 max-w-xl">
+						<div class="flex gap-2">
+							<input
+								type="text"
+								name="q"
+								placeholder="Buscar artículos..."
+								class="flex-1 px-4 py-3 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-white"
+							/>
+							<button type="submit" class="px-6 py-3 bg-white text-apple font-semibold rounded-lg hover:bg-gray-100 transition">
+								Buscar
+							</button>
+						</div>
+					</form>
+				</div>
+			</section>
+			<!-- Articles Grid -->
+			<section class="py-16">
+				<div class="max-w-7xl mx-auto px-4">
+					if len(articles) == 0 {
+						<div class="text-center py-16">
+							<p class="text-xl text-gray-600">No hay artículos publicados aún.</p>
+							<p class="mt-2 text-gray-500">Vuelve pronto para ver nuevo contenido.</p>
+						</div>
+					} else {
+						<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+							for _, article := range articles {
+								@BlogArticleCard(article, imagesMap)
+							}
+						</div>
+						<!-- Pagination -->
+						if totalPages > 1 {
+							<div class="flex justify-center gap-2 mt-12">
+								if currentPage > 1 {
+									<a href={ templ.URL(fmt.Sprintf("/blog?page=%d", currentPage-1)) } class="px-4 py-2 border border-apple text-apple rounded-lg hover:bg-apple hover:text-white transition">
+										Anterior
+									</a>
+								}
+								for i := 1; i <= totalPages; i++ {
+									if i == currentPage {
+										<span class="px-4 py-2 bg-apple text-white rounded-lg">
+											{ fmt.Sprint(i) }
+										</span>
+									} else {
+										<a href={ templ.URL(fmt.Sprintf("/blog?page=%d", i)) } class="px-4 py-2 border border-apple text-apple rounded-lg hover:bg-apple hover:text-white transition">
+											{ fmt.Sprint(i) }
+										</a>
+									}
+								}
+								if currentPage < totalPages {
+									<a href={ templ.URL(fmt.Sprintf("/blog?page=%d", currentPage+1)) } class="px-4 py-2 border border-apple text-apple rounded-lg hover:bg-apple hover:text-white transition">
+										Siguiente
+									</a>
+								}
+							</div>
+						}
+					}
+				</div>
+			</section>
+		</main>
+	}
+}
+
+// BlogArticleCard muestra una tarjeta de artículo en el listado
+templ BlogArticleCard(article repository.ListPublishedArticlesPaginatedRow, imagesMap map[int32]repository.StaticFile) {
+	<article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition group">
+		<a href={ templ.URL("/blog/" + article.Slug) } class="block">
+			<!-- Cover Image -->
+			<div class="aspect-video bg-gray-200 overflow-hidden">
+				if article.CoverImageID.Valid {
+					if img, ok := imagesMap[article.CoverImageID.Int32]; ok {
+						<img
+							src={ path.Join(config.IMAGES_PATH, img.FileName) }
+							alt={ article.Title }
+							class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+						/>
+					} else {
+						<div class="w-full h-full flex items-center justify-center text-gray-400">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+							</svg>
+						</div>
+					}
+				} else {
+					<div class="w-full h-full flex items-center justify-center text-gray-400">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+						</svg>
+					</div>
+				}
+			</div>
+			<!-- Content -->
+			<div class="p-6">
+				<h2 class="text-xl font-bold mb-2 text-gray-900 group-hover:text-apple transition">
+					{ article.Title }
+				</h2>
+				<p class="text-gray-600 mb-4 line-clamp-3">
+					{ article.Summary }
+				</p>
+				<div class="flex items-center justify-between text-sm text-gray-500">
+					<span>{ article.Author }</span>
+					if article.PublishedAt.Valid {
+						<time datetime={ article.PublishedAt.Time.Format("2006-01-02") }>
+							{ article.PublishedAt.Time.Format("02 Ene 2006") }
+						</time>
+					}
+				</div>
+			</div>
+		</a>
+	</article>
+}
+
+// BlogSearchPage muestra los resultados de búsqueda
+templ BlogSearchPage(meta model.PageMeta, query string, results []repository.SearchArticlesRow, imagesMap map[int32]repository.StaticFile) {
+	@BasePageWithMeta(meta) {
+		<main class="bg-chalky">
+			<!-- Search Header -->
+			<section class="bg-apple text-white py-12">
+				<div class="max-w-7xl mx-auto px-4">
+					<a href="/blog" class="inline-flex items-center gap-2 text-white/80 hover:text-white mb-4">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+						</svg>
+						Volver al blog
+					</a>
+					<h1 class="text-3xl font-bold mb-4">Resultados de búsqueda</h1>
+					<!-- Search Form -->
+					<form action="/blog/buscar" method="GET" class="max-w-xl">
+						<div class="flex gap-2">
+							<input
+								type="text"
+								name="q"
+								value={ query }
+								placeholder="Buscar artículos..."
+								class="flex-1 px-4 py-3 rounded-lg text-black focus:outline-none focus:ring-2 focus:ring-white"
+							/>
+							<button type="submit" class="px-6 py-3 bg-white text-apple font-semibold rounded-lg hover:bg-gray-100 transition">
+								Buscar
+							</button>
+						</div>
+					</form>
+				</div>
+			</section>
+			<!-- Results -->
+			<section class="py-16">
+				<div class="max-w-7xl mx-auto px-4">
+					<p class="text-gray-600 mb-8">
+						{ fmt.Sprintf("%d resultado(s) para \"%s\"", len(results), query) }
+					</p>
+					if len(results) == 0 {
+						<div class="text-center py-16">
+							<p class="text-xl text-gray-600">No se encontraron artículos.</p>
+							<p class="mt-2 text-gray-500">Intenta con otros términos de búsqueda.</p>
+						</div>
+					} else {
+						<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+							for _, result := range results {
+								@BlogSearchResultCard(result, imagesMap)
+							}
+						</div>
+					}
+				</div>
+			</section>
+		</main>
+	}
+}
+
+// BlogSearchResultCard muestra una tarjeta de resultado de búsqueda
+templ BlogSearchResultCard(result repository.SearchArticlesRow, imagesMap map[int32]repository.StaticFile) {
+	<article class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition group">
+		<a href={ templ.URL("/blog/" + result.Slug) } class="block">
+			<!-- Cover Image -->
+			<div class="aspect-video bg-gray-200 overflow-hidden">
+				if result.CoverImageID.Valid {
+					if img, ok := imagesMap[result.CoverImageID.Int32]; ok {
+						<img
+							src={ path.Join(config.IMAGES_PATH, img.FileName) }
+							alt={ result.Title }
+							class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+						/>
+					} else {
+						<div class="w-full h-full flex items-center justify-center text-gray-400">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+							</svg>
+						</div>
+					}
+				} else {
+					<div class="w-full h-full flex items-center justify-center text-gray-400">
+						<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+						</svg>
+					</div>
+				}
+			</div>
+			<!-- Content -->
+			<div class="p-6">
+				<h2 class="text-xl font-bold mb-2 text-gray-900 group-hover:text-apple transition">
+					{ result.Title }
+				</h2>
+				<p class="text-gray-600 mb-4 line-clamp-3">
+					{ result.Summary }
+				</p>
+				<div class="flex items-center justify-between text-sm text-gray-500">
+					<span>{ result.Author }</span>
+					if result.PublishedAt.Valid {
+						<time datetime={ result.PublishedAt.Time.Format("2006-01-02") }>
+							{ result.PublishedAt.Time.Format("02 Ene 2006") }
+						</time>
+					}
+				</div>
+			</div>
+		</a>
+	</article>
+}
+
+// BlogArticlePage muestra un artículo individual
+templ BlogArticlePage(meta model.PageMeta, article repository.GetPublishedArticleBySlugRow, faqs []repository.ArticleFaq, coverImage *repository.StaticFile) {
+	@BasePageWithMeta(meta) {
+		<main class="bg-chalky">
+			<!-- Article Header -->
+			<article>
+				<!-- Cover Image -->
+				if coverImage != nil {
+					<div class="relative h-[40vh] min-h-[300px] max-h-[500px] bg-gray-900">
+						<img
+							src={ path.Join(config.IMAGES_PATH, coverImage.FileName) }
+							alt={ article.Title }
+							class="w-full h-full object-cover opacity-70"
+						/>
+						<div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+						<div class="absolute bottom-0 left-0 right-0 p-8">
+							<div class="max-w-4xl mx-auto">
+								<h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4">
+									{ article.Title }
+								</h1>
+								<div class="flex items-center gap-4 text-white/80">
+									<span>Por { article.Author }</span>
+									if article.PublishedAt.Valid {
+										<span>|</span>
+										<time datetime={ article.PublishedAt.Time.Format("2006-01-02") }>
+											{ article.PublishedAt.Time.Format("02 de Enero, 2006") }
+										</time>
+									}
+								</div>
+							</div>
+						</div>
+					</div>
+				} else {
+					<div class="bg-apple text-white py-16">
+						<div class="max-w-4xl mx-auto px-4">
+							<a href="/blog" class="inline-flex items-center gap-2 text-white/80 hover:text-white mb-6">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+								</svg>
+								Volver al blog
+							</a>
+							<h1 class="text-3xl md:text-4xl lg:text-5xl font-bold mb-4">
+								{ article.Title }
+							</h1>
+							<div class="flex items-center gap-4 text-white/80">
+								<span>Por { article.Author }</span>
+								if article.PublishedAt.Valid {
+									<span>|</span>
+									<time datetime={ article.PublishedAt.Time.Format("2006-01-02") }>
+										{ article.PublishedAt.Time.Format("02 de Enero, 2006") }
+									</time>
+								}
+							</div>
+						</div>
+					</div>
+				}
+				<!-- Article Content -->
+				<div class="py-12 lg:py-16">
+					<div class="max-w-4xl mx-auto px-4">
+						if coverImage != nil {
+							<a href="/blog" class="inline-flex items-center gap-2 text-apple hover:text-apple/80 mb-8">
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+								</svg>
+								Volver al blog
+							</a>
+						}
+						<!-- Summary -->
+						<div class="text-xl text-gray-600 mb-8 italic border-l-4 border-apple pl-4">
+							{ article.Summary }
+						</div>
+						<!-- Content -->
+						<div class="prose prose-lg max-w-none prose-headings:text-gray-900 prose-a:text-apple prose-img:rounded-lg">
+							@templ.Raw(article.Content)
+						</div>
+						<!-- FAQs Section -->
+						if len(faqs) > 0 {
+							<section class="mt-16 pt-8 border-t border-gray-200">
+								<h2 class="text-2xl font-bold mb-6">Preguntas Frecuentes</h2>
+								<div class="space-y-4">
+									for _, faq := range faqs {
+										<details class="group bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+											<summary class="flex items-center justify-between p-4 cursor-pointer font-semibold text-gray-900 hover:bg-gray-50">
+												{ faq.Question }
+												<svg class="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+												</svg>
+											</summary>
+											<div class="p-4 pt-0 text-gray-600">
+												{ faq.Answer }
+											</div>
+										</details>
+									}
+								</div>
+							</section>
+						}
+						<!-- Share Section -->
+						<div class="mt-12 pt-8 border-t border-gray-200">
+							<p class="text-gray-600 mb-4">Comparte este artículo:</p>
+							<div class="flex gap-4">
+								<a
+									href={ templ.URL(fmt.Sprintf("https://www.facebook.com/sharer/sharer.php?u=%s", meta.Canonical)) }
+									target="_blank"
+									rel="noopener noreferrer"
+									class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+								>
+									<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+										<path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"></path>
+									</svg>
+									Facebook
+								</a>
+								<a
+									href={ templ.URL(fmt.Sprintf("https://twitter.com/intent/tweet?url=%s&text=%s", meta.Canonical, article.Title)) }
+									target="_blank"
+									rel="noopener noreferrer"
+									class="inline-flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition"
+								>
+									<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+										<path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
+									</svg>
+									X
+								</a>
+								<a
+									href={ templ.URL(fmt.Sprintf("https://api.whatsapp.com/send?text=%s%%20%s", article.Title, meta.Canonical)) }
+									target="_blank"
+									rel="noopener noreferrer"
+									class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+								>
+									<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+										<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"></path>
+									</svg>
+									WhatsApp
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
+			</article>
+		</main>
+	}
+}

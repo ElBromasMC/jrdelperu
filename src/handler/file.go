@@ -177,6 +177,55 @@ func (h *Handler) HandleFileUpdateDisplayName(c echo.Context) error {
 	return Render(c, http.StatusOK, view.FileCard(file, fileType))
 }
 
+// HandleFileUploadInline maneja la subida de imágenes desde el editor Quill
+// Retorna JSON con la URL de la imagen para insertar en el editor
+func (h *Handler) HandleFileUploadInline(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	// Obtener archivo del formulario
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{
+			"error": "No se proporcionó archivo",
+		})
+	}
+
+	// Generar display name automático para imágenes inline
+	displayName := "Imagen de artículo"
+
+	// Subir archivo usando el servicio existente (optimiza automáticamente)
+	result, err := h.fileService.UploadFile(ctx, file, displayName)
+	if err != nil {
+		if errors.Is(err, service.ErrInvalidFileType) {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "Tipo de archivo no permitido. Solo imágenes.",
+			})
+		}
+		if errors.Is(err, service.ErrFileTooLarge) {
+			return c.JSON(http.StatusBadRequest, map[string]string{
+				"error": "Imagen demasiado grande. Máximo: 10 MB.",
+			})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": fmt.Sprintf("Error al subir imagen: %v", err),
+		})
+	}
+
+	// Obtener URL de la imagen
+	imageURL, err := h.fileService.GetFileURL(ctx, result.FileID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{
+			"error": "Error al obtener URL de imagen",
+		})
+	}
+
+	// Retornar JSON con la URL
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"url":     imageURL,
+		"file_id": result.FileID,
+	})
+}
+
 // HandleFileDelete elimina un archivo
 func (h *Handler) HandleFileDelete(c echo.Context) error {
 	ctx := c.Request().Context()

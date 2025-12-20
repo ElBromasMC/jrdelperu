@@ -1,0 +1,136 @@
+package view
+
+import (
+	"alc/model"
+	"alc/repository"
+)
+
+// FAQPage muestra la página pública de preguntas frecuentes
+templ FAQPage(meta model.PageMeta, categories []string, faqsByCategory map[string][]repository.GlobalFaq) {
+	@BasePageWithMeta(meta) {
+		<main class="bg-chalky">
+			<!-- Hero Section -->
+			<section class="bg-apple text-white py-16">
+				<div class="max-w-7xl mx-auto px-4 text-center">
+					<h1 class="text-4xl font-bold mb-4 lg:text-5xl">Preguntas Frecuentes</h1>
+					<p class="text-xl opacity-90 max-w-2xl mx-auto">
+						Encuentra respuestas a las preguntas más comunes sobre nuestros productos y servicios.
+					</p>
+				</div>
+			</section>
+			<!-- FAQ Content -->
+			<section class="py-16">
+				<div class="max-w-4xl mx-auto px-4">
+					if len(categories) == 0 {
+						<div class="text-center py-16">
+							<svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mx-auto text-gray-400 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+							</svg>
+							<p class="text-xl text-gray-600">No hay preguntas frecuentes disponibles en este momento.</p>
+							<p class="mt-2 text-gray-500">Contáctanos directamente si tienes alguna pregunta.</p>
+							<a href="/contacto" class="inline-block mt-6 px-6 py-3 bg-apple text-white rounded-lg hover:bg-apple/90 transition">
+								Contáctanos
+							</a>
+						</div>
+					} else {
+						<!-- Category Navigation -->
+						if len(categories) > 1 {
+							<nav class="mb-12">
+								<div class="flex flex-wrap gap-2 justify-center">
+									for _, cat := range categories {
+										<a
+											href={ templ.URL("#" + slugifyCategory(cat)) }
+											class="px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-apple hover:text-white hover:border-apple transition"
+										>
+											{ cat }
+										</a>
+									}
+								</div>
+							</nav>
+						}
+						<!-- FAQ Categories -->
+						<div class="space-y-12">
+							for _, cat := range categories {
+								<div id={ slugifyCategory(cat) } class="scroll-mt-8">
+									if len(categories) > 1 {
+										<h2 class="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b-2 border-apple">
+											{ cat }
+										</h2>
+									}
+									<div class="space-y-4">
+										for _, faq := range faqsByCategory[cat] {
+											@FAQItem(faq)
+										}
+									</div>
+								</div>
+							}
+						</div>
+					}
+					<!-- Contact CTA -->
+					<div class="mt-16 p-8 bg-white rounded-lg shadow-md text-center">
+						<h3 class="text-xl font-bold mb-2">¿No encontraste lo que buscabas?</h3>
+						<p class="text-gray-600 mb-6">
+							Nuestro equipo está listo para ayudarte con cualquier consulta adicional.
+						</p>
+						<div class="flex flex-wrap gap-4 justify-center">
+							<a
+								href="/contacto"
+								class="inline-flex items-center gap-2 px-6 py-3 bg-apple text-white rounded-lg hover:bg-apple/90 transition"
+							>
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+								</svg>
+								Contáctanos
+							</a>
+							<a
+								href="https://api.whatsapp.com/send?phone=51948846618&text=Hola,%20tengo%20una%20consulta"
+								target="_blank"
+								class="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+							>
+								<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
+									<path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"></path>
+								</svg>
+								WhatsApp
+							</a>
+						</div>
+					</div>
+				</div>
+			</section>
+		</main>
+	}
+}
+
+// FAQItem muestra un ítem de FAQ con expand/collapse
+templ FAQItem(faq repository.GlobalFaq) {
+	<details class="group bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+		<summary class="flex items-center justify-between p-5 cursor-pointer font-semibold text-gray-900 hover:bg-gray-50 transition">
+			<span class="pr-4">{ faq.Question }</span>
+			<svg class="w-5 h-5 text-gray-500 group-open:rotate-180 transition-transform flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+			</svg>
+		</summary>
+		<div class="p-5 pt-0 text-gray-600 leading-relaxed">
+			{ faq.Answer }
+		</div>
+	</details>
+}
+
+// slugifyCategory converts a category name to a URL-friendly slug
+func slugifyCategory(cat string) string {
+	// Simple slugify - replace spaces with dashes and lowercase
+	result := ""
+	for _, r := range cat {
+		if r >= 'a' && r <= 'z' {
+			result += string(r)
+		} else if r >= 'A' && r <= 'Z' {
+			result += string(r + 32) // lowercase
+		} else if r >= '0' && r <= '9' {
+			result += string(r)
+		} else if r == ' ' || r == '-' {
+			if len(result) > 0 && result[len(result)-1] != '-' {
+				result += "-"
+			}
+		}
+	}
+	return result
+}

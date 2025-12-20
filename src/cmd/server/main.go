@@ -100,6 +100,14 @@ func main() {
 	e.GET("/servicio/upvc/:catSlug", h.HandleUPVCCategoryShow)
 	e.GET("/servicio/upvc/:catSlug/:itemSlug", h.HandleUPVCItemShow)
 
+	// Blog routes
+	e.GET("/blog", h.HandleBlogIndex)
+	e.GET("/blog/buscar", h.HandleBlogSearch)
+	e.GET("/blog/:slug", h.HandleBlogArticle)
+
+	// FAQ route
+	e.GET("/preguntas-frecuentes", h.HandleFAQPage)
+
 	// Admin routes (public)
 	e.GET("/admin/login", h.HandleAdminLoginShow)
 	e.POST("/admin/login", h.HandleAdminLoginSubmit)
@@ -112,6 +120,7 @@ func main() {
 	// File management
 	admin.GET("/files", h.HandleFilesIndex)
 	admin.POST("/files/upload", h.HandleFileUpload)
+	admin.POST("/files/upload-inline", h.HandleFileUploadInline) // For Quill editor images
 	admin.GET("/files/:id", h.HandleFileGet)
 	admin.GET("/files/:id/edit", h.HandleFileEdit)
 	admin.PUT("/files/:id/display-name", h.HandleFileUpdateDisplayName)
@@ -164,6 +173,27 @@ func main() {
 	admin.PUT("/projects/:id/images/:imageId/order", h.HandleProjectImageUpdateOrder)
 	admin.PUT("/projects/:id/images/:imageId/featured", h.HandleProjectImageUpdateFeatured)
 	admin.DELETE("/projects/:id/images/:imageId", h.HandleAdminProjectImageDelete)
+
+	// Blog articles management
+	admin.GET("/articles", h.HandleArticlesIndex)
+	admin.GET("/articles/new", h.HandleArticleNewForm)
+	admin.POST("/articles", h.HandleArticleCreate)
+	admin.GET("/articles/:id", h.HandleArticleDetail)
+	admin.GET("/articles/:id/edit", h.HandleArticleEditForm)
+	admin.PUT("/articles/:id", h.HandleArticleUpdate)
+	admin.DELETE("/articles/:id", h.HandleArticleDelete)
+	admin.POST("/articles/:id/publish", h.HandleArticlePublish)
+	admin.POST("/articles/:id/unpublish", h.HandleArticleUnpublish)
+	admin.POST("/articles/:id/faqs", h.HandleArticleFAQCreate)
+	admin.PUT("/articles/:id/faqs/:faqId", h.HandleArticleFAQUpdate)
+	admin.DELETE("/articles/:id/faqs/:faqId", h.HandleArticleFAQDelete)
+
+	// Global FAQs management
+	admin.GET("/faqs", h.HandleGlobalFAQsIndex)
+	admin.POST("/faqs", h.HandleGlobalFAQCreate)
+	admin.PUT("/faqs/:id", h.HandleGlobalFAQUpdate)
+	admin.DELETE("/faqs/:id", h.HandleGlobalFAQDelete)
+	admin.POST("/faqs/:id/toggle-visibility", h.HandleGlobalFAQToggleVisibility)
 
 	// Start server
 	log.Println("Starting server on :8080")
