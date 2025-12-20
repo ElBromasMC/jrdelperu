@@ -6,15 +6,17 @@ import (
 )
 
 type Handler struct {
-	authService *service.SessionAuthService
-	fileService *service.FileService
-	queries     *repository.Queries
+	authService      *service.SessionAuthService
+	fileService      *service.FileService
+	recaptchaService *service.RecaptchaService
+	queries          *repository.Queries
 }
 
-func New(authService *service.SessionAuthService, fileService *service.FileService, queries *repository.Queries) Handler {
+func New(authService *service.SessionAuthService, fileService *service.FileService, recaptchaService *service.RecaptchaService, queries *repository.Queries) Handler {
 	return Handler{
-		authService: authService,
-		fileService: fileService,
-		queries:     queries,
+		authService:      authService,
+		fileService:      fileService,
+		recaptchaService: recaptchaService,
+		queries:          queries,
 	}
 }

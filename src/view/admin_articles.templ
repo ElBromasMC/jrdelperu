@@ -5,6 +5,8 @@ import (
 	"alc/repository"
 	"fmt"
 	"path"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // formatPublishedAtRow formatea la fecha de publicación
@@ -573,7 +575,7 @@ templ adminSidebarContent() {
 }
 
 // AdminArticleDetailPage muestra el detalle del artículo con gestión de FAQs
-templ AdminArticleDetailPage(username string, article repository.GetArticleRow, faqs []repository.ArticleFaq, coverImage *repository.StaticFile) {
+templ AdminArticleDetailPage(username string, article repository.GetArticleRow, faqs []repository.ArticleFaq, coverImage *repository.StaticFile, comments []repository.ArticleComment, repliesMap map[int32][]repository.ArticleComment) {
 	@AdminLayout("Detalle del Artículo", username) {
 		<div class="space-y-6">
 			<div class="flex items-center gap-4">
@@ -729,6 +731,22 @@ templ AdminArticleDetailPage(username string, article repository.GetArticleRow, 
 					</div>
 				</div>
 			</div>
+			<!-- Comments Management -->
+			<div class="card bg-base-100 shadow-xl">
+				<div class="card-body">
+					<h2 class="card-title text-2xl">
+						Comentarios
+						if len(comments) > 0 {
+							<span class="badge badge-neutral">{ fmt.Sprint(len(comments)) }</span>
+						}
+					</h2>
+					<p class="text-base-content/70">Gestiona los comentarios de este artículo.</p>
+					<!-- Comments List -->
+					<div id="article-comments-grid" class="space-y-4 mt-6">
+						@AdminCommentsGrid(article.ArticleID, comments, repliesMap)
+					</div>
+				</div>
+			</div>
 		</div>
 	}
 }
@@ -813,4 +831,114 @@ templ AdminArticleFAQCard(articleID int32, faq repository.ArticleFaq) {
 			</form>
 		</div>
 	</div>
+}
+
+// AdminCommentsGrid renderiza la lista de comentarios del artículo
+templ AdminCommentsGrid(articleID int32, comments []repository.ArticleComment, repliesMap map[int32][]repository.ArticleComment) {
+	if len(comments) == 0 {
+		<div class="text-center text-base-content/60 py-8">
+			No hay comentarios para este artículo.
+		</div>
+	} else {
+		for _, comment := range comments {
+			@AdminCommentCard(articleID, comment, repliesMap[comment.CommentID])
+		}
+	}
+}
+
+// AdminCommentCard representa un comentario con opciones de admin
+templ AdminCommentCard(articleID int32, comment repository.ArticleComment, replies []repository.ArticleComment) {
+	<div
+		id={ fmt.Sprintf("admin-comment-%d", comment.CommentID) }
+		class={
+			"card",
+			templ.KV("bg-primary/10 border-l-4 border-primary", comment.IsAdmin),
+			templ.KV("bg-base-200", !comment.IsAdmin),
+		}
+	>
+		<div class="card-body p-4">
+			<!-- Comment Header -->
+			<div class="flex items-start justify-between">
+				<div class="flex items-center gap-3">
+					<div class={
+						"avatar placeholder",
+					}>
+						<div class={
+							"w-10 rounded-full",
+							templ.KV("bg-primary text-primary-content", comment.IsAdmin),
+							templ.KV("bg-neutral text-neutral-content", !comment.IsAdmin),
+						}>
+							<span>{ string([]rune(comment.AuthorName)[0]) }</span>
+						</div>
+					</div>
+					<div>
+						<div class="flex items-center gap-2">
+							<span class="font-semibold">{ comment.AuthorName }</span>
+							if comment.IsAdmin {
+								<span class="badge badge-primary badge-sm">Admin</span>
+							}
+						</div>
+						if comment.AuthorEmail.Valid && comment.AuthorEmail.String != "" {
+							<span class="text-sm text-base-content/60">{ comment.AuthorEmail.String }</span>
+						}
+						<div class="text-xs text-base-content/50">
+							{ formatAdminCommentDate(comment.CreatedAt) }
+						</div>
+					</div>
+				</div>
+				<!-- Delete Button -->
+				<button
+					hx-delete={ fmt.Sprintf("/admin/articles/%d/comments/%d", articleID, comment.CommentID) }
+					hx-confirm="¿Eliminar este comentario y sus respuestas?"
+					hx-target="#article-comments-grid"
+					hx-swap="innerHTML"
+					class="btn btn-ghost btn-sm btn-square text-error"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+					</svg>
+				</button>
+			</div>
+			<!-- Comment Content -->
+			<p class="mt-2 whitespace-pre-wrap">{ comment.Content }</p>
+			<!-- Reply Form (only for non-admin comments) -->
+			if !comment.IsAdmin {
+				<div class="mt-4 pt-4 border-t border-base-300">
+					<form
+						hx-post={ fmt.Sprintf("/admin/articles/%d/comments/%d/reply", articleID, comment.CommentID) }
+						hx-target={ fmt.Sprintf("#admin-comment-%d", comment.CommentID) }
+						hx-swap="outerHTML"
+						class="flex gap-2"
+					>
+						<input
+							type="text"
+							name="content"
+							class="input input-bordered input-sm flex-1"
+							placeholder="Escribe una respuesta..."
+							required
+						/>
+						<button type="submit" class="btn btn-primary btn-sm">
+							Responder
+						</button>
+					</form>
+				</div>
+			}
+			<!-- Replies -->
+			if len(replies) > 0 {
+				<div class="ml-6 mt-4 space-y-3 border-l-2 border-base-300 pl-4">
+					for _, reply := range replies {
+						@AdminCommentCard(articleID, reply, nil)
+					}
+				</div>
+			}
+		</div>
+	</div>
+}
+
+// formatAdminCommentDate formatea la fecha del comentario para admin
+func formatAdminCommentDate(t pgtype.Timestamptz) string {
+	if !t.Valid {
+		return ""
+	}
+	return t.Time.Format("02/01/2006 15:04")
 }

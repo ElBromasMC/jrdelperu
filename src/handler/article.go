@@ -277,7 +277,20 @@ func (h *Handler) HandleArticleDetail(c echo.Context) error {
 		}
 	}
 
-	return Render(c, http.StatusOK, view.AdminArticleDetailPage(sessionData.Username, article, faqs, coverImage))
+	// Get comments
+	comments, err := h.queries.ListArticleComments(ctx, int32(articleID))
+	if err != nil {
+		comments = []repository.ArticleComment{}
+	}
+
+	// Build replies map
+	repliesMap := make(map[int32][]repository.ArticleComment)
+	for _, comment := range comments {
+		replies, _ := h.queries.ListCommentReplies(ctx, pgtype.Int4{Int32: comment.CommentID, Valid: true})
+		repliesMap[comment.CommentID] = replies
+	}
+
+	return Render(c, http.StatusOK, view.AdminArticleDetailPage(sessionData.Username, article, faqs, coverImage, comments, repliesMap))
 }
 
 // HandleArticleFAQCreate crea una FAQ para un artículo

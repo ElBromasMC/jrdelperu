@@ -52,8 +52,13 @@ func main() {
 	// Initialize file service
 	fileService := service.NewFileService(queries)
 
+	// Initialize reCAPTCHA service
+	recaptchaSiteKey := os.Getenv("RECAPTCHA_SITE_KEY")
+	recaptchaSecretKey := os.Getenv("RECAPTCHA_SECRET_KEY")
+	recaptchaService := service.NewRecaptchaService(recaptchaSiteKey, recaptchaSecretKey)
+
 	// Initialize handlers
-	h := handler.New(authService, fileService, queries)
+	h := handler.New(authService, fileService, recaptchaService, queries)
 
 	// Middleware
 	e.Pre(middleware.RemoveTrailingSlashWithConfig(middleware.TrailingSlashConfig{
@@ -104,6 +109,7 @@ func main() {
 	e.GET("/blog", h.HandleBlogIndex)
 	e.GET("/blog/buscar", h.HandleBlogSearch)
 	e.GET("/blog/:slug", h.HandleBlogArticle)
+	e.POST("/blog/:slug/comments", h.HandleCommentCreate)
 
 	// FAQ route
 	e.GET("/preguntas-frecuentes", h.HandleFAQPage)
@@ -187,6 +193,8 @@ func main() {
 	admin.POST("/articles/:id/faqs", h.HandleArticleFAQCreate)
 	admin.PUT("/articles/:id/faqs/:faqId", h.HandleArticleFAQUpdate)
 	admin.DELETE("/articles/:id/faqs/:faqId", h.HandleArticleFAQDelete)
+	admin.POST("/articles/:id/comments/:commentId/reply", h.HandleAdminReplyCreate)
+	admin.DELETE("/articles/:id/comments/:commentId", h.HandleCommentDelete)
 
 	// Global FAQs management
 	admin.GET("/faqs", h.HandleGlobalFAQsIndex)

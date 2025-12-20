@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
@@ -133,6 +134,22 @@ func (h *Handler) HandleBlogArticle(c echo.Context) error {
 		}
 	}
 
+	// Get comments
+	comments, err := h.queries.ListArticleComments(ctx, article.ArticleID)
+	if err != nil {
+		comments = []repository.ArticleComment{}
+	}
+
+	// Build replies map
+	repliesMap := make(map[int32][]repository.ArticleComment)
+	for _, comment := range comments {
+		replies, _ := h.queries.ListCommentReplies(ctx, pgtype.Int4{Int32: comment.CommentID, Valid: true})
+		repliesMap[comment.CommentID] = replies
+	}
+
+	// Get reCAPTCHA site key
+	recaptchaSiteKey := h.recaptchaService.GetSiteKey()
+
 	// Build SEO meta
 	baseURL := getBaseURL()
 	meta := model.PageMeta{
@@ -151,7 +168,7 @@ func (h *Handler) HandleBlogArticle(c echo.Context) error {
 		meta.OGImage = baseURL + path.Join(config.IMAGES_PATH, coverImage.FileName)
 	}
 
-	return Render(c, http.StatusOK, view.BlogArticlePage(meta, article, faqs, coverImage))
+	return Render(c, http.StatusOK, view.BlogArticlePage(meta, article, faqs, coverImage, comments, repliesMap, recaptchaSiteKey))
 }
 
 // HandleFAQPage muestra la página pública de preguntas frecuentes
