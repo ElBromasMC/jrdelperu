@@ -83,6 +83,7 @@ func (h *Handler) HandleCategoryCreate(c echo.Context) error {
 	description := c.FormValue("description")
 	longDescription := c.FormValue("long_description")
 	imageIDStr := c.FormValue("image_id")
+	secondaryImageIDStr := c.FormValue("secondary_image_id")
 	tagIDStr := c.FormValue("tag_id")
 	pdfIDStr := c.FormValue("pdf_id")
 
@@ -108,6 +109,14 @@ func (h *Handler) HandleCategoryCreate(c echo.Context) error {
 		}
 	}
 
+	var secondaryImageID pgtype.Int4
+	if secondaryImageIDStr != "" {
+		id, err := strconv.Atoi(secondaryImageIDStr)
+		if err == nil {
+			secondaryImageID = pgtype.Int4{Int32: int32(id), Valid: true}
+		}
+	}
+
 	var tagID pgtype.Int4
 	if tagIDStr != "" {
 		id, err := strconv.Atoi(tagIDStr)
@@ -126,14 +135,15 @@ func (h *Handler) HandleCategoryCreate(c echo.Context) error {
 
 	// Create category
 	_, err := h.queries.CreateCategory(ctx, repository.CreateCategoryParams{
-		MaterialType:    materialType,
-		Slug:            slug,
-		Name:            name,
-		Description:     description,
-		LongDescription: longDescription,
-		ImageID:         imageID,
-		TagID:           tagID,
-		PdfID:           pdfID,
+		MaterialType:      materialType,
+		Slug:              slug,
+		Name:              name,
+		Description:       description,
+		LongDescription:   longDescription,
+		ImageID:           imageID,
+		SecondaryImageID:  secondaryImageID,
+		TagID:             tagID,
+		PdfID:             pdfID,
 	})
 
 	if err != nil {
@@ -188,6 +198,7 @@ func (h *Handler) HandleCategoryUpdate(c echo.Context) error {
 	description := c.FormValue("description")
 	longDescription := c.FormValue("long_description")
 	imageIDStr := c.FormValue("image_id")
+	secondaryImageIDStr := c.FormValue("secondary_image_id")
 	tagIDStr := c.FormValue("tag_id")
 	pdfIDStr := c.FormValue("pdf_id")
 
@@ -197,6 +208,14 @@ func (h *Handler) HandleCategoryUpdate(c echo.Context) error {
 		id, err := strconv.Atoi(imageIDStr)
 		if err == nil {
 			imageID = pgtype.Int4{Int32: int32(id), Valid: true}
+		}
+	}
+
+	var secondaryImageID pgtype.Int4
+	if secondaryImageIDStr != "" {
+		id, err := strconv.Atoi(secondaryImageIDStr)
+		if err == nil {
+			secondaryImageID = pgtype.Int4{Int32: int32(id), Valid: true}
 		}
 	}
 
@@ -218,14 +237,15 @@ func (h *Handler) HandleCategoryUpdate(c echo.Context) error {
 
 	// Update category
 	err = h.queries.UpdateCategory(ctx, repository.UpdateCategoryParams{
-		CategoryID:      int32(categoryID),
-		Slug:            slug,
-		Name:            name,
-		Description:     description,
-		LongDescription: longDescription,
-		ImageID:         imageID,
-		TagID:           tagID,
-		PdfID:           pdfID,
+		CategoryID:       int32(categoryID),
+		Slug:             slug,
+		Name:             name,
+		Description:      description,
+		LongDescription:  longDescription,
+		ImageID:          imageID,
+		SecondaryImageID: secondaryImageID,
+		TagID:            tagID,
+		PdfID:            pdfID,
 	})
 
 	if err != nil {

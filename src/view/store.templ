@@ -431,7 +431,9 @@ templ StoreAluminioItem(i model.Item, pdfURL string, pdfName string) {
 											alt={ i.Slug }
 											if i.SecondaryImg.Id != 0 {
 												src={ path.Join(config.IMAGES_PATH, i.SecondaryImg.Filename) }
-											} else if i.Img.Id != 0 {
+											}
+											else
+											if i.Img.Id != 0 {
 												src={ path.Join(config.IMAGES_PATH, i.Img.Filename) }
 											} else {
 												src="/static/img/placeholder.webp"
@@ -546,12 +548,14 @@ templ StoreUPVCIndex(cats []model.Category, pdfURL string, pdfName string, afich
 	}
 }
 
-templ StoreUPVCCategory(cat model.Category, is []model.Item, pdfURL string, pdfName string) {
+// StoreUPVCCategoryLumina renders a uPVC category with long description and static items (no links)
+// This is the default style for uPVC categories
+templ StoreUPVCCategoryLumina(cat model.Category, is []model.Item, pdfURL string, pdfName string) {
 	@BasePage(cat.Name) {
 		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
 			<section>
 				<div class="px-4 py-8 max-w-7xl mx-auto">
-					<div class="space-y-16">
+					<div class="space-y-8">
 						<h2 class="text-center font-medium text-3xl uppercase">
 							<a
 								class="text-apple hover:text-livid"
@@ -561,15 +565,25 @@ templ StoreUPVCCategory(cat model.Category, is []model.Item, pdfURL string, pdfN
 							</a>
 							<span>/</span>
 							<span>
-								{  cat.Name }
+								{ cat.Name }
 							</span>
 						</h2>
-						<div class="flex flex-row justify-center flex-wrap gap-x-12 gap-y-16 mt-12">
+						<!-- Long description below title -->
+						if cat.LongDescription != "" {
+							<p class="text-center lg:text-lg">
+								{ cat.LongDescription }
+							</p>
+						}
+					</div>
+				</div>
+			</section>
+			<!-- Items displayed statically (no links) -->
+			if len(is) > 0 {
+				<section>
+					<div class="px-4 py-8 max-w-7xl mx-auto">
+						<div class="flex flex-row justify-center flex-wrap gap-x-12 gap-y-16">
 							for _, i := range is {
-								<a
-									class="border border-black w-full max-w-96"
-									href={ templ.SafeURL(fmt.Sprintf("/servicio/upvc/%s/%s", cat.Slug, i.Slug)) }
-								>
+								<div class="border border-black w-full max-w-96">
 									<div class="w-full aspect-[5/4] flex justify-center">
 										<img
 											class="object-cover h-full"
@@ -585,8 +599,93 @@ templ StoreUPVCCategory(cat model.Category, is []model.Item, pdfURL string, pdfN
 											{ i.Name }
 										</div>
 									</div>
-								</a>
+								</div>
 							}
+						</div>
+					</div>
+				</section>
+			}
+			if pdfURL != "" {
+				<!-- Descarga de catálogo -->
+				<section>
+					<div class="px-4 py-8 max-w-7xl mx-auto">
+						<a
+							href={ templ.URL(pdfURL) }
+							target="_blank"
+							class="block py-4 border-4 border-apple font-bold text-xl text-center"
+						>
+							{ pdfName }
+						</a>
+					</div>
+				</section>
+			}
+			<!-- Formulario -->
+			<div class="px-4 py-16 max-w-7xl mx-auto lg:py-24">
+				@Form()
+			</div>
+		</main>
+	}
+}
+
+// StoreUPVCCategoryNatura renders a uPVC category like an item detail page (two images side-by-side)
+// Used for categories with "natura" in their slug
+templ StoreUPVCCategoryNatura(cat model.Category, pdfURL string, pdfName string) {
+	@BasePage(cat.Name) {
+		<main class="min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
+			<section>
+				<div class="px-4 py-8 max-w-7xl mx-auto">
+					<div class="space-y-16">
+						<h2 class="text-center font-medium text-3xl">
+							<a
+								class="text-apple hover:text-livid"
+								href="/servicio/upvc"
+							>
+								uPVC
+							</a>
+							<span>/</span>
+							<span>{ cat.Name }</span>
+						</h2>
+						<div class="flex flex-col items-center gap-9 lg:flex-row lg:items-start">
+							<!-- Primary Image -->
+							<div class="space-y-3">
+								<div class="border border-black w-full aspect-square max-w-80">
+									<div class="h-full flex justify-center">
+										<img
+											class="object-cover h-full"
+											alt={ cat.Slug }
+											if cat.Img.Id != 0 {
+												src={ path.Join(config.IMAGES_PATH, cat.Img.Filename) }
+											} else {
+												src="/static/img/placeholder.webp"
+											}
+										/>
+									</div>
+								</div>
+							</div>
+							<!-- Secondary Image -->
+							<div class="space-y-3">
+								<div class="border border-black w-full aspect-square max-w-80">
+									<div class="h-full flex justify-center">
+										<img
+											class="object-cover h-full"
+											alt={ cat.Slug }
+											if cat.SecondaryImg.Id != 0 {
+												src={ path.Join(config.IMAGES_PATH, cat.SecondaryImg.Filename) }
+											}
+											else
+											if cat.Img.Id != 0 {
+												src={ path.Join(config.IMAGES_PATH, cat.Img.Filename) }
+											} else {
+												src="/static/img/placeholder.webp"
+											}
+										/>
+									</div>
+								</div>
+							</div>
+							<!-- Long Description -->
+							<div class="flex-1 space-y-6 text-justify">
+								{ cat.LongDescription }
+							</div>
 						</div>
 					</div>
 				</div>
@@ -660,7 +759,9 @@ templ StoreUPVCItem(i model.Item, pdfURL string, pdfName string) {
 											alt={ i.Slug }
 											if i.SecondaryImg.Id != 0 {
 												src={ path.Join(config.IMAGES_PATH, i.SecondaryImg.Filename) }
-											} else if i.Img.Id != 0 {
+											}
+											else
+											if i.Img.Id != 0 {
 												src={ path.Join(config.IMAGES_PATH, i.Img.Filename) }
 											} else {
 												src="/static/img/placeholder.webp"

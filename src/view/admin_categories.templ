@@ -245,32 +245,57 @@ templ adminCategoryFormContent(cat *repository.Category, images []repository.Sta
 						<!-- Image -->
 						<div class="form-control">
 							<label class="label">
-								<span class="label-text font-semibold">Imagen</span>
+								<span class="label-text font-semibold">Imagen Principal</span>
 							</label>
-							<select name="image_id" class="select select-bordered">
-								<option value="">Sin imagen</option>
-								for _, img := range images {
-									<option
-										value={ fmt.Sprint(img.FileID) }
-										if isEdit && cat.ImageID.Valid && cat.ImageID.Int32 == img.FileID {
-											selected
-										}
-									>
-										if img.DisplayName.Valid {
-											{ img.DisplayName.String }
-										} else {
-											{ img.FileName }
-										}
-									</option>
-								}
-							</select>
+							<div class="flex items-center gap-2">
+								<select name="image_id" class="select select-bordered flex-1">
+									<option value="">Sin imagen</option>
+									for _, img := range images {
+										<option
+											value={ fmt.Sprint(img.FileID) }
+											if isEdit && cat.ImageID.Valid && cat.ImageID.Int32 == img.FileID {
+												selected
+											}
+										>
+											if img.DisplayName.Valid {
+												{ img.DisplayName.String }
+											} else {
+												{ img.FileName }
+											}
+										</option>
+									}
+								</select>
+								<a href="/admin/files" class="btn btn-sm btn-ghost" target="_blank">Gestionar archivos</a>
+								<button type="button" class="btn btn-sm btn-ghost" onclick="openImageUploadModal('image_id')">Subir nuevo</button>
+							</div>
+						</div>
+						<!-- Secondary Image (for natura-style categories) -->
+						<div class="form-control">
 							<label class="label">
-								<span class="label-text-alt">
-									<a href="/admin/files" class="link" target="_blank">Gestionar archivos</a>
-									{ " | " }
-									<button type="button" class="link" onclick="openImageUploadModal('image_id')">Subir nuevo</button>
-								</span>
+								<span class="label-text font-semibold">Imagen Secundaria</span>
+								<span class="label-text-alt">Para categorías uPVC tipo Natura</span>
 							</label>
+							<div class="flex items-center gap-2">
+								<select name="secondary_image_id" class="select select-bordered flex-1">
+									<option value="">Sin imagen secundaria</option>
+									for _, img := range images {
+										<option
+											value={ fmt.Sprint(img.FileID) }
+											if isEdit && cat.SecondaryImageID.Valid && cat.SecondaryImageID.Int32 == img.FileID {
+												selected
+											}
+										>
+											if img.DisplayName.Valid {
+												{ img.DisplayName.String }
+											} else {
+												{ img.FileName }
+											}
+										</option>
+									}
+								</select>
+								<a href="/admin/files" class="btn btn-sm btn-ghost" target="_blank">Gestionar archivos</a>
+								<button type="button" class="btn btn-sm btn-ghost" onclick="openImageUploadModal('secondary_image_id')">Subir nuevo</button>
+							</div>
 						</div>
 						<!-- Tag -->
 						<div class="form-control">

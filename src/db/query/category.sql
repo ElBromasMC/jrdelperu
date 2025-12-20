@@ -1,8 +1,8 @@
 
 -- Crear una nueva categoría
 -- name: CreateCategory :one
-INSERT INTO categories (material_type, slug, name, description, long_description, image_id, tag_id, pdf_id)
-VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+INSERT INTO categories (material_type, slug, name, description, long_description, image_id, secondary_image_id, tag_id, pdf_id)
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
 RETURNING *;
 
 -- Obtener una categoría por ID
@@ -41,8 +41,9 @@ SET slug = $2,
     description = $4,
     long_description = $5,
     image_id = $6,
-    tag_id = $7,
-    pdf_id = $8,
+    secondary_image_id = $7,
+    tag_id = $8,
+    pdf_id = $9,
     updated_at = NOW()
 WHERE category_id = $1;
 
@@ -50,6 +51,12 @@ WHERE category_id = $1;
 -- name: UpdateCategoryImage :exec
 UPDATE categories
 SET image_id = $2, updated_at = NOW()
+WHERE category_id = $1;
+
+-- Actualizar la imagen secundaria de una categoría
+-- name: UpdateCategorySecondaryImage :exec
+UPDATE categories
+SET secondary_image_id = $2, updated_at = NOW()
 WHERE category_id = $1;
 
 -- Actualizar el PDF de una categoría

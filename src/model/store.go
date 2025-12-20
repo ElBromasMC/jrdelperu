@@ -16,6 +16,7 @@ type Category struct {
 	Description     string
 	LongDescription string
 	Img             Image
+	SecondaryImg    Image
 }
 
 type Item struct {

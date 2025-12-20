@@ -6,7 +6,7 @@ import (
 )
 
 // MapCategoryToModel convierte una categoría de la base de datos al modelo
-func MapCategoryToModel(dbCat repository.Category, dbImage *repository.StaticFile) model.Category {
+func MapCategoryToModel(dbCat repository.Category, dbImage *repository.StaticFile, dbSecondaryImage *repository.StaticFile) model.Category {
 	cat := model.Category{
 		Id:              int(dbCat.CategoryID),
 		Slug:            dbCat.Slug,
@@ -33,6 +33,14 @@ func MapCategoryToModel(dbCat repository.Category, dbImage *repository.StaticFil
 		}
 	}
 
+	// Map secondary image if exists
+	if dbSecondaryImage != nil {
+		cat.SecondaryImg = model.Image{
+			Id:       int(dbSecondaryImage.FileID),
+			Filename: dbSecondaryImage.FileName,
+		}
+	}
+
 	return cat
 }
 
@@ -44,7 +52,7 @@ func MapItemToModel(dbItem repository.Item, dbCat repository.Category, dbImage *
 		Name:            dbItem.Name,
 		Description:     dbItem.Description,
 		LongDescription: dbItem.LongDescription,
-		Category:        MapCategoryToModel(dbCat, dbCatImage),
+		Category:        MapCategoryToModel(dbCat, dbCatImage, nil),
 	}
 
 	// Map image if exists
@@ -72,7 +80,7 @@ func MapCategoryFeatureToModel(dbFeature repository.CategoryFeature, dbCat repos
 		Id:          int(dbFeature.FeatureID),
 		Name:        dbFeature.Name,
 		Description: dbFeature.Description,
-		Category:    MapCategoryToModel(dbCat, dbCatImage),
+		Category:    MapCategoryToModel(dbCat, dbCatImage, nil),
 	}
 }
 

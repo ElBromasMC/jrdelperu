@@ -8,6 +8,7 @@ import (
 	"alc/view"
 	"net/http"
 	"path"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 )
@@ -37,7 +38,7 @@ func (h *Handler) HandleVidrioIndexShow(c echo.Context) error {
 			}
 		}
 
-		cats = append(cats, service.MapCategoryToModel(dbCat, dbImage))
+		cats = append(cats, service.MapCategoryToModel(dbCat, dbImage, nil))
 	}
 
 	// Get catalog PDF from site documents
@@ -77,7 +78,7 @@ func (h *Handler) HandleVidrioCategoryShow(c echo.Context) error {
 		}
 	}
 
-	cat := service.MapCategoryToModel(dbCat, catImage)
+	cat := service.MapCategoryToModel(dbCat, catImage, nil)
 
 	// Get items for this category
 	dbItems, err := h.queries.ListItemsByCategory(ctx, dbCat.CategoryID)
@@ -130,7 +131,7 @@ func (h *Handler) HandleAluminioIndexShow(c echo.Context) error {
 				dbImage = &img
 			}
 		}
-		cats = append(cats, service.MapCategoryToModel(dbCat, dbImage))
+		cats = append(cats, service.MapCategoryToModel(dbCat, dbImage, nil))
 	}
 
 	// Get catalog PDF from site documents
@@ -170,7 +171,7 @@ func (h *Handler) HandleAluminioCategoryShow(c echo.Context) error {
 		}
 	}
 
-	cat := service.MapCategoryToModel(dbCat, catImage)
+	cat := service.MapCategoryToModel(dbCat, catImage, nil)
 
 	// Get items for this category
 	dbItems, err := h.queries.ListItemsByCategory(ctx, dbCat.CategoryID)
@@ -289,7 +290,7 @@ func (h *Handler) HandleUPVCIndexShow(c echo.Context) error {
 				dbImage = &img
 			}
 		}
-		cats = append(cats, service.MapCategoryToModel(dbCat, dbImage))
+		cats = append(cats, service.MapCategoryToModel(dbCat, dbImage, nil))
 	}
 
 	// Get catalog PDF from site documents
@@ -341,9 +342,34 @@ func (h *Handler) HandleUPVCCategoryShow(c echo.Context) error {
 		}
 	}
 
-	cat := service.MapCategoryToModel(dbCat, catImage)
+	// Get category secondary image (for natura-style rendering)
+	var catSecondaryImage *repository.StaticFile
+	if dbCat.SecondaryImageID.Valid {
+		img, err := h.queries.GetStaticFile(ctx, dbCat.SecondaryImageID.Int32)
+		if err == nil {
+			catSecondaryImage = &img
+		}
+	}
 
-	// Get items for this category
+	cat := service.MapCategoryToModel(dbCat, catImage, catSecondaryImage)
+
+	// Get PDF URL if exists
+	pdfURL := ""
+	pdfName := ""
+	if dbCat.PdfID.Valid {
+		pdf, err := h.queries.GetStaticFile(ctx, dbCat.PdfID.Int32)
+		if err == nil {
+			pdfURL = path.Join(config.PDFS_PATH, pdf.FileName)
+			pdfName = pdf.DisplayName.String
+		}
+	}
+
+	// Natura-style: Render category like an item (two images, no items list)
+	if strings.Contains(cat.Slug, "natura") {
+		return renderOK(c, view.StoreUPVCCategoryNatura(cat, pdfURL, pdfName))
+	}
+
+	// Lumina-style (default): Show long description + static items
 	dbItems, err := h.queries.ListItemsByCategory(ctx, dbCat.CategoryID)
 	if err != nil {
 		return c.String(http.StatusInternalServerError, "Error al cargar items")
@@ -361,18 +387,7 @@ func (h *Handler) HandleUPVCCategoryShow(c echo.Context) error {
 		items = append(items, service.MapItemToModel(dbItem, dbCat, itemImage, nil, catImage))
 	}
 
-	// Get PDF URL if exists
-	pdfURL := ""
-	pdfName := ""
-	if dbCat.PdfID.Valid {
-		pdf, err := h.queries.GetStaticFile(ctx, dbCat.PdfID.Int32)
-		if err == nil {
-			pdfURL = path.Join(config.PDFS_PATH, pdf.FileName)
-			pdfName = pdf.DisplayName.String
-		}
-	}
-
-	return renderOK(c, view.StoreUPVCCategory(cat, items, pdfURL, pdfName))
+	return renderOK(c, view.StoreUPVCCategoryLumina(cat, items, pdfURL, pdfName))
 }
 
 func (h *Handler) HandleUPVCItemShow(c echo.Context) error {
