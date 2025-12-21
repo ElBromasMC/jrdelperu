@@ -4,11 +4,24 @@ import (
 	"alc/config"
 	"alc/model"
 	"alc/repository"
+	"alc/service"
 	"fmt"
 	"path"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+var limaLocation *time.Location
+
+func init() {
+	var err error
+	limaLocation, err = time.LoadLocation("America/Lima")
+	if err != nil {
+		// Fallback to UTC-5 if timezone data not available
+		limaLocation = time.FixedZone("America/Lima", -5*60*60)
+	}
+}
 
 // BlogIndexPage muestra la página principal del blog
 templ BlogIndexPage(meta model.PageMeta, articles []repository.ListPublishedArticlesPaginatedRow, imagesMap map[int32]repository.StaticFile, currentPage int, totalPages int) {
@@ -244,7 +257,7 @@ templ BlogSearchResultCard(result repository.SearchArticlesRow, imagesMap map[in
 }
 
 // BlogArticlePage muestra un artículo individual
-templ BlogArticlePage(meta model.PageMeta, article repository.GetPublishedArticleBySlugRow, faqs []repository.ArticleFaq, coverImage *repository.StaticFile, comments []repository.ArticleComment, repliesMap map[int32][]repository.ArticleComment, recaptchaSiteKey string) {
+templ BlogArticlePage(meta model.PageMeta, article repository.GetPublishedArticleBySlugRow, faqs []repository.ArticleFaq, coverImage *repository.StaticFile, comments []repository.ListArticleCommentsWithAdminRow, repliesMap map[int32][]repository.ListCommentRepliesWithAdminRow, recaptchaSiteKey string, adminSession *service.SessionData) {
 	@BasePageWithMeta(meta) {
 		<main class="bg-chalky">
 			<!-- Article Header -->
@@ -379,20 +392,20 @@ templ BlogArticlePage(meta model.PageMeta, article repository.GetPublishedArticl
 							</div>
 						</div>
 						<!-- Comments Section -->
-						@CommentsSection(article.Slug, comments, repliesMap, recaptchaSiteKey)
+						@CommentsSection(article.Slug, comments, repliesMap, recaptchaSiteKey, adminSession)
 					</div>
 				</div>
 			</article>
 		</main>
-		<!-- reCAPTCHA v3 Script -->
+		<!-- reCAPTCHA v3 Script - loaded with site key for proper v3 initialization -->
 		if recaptchaSiteKey != "" {
-			<script src="https://www.google.com/recaptcha/api.js"></script>
+			<script src={ "https://www.google.com/recaptcha/api.js?render=" + recaptchaSiteKey }></script>
 		}
 	}
 }
 
 // CommentsSection muestra la sección de comentarios
-templ CommentsSection(slug string, comments []repository.ArticleComment, repliesMap map[int32][]repository.ArticleComment, recaptchaSiteKey string) {
+templ CommentsSection(slug string, comments []repository.ListArticleCommentsWithAdminRow, repliesMap map[int32][]repository.ListCommentRepliesWithAdminRow, recaptchaSiteKey string, adminSession *service.SessionData) {
 	<section class="mt-12 pt-8 border-t border-gray-200" id="comentarios">
 		<h2 class="text-2xl font-bold mb-6">
 			Comentarios
@@ -402,44 +415,62 @@ templ CommentsSection(slug string, comments []repository.ArticleComment, replies
 		</h2>
 		<!-- Comment Form -->
 		<div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-			<h3 class="font-semibold mb-4">Deja un comentario</h3>
+			if adminSession != nil {
+				<div class="flex items-center gap-2 mb-4">
+					<div class="w-8 h-8 rounded-full bg-apple flex items-center justify-center text-white font-bold text-sm">
+						{ string([]rune(adminSession.Username)[0]) }
+					</div>
+					<div>
+						<span class="font-semibold text-gray-900">{ adminSession.Username }</span>
+						<span class="text-xs bg-apple text-white px-2 py-0.5 rounded-full ml-2">Admin</span>
+					</div>
+				</div>
+			} else {
+				<h3 class="font-semibold mb-4">Deja un comentario</h3>
+			}
 			<form
 				id="comment-form"
 				data-post-url={ "/blog/" + slug + "/comments" }
+				data-recaptcha-key={ recaptchaSiteKey }
+				data-is-admin={ fmt.Sprintf("%t", adminSession != nil) }
 				class="space-y-4"
 				onsubmit="return false;"
 			>
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<div>
-						<label for="author_name" class="block text-sm font-medium text-gray-700 mb-1">
-							Nombre <span class="text-red-500">*</span>
-						</label>
-						<input
-							type="text"
-							id="author_name"
-							name="author_name"
-							class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-apple focus:border-apple"
-							placeholder="Tu nombre"
-							required
-						/>
+				if adminSession == nil {
+					<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div>
+							<label for="author_name" class="block text-sm font-medium text-gray-700 mb-1">
+								Nombre <span class="text-red-500">*</span>
+							</label>
+							<input
+								type="text"
+								id="author_name"
+								name="author_name"
+								class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-apple focus:border-apple"
+								placeholder="Tu nombre"
+								required
+							/>
+						</div>
+						<div>
+							<label for="author_email" class="block text-sm font-medium text-gray-700 mb-1">
+								Email <span class="text-gray-400">(opcional)</span>
+							</label>
+							<input
+								type="email"
+								id="author_email"
+								name="author_email"
+								class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-apple focus:border-apple"
+								placeholder="tu@email.com"
+							/>
+						</div>
 					</div>
-					<div>
-						<label for="author_email" class="block text-sm font-medium text-gray-700 mb-1">
-							Email <span class="text-gray-400">(opcional)</span>
-						</label>
-						<input
-							type="email"
-							id="author_email"
-							name="author_email"
-							class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-apple focus:border-apple"
-							placeholder="tu@email.com"
-						/>
-					</div>
-				</div>
+				}
 				<div>
-					<label for="content" class="block text-sm font-medium text-gray-700 mb-1">
-						Comentario <span class="text-red-500">*</span>
-					</label>
+					if adminSession == nil {
+						<label for="content" class="block text-sm font-medium text-gray-700 mb-1">
+							Comentario <span class="text-red-500">*</span>
+						</label>
+					}
 					<textarea
 						id="content"
 						name="content"
@@ -450,39 +481,22 @@ templ CommentsSection(slug string, comments []repository.ArticleComment, replies
 					></textarea>
 				</div>
 				<div class="flex justify-end">
-					if recaptchaSiteKey != "" {
-						<button
-							type="submit"
-							class="g-recaptcha px-6 py-2 bg-apple text-white font-semibold rounded-lg hover:bg-apple/90 transition"
-							data-sitekey={ recaptchaSiteKey }
-							data-callback="onCommentCaptcha"
-							data-action="submit_comment"
-						>
-							Enviar comentario
-						</button>
-					} else {
-						<button
-							type="submit"
-							class="px-6 py-2 bg-apple text-white font-semibold rounded-lg hover:bg-apple/90 transition"
-						>
-							Enviar comentario
-						</button>
-					}
+					<button
+						type="submit"
+						class="px-6 py-2 bg-apple text-white font-semibold rounded-lg hover:bg-apple/90 transition"
+					>
+						Enviar comentario
+					</button>
 				</div>
 			</form>
-			if recaptchaSiteKey != "" {
-				<script>
-					function onCommentCaptcha(token) {
-						const form = document.getElementById('comment-form');
-						if (!form.reportValidity()) {
-							grecaptcha.reset();
-							return;
-						}
-						form.dispatchEvent(new Event('captcha-verified'));
-					}
+			<script>
+				(function() {
+					var form = document.getElementById('comment-form');
+					var RECAPTCHA_SITE_KEY = form.dataset.recaptchaKey || '';
+					var IS_ADMIN = form.dataset.isAdmin === 'true';
 
 					function showCommentError(message) {
-						let errorDiv = document.getElementById('comment-error');
+						var errorDiv = document.getElementById('comment-error');
 						if (!errorDiv) {
 							errorDiv = document.createElement('div');
 							errorDiv.id = 'comment-error';
@@ -494,105 +508,139 @@ templ CommentsSection(slug string, comments []repository.ArticleComment, replies
 					}
 
 					function hideCommentError() {
-						const errorDiv = document.getElementById('comment-error');
+						var errorDiv = document.getElementById('comment-error');
 						if (errorDiv) errorDiv.style.display = 'none';
 					}
 
-					document.getElementById('comment-form').addEventListener('captcha-verified', function() {
-						const form = this;
-						const btn = form.querySelector('button[type="submit"]');
-						const originalText = btn.textContent;
+					function submitCommentForm(form, token) {
+						var btn = form.querySelector('button[type="submit"]');
+						var originalText = btn.textContent;
 
 						hideCommentError();
 						btn.disabled = true;
 						btn.textContent = 'Enviando...';
 
+						var formData = new FormData(form);
+						if (token) {
+							formData.set('g-recaptcha-response', token);
+						}
+
 						fetch(form.dataset.postUrl, {
 							method: 'POST',
-							body: new FormData(form)
+							body: formData
 						}).then(function(response) {
 							return response.text().then(function(text) {
 								return { ok: response.ok, status: response.status, text: text };
 							});
 						}).then(function(result) {
 							if (result.ok) {
-								// Insert new comment
-								const commentsList = document.getElementById('comments-list');
-								const emptyMsg = commentsList.querySelector('p.text-center');
+								var commentsList = document.getElementById('comments-list');
+								var emptyMsg = commentsList.querySelector('p.text-center');
 								if (emptyMsg) emptyMsg.remove();
 								commentsList.insertAdjacentHTML('afterbegin', result.text);
 								form.reset();
 							} else {
 								showCommentError(result.text);
 							}
-							grecaptcha.reset();
 						}).catch(function(err) {
 							showCommentError('Error de conexión. Intenta de nuevo.');
-							grecaptcha.reset();
 						}).finally(function() {
 							btn.disabled = false;
 							btn.textContent = originalText;
 						});
-					});
-				</script>
-			} else {
-				<script>
-					function showCommentError(message) {
-						let errorDiv = document.getElementById('comment-error');
-						if (!errorDiv) {
-							errorDiv = document.createElement('div');
-							errorDiv.id = 'comment-error';
-							errorDiv.className = 'p-3 mb-4 bg-red-100 border border-red-400 text-red-700 rounded-lg';
-							document.getElementById('comment-form').insertAdjacentElement('beforebegin', errorDiv);
-						}
-						errorDiv.textContent = message;
-						errorDiv.style.display = 'block';
 					}
 
-					function hideCommentError() {
-						const errorDiv = document.getElementById('comment-error');
-						if (errorDiv) errorDiv.style.display = 'none';
-					}
-
-					document.getElementById('comment-form').addEventListener('submit', function(e) {
+					form.addEventListener('submit', function(e) {
 						e.preventDefault();
-						const form = this;
-						const btn = form.querySelector('button[type="submit"]');
-						const originalText = btn.textContent;
 
 						if (!form.reportValidity()) return;
 
-						hideCommentError();
-						btn.disabled = true;
-						btn.textContent = 'Enviando...';
+						// For admins, submit directly without reCAPTCHA
+						if (IS_ADMIN || !RECAPTCHA_SITE_KEY) {
+							submitCommentForm(form, null);
+							return;
+						}
 
-						fetch(form.dataset.postUrl, {
-							method: 'POST',
-							body: new FormData(form)
-						}).then(function(response) {
-							return response.text().then(function(text) {
-								return { ok: response.ok, status: response.status, text: text };
+						// For guests, get reCAPTCHA v3 token first
+						grecaptcha.ready(function() {
+							grecaptcha.execute(RECAPTCHA_SITE_KEY, {action: 'submit_comment'}).then(function(token) {
+								submitCommentForm(form, token);
+							}).catch(function(err) {
+								showCommentError('Error de verificación. Intenta de nuevo.');
 							});
-						}).then(function(result) {
-							if (result.ok) {
-								const commentsList = document.getElementById('comments-list');
-								const emptyMsg = commentsList.querySelector('p.text-center');
-								if (emptyMsg) emptyMsg.remove();
-								commentsList.insertAdjacentHTML('afterbegin', result.text);
-								form.reset();
-							} else {
-								showCommentError(result.text);
-							}
-						}).catch(function(err) {
-							showCommentError('Error de conexión. Intenta de nuevo.');
-						}).finally(function() {
-							btn.disabled = false;
-							btn.textContent = originalText;
 						});
 					});
-				</script>
-			}
+				})();
+			</script>
 		</div>
+		<!-- Reply Functions -->
+		<script>
+			function toggleReplyForm(commentId) {
+				var formDiv = document.getElementById('reply-form-' + commentId);
+				if (formDiv) {
+					formDiv.classList.toggle('hidden');
+				}
+			}
+
+			function submitReplyForm(form, token) {
+				var parentId = form.dataset.parentId;
+				var btn = form.querySelector('button[type="submit"]');
+				var originalText = btn.textContent;
+				btn.disabled = true;
+				btn.textContent = 'Enviando...';
+
+				var formData = new FormData(form);
+				if (token) {
+					formData.set('g-recaptcha-response', token);
+				}
+
+				fetch(form.dataset.postUrl, {
+					method: 'POST',
+					body: formData
+				}).then(function(response) {
+					return response.text().then(function(text) {
+						return { ok: response.ok, status: response.status, text: text };
+					});
+				}).then(function(result) {
+					if (result.ok) {
+						var repliesDiv = document.getElementById('replies-' + parentId);
+						repliesDiv.insertAdjacentHTML('beforeend', result.text);
+						form.reset();
+						toggleReplyForm(parentId);
+					} else {
+						alert(result.text);
+					}
+				}).catch(function(err) {
+					alert('Error de conexión. Intenta de nuevo.');
+				}).finally(function() {
+					btn.disabled = false;
+					btn.textContent = originalText;
+				});
+			}
+
+			function submitReply(parentId) {
+				var form = document.getElementById('reply-form-content-' + parentId);
+				if (!form.reportValidity()) return;
+
+				var recaptchaKey = form.dataset.recaptchaKey || '';
+				var isAdmin = form.dataset.isAdmin === 'true';
+
+				// For admins or no reCAPTCHA, submit directly
+				if (isAdmin || !recaptchaKey) {
+					submitReplyForm(form, null);
+					return;
+				}
+
+				// For guests, get reCAPTCHA v3 token first
+				grecaptcha.ready(function() {
+					grecaptcha.execute(recaptchaKey, {action: 'submit_reply'}).then(function(token) {
+						submitReplyForm(form, token);
+					}).catch(function(err) {
+						alert('Error de verificación. Intenta de nuevo.');
+					});
+				});
+			}
+		</script>
 		<!-- Comments List -->
 		<div id="comments-list" class="space-y-6">
 			if len(comments) == 0 {
@@ -601,7 +649,7 @@ templ CommentsSection(slug string, comments []repository.ArticleComment, replies
 				</p>
 			} else {
 				for _, comment := range comments {
-					@CommentCard(comment, repliesMap[comment.CommentID], false)
+					@CommentCard(comment, repliesMap[comment.CommentID], slug, recaptchaSiteKey, adminSession)
 				}
 			}
 		</div>
@@ -609,13 +657,13 @@ templ CommentsSection(slug string, comments []repository.ArticleComment, replies
 }
 
 // CommentCard muestra un comentario individual con sus respuestas
-templ CommentCard(comment repository.ArticleComment, replies []repository.ArticleComment, isAdmin bool) {
+templ CommentCard(comment repository.ListArticleCommentsWithAdminRow, replies []repository.ListCommentRepliesWithAdminRow, slug string, recaptchaSiteKey string, adminSession *service.SessionData) {
 	<div
 		id={ fmt.Sprintf("comment-%d", comment.CommentID) }
 		class={
 			"p-5 rounded-lg",
-			templ.KV("bg-apple/10 border-l-4 border-apple", comment.IsAdmin),
-			templ.KV("bg-white border border-gray-200 shadow-sm", !comment.IsAdmin),
+			templ.KV("bg-apple/10 border-l-4 border-apple", comment.AdminID.Valid),
+			templ.KV("bg-white border border-gray-200 shadow-sm", !comment.AdminID.Valid),
 		}
 	>
 		<div class="flex items-start justify-between">
@@ -623,42 +671,230 @@ templ CommentCard(comment repository.ArticleComment, replies []repository.Articl
 				<!-- Avatar placeholder -->
 				<div class={
 					"w-10 h-10 rounded-full flex items-center justify-center text-white font-bold",
-					templ.KV("bg-apple", comment.IsAdmin),
-					templ.KV("bg-gray-400", !comment.IsAdmin),
+					templ.KV("bg-apple", comment.AdminID.Valid),
+					templ.KV("bg-gray-400", !comment.AdminID.Valid),
 				}>
-					{ string([]rune(comment.AuthorName)[0]) }
+					if comment.AdminID.Valid && comment.AdminUsername.Valid {
+						{ string([]rune(comment.AdminUsername.String)[0]) }
+					} else {
+						{ string([]rune(comment.AuthorName)[0]) }
+					}
 				</div>
 				<div>
 					<div class="flex items-center gap-2">
-						<span class="font-semibold text-gray-900">{ comment.AuthorName }</span>
-						if comment.IsAdmin {
+						if comment.AdminID.Valid && comment.AdminUsername.Valid {
+							<span class="font-semibold text-gray-900">{ comment.AdminUsername.String }</span>
+						} else {
+							<span class="font-semibold text-gray-900">{ comment.AuthorName }</span>
+						}
+						if comment.AdminID.Valid {
 							<span class="text-xs bg-apple text-white px-2 py-0.5 rounded-full">Admin</span>
+						} else {
+							<span class="text-xs bg-gray-500 text-white px-2 py-0.5 rounded-full">Invitado</span>
 						}
 					</div>
-					<time class="text-sm text-gray-500">
-						{ formatCommentDate(comment.CreatedAt) }
-					</time>
+					<div class="flex items-center gap-2 text-sm text-gray-500">
+						if comment.AuthorEmail.Valid && comment.AuthorEmail.String != "" {
+							<span>{ comment.AuthorEmail.String }</span>
+							<span>·</span>
+						}
+						<time>
+							{ formatCommentDate(comment.CreatedAt) }
+						</time>
+					</div>
 				</div>
 			</div>
+			<!-- Delete button for admins -->
+			if adminSession != nil {
+				<button
+					type="button"
+					class="text-red-500 hover:text-red-700 transition p-1"
+					hx-delete={ "/blog/" + slug + "/comments/" + fmt.Sprint(comment.CommentID) }
+					hx-target={ "#comment-" + fmt.Sprint(comment.CommentID) }
+					hx-swap="outerHTML"
+					hx-confirm="¿Estás seguro de eliminar este comentario y todas sus respuestas?"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+					</svg>
+				</button>
+			}
 		</div>
 		<p class="mt-3 text-gray-700 whitespace-pre-wrap">{ comment.Content }</p>
-		<!-- Replies -->
-		if len(replies) > 0 {
-			<div class="ml-6 mt-4 space-y-4 border-l-2 border-gray-200 pl-4">
-				for _, reply := range replies {
-					@CommentCard(reply, nil, isAdmin)
-				}
+		<!-- Reply Button (only for top-level comments, not for replies to replies) -->
+		if !comment.ParentID.Valid {
+			<div class="mt-3">
+				<button
+					type="button"
+					class="text-sm text-apple hover:text-apple/80 transition flex items-center gap-1"
+					onclick={ templ.ComponentScript{Call: fmt.Sprintf("toggleReplyForm(%d)", comment.CommentID)} }
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path>
+					</svg>
+					Responder
+				</button>
+				<!-- Reply Form (hidden by default) -->
+				<div id={ fmt.Sprintf("reply-form-%d", comment.CommentID) } class="hidden mt-4">
+					@ReplyForm(comment.CommentID, slug, recaptchaSiteKey, adminSession)
+				</div>
 			</div>
 		}
+		<!-- Replies -->
+		<div id={ fmt.Sprintf("replies-%d", comment.CommentID) } class="ml-6 mt-4 space-y-4 border-l-2 border-gray-200 pl-4">
+			if len(replies) > 0 {
+				for _, reply := range replies {
+					@CommentReplyCard(reply, slug, adminSession)
+				}
+			}
+		</div>
 	</div>
 }
 
-// formatCommentDate formatea la fecha del comentario
+// CommentReplyCard muestra una respuesta a un comentario
+templ CommentReplyCard(reply repository.ListCommentRepliesWithAdminRow, slug string, adminSession *service.SessionData) {
+	<div
+		id={ fmt.Sprintf("comment-%d", reply.CommentID) }
+		class={
+			"p-4 rounded-lg",
+			templ.KV("bg-apple/10 border-l-4 border-apple", reply.AdminID.Valid),
+			templ.KV("bg-gray-50 border border-gray-100", !reply.AdminID.Valid),
+		}
+	>
+		<div class="flex items-start justify-between">
+			<div class="flex items-center gap-2">
+				<!-- Avatar placeholder -->
+				<div class={
+					"w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold",
+					templ.KV("bg-apple", reply.AdminID.Valid),
+					templ.KV("bg-gray-400", !reply.AdminID.Valid),
+				}>
+					if reply.AdminID.Valid && reply.AdminUsername.Valid {
+						{ string([]rune(reply.AdminUsername.String)[0]) }
+					} else {
+						{ string([]rune(reply.AuthorName)[0]) }
+					}
+				</div>
+				<div>
+					<div class="flex items-center gap-2">
+						if reply.AdminID.Valid && reply.AdminUsername.Valid {
+							<span class="font-semibold text-gray-900 text-sm">{ reply.AdminUsername.String }</span>
+						} else {
+							<span class="font-semibold text-gray-900 text-sm">{ reply.AuthorName }</span>
+						}
+						if reply.AdminID.Valid {
+							<span class="text-xs bg-apple text-white px-2 py-0.5 rounded-full">Admin</span>
+						} else {
+							<span class="text-xs bg-gray-500 text-white px-2 py-0.5 rounded-full">Invitado</span>
+						}
+					</div>
+					<div class="flex items-center gap-2 text-xs text-gray-500">
+						if reply.AuthorEmail.Valid && reply.AuthorEmail.String != "" {
+							<span>{ reply.AuthorEmail.String }</span>
+							<span>·</span>
+						}
+						<time>
+							{ formatCommentDate(reply.CreatedAt) }
+						</time>
+					</div>
+				</div>
+			</div>
+			<!-- Delete button for admins -->
+			if adminSession != nil {
+				<button
+					type="button"
+					class="text-red-500 hover:text-red-700 transition p-1"
+					hx-delete={ "/blog/" + slug + "/comments/" + fmt.Sprint(reply.CommentID) }
+					hx-target={ "#comment-" + fmt.Sprint(reply.CommentID) }
+					hx-swap="outerHTML"
+					hx-confirm="¿Estás seguro de eliminar esta respuesta?"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+					</svg>
+				</button>
+			}
+		</div>
+		<p class="mt-2 text-gray-700 text-sm whitespace-pre-wrap">{ reply.Content }</p>
+	</div>
+}
+
+// ReplyForm muestra el formulario de respuesta a un comentario
+templ ReplyForm(parentID int32, slug string, recaptchaSiteKey string, adminSession *service.SessionData) {
+	<form
+		id={ fmt.Sprintf("reply-form-content-%d", parentID) }
+		data-post-url={ "/blog/" + slug + "/comments" }
+		data-parent-id={ fmt.Sprint(parentID) }
+		data-recaptcha-key={ recaptchaSiteKey }
+		data-is-admin={ fmt.Sprintf("%t", adminSession != nil) }
+		class="space-y-3 bg-gray-50 p-4 rounded-lg"
+		onsubmit="return false;"
+	>
+		<input type="hidden" name="parent_id" value={ fmt.Sprint(parentID) }/>
+		if adminSession != nil {
+			<div class="flex items-center gap-2 mb-2">
+				<div class="w-6 h-6 rounded-full bg-apple flex items-center justify-center text-white font-bold text-xs">
+					{ string([]rune(adminSession.Username)[0]) }
+				</div>
+				<span class="text-sm font-semibold text-gray-900">{ adminSession.Username }</span>
+				<span class="text-xs bg-apple text-white px-1.5 py-0.5 rounded-full">Admin</span>
+			</div>
+		} else {
+			<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+				<div>
+					<input
+						type="text"
+						name="author_name"
+						class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-apple focus:border-apple"
+						placeholder="Tu nombre *"
+						required
+					/>
+				</div>
+				<div>
+					<input
+						type="email"
+						name="author_email"
+						class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-apple focus:border-apple"
+						placeholder="Email (opcional)"
+					/>
+				</div>
+			</div>
+		}
+		<div>
+			<textarea
+				name="content"
+				rows="2"
+				class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-apple focus:border-apple resize-none"
+				placeholder="Tu respuesta..."
+				required
+			></textarea>
+		</div>
+		<div class="flex justify-end gap-2">
+			<button
+				type="button"
+				class="px-4 py-1.5 text-sm text-gray-600 hover:text-gray-800 transition"
+				onclick={ templ.ComponentScript{Call: fmt.Sprintf("toggleReplyForm(%d)", parentID)} }
+			>
+				Cancelar
+			</button>
+			<button
+				type="submit"
+				class="px-4 py-1.5 text-sm bg-apple text-white font-semibold rounded-lg hover:bg-apple/90 transition"
+				onclick={ templ.ComponentScript{Call: fmt.Sprintf("submitReply(%d)", parentID)} }
+			>
+				Responder
+			</button>
+		</div>
+	</form>
+}
+
+// formatCommentDate formatea la fecha del comentario en zona horaria de Lima
 func formatCommentDate(t pgtype.Timestamptz) string {
 	if !t.Valid {
 		return ""
 	}
-	return t.Time.Format("02 Ene 2006, 15:04")
+	limaTime := t.Time.In(limaLocation)
+	return limaTime.Format("02 Ene 2006, 15:04")
 }
 
 

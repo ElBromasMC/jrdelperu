@@ -119,6 +119,9 @@ func (h *Handler) HandleBlogArticle(c echo.Context) error {
 		return c.Redirect(http.StatusFound, "/blog")
 	}
 
+	// Check if user is admin
+	adminSession := h.getAdminSession(c)
+
 	// Get article FAQs
 	faqs, err := h.queries.ListArticleFAQs(ctx, article.ArticleID)
 	if err != nil {
@@ -134,16 +137,16 @@ func (h *Handler) HandleBlogArticle(c echo.Context) error {
 		}
 	}
 
-	// Get comments
-	comments, err := h.queries.ListArticleComments(ctx, article.ArticleID)
+	// Get comments with admin info
+	comments, err := h.queries.ListArticleCommentsWithAdmin(ctx, article.ArticleID)
 	if err != nil {
-		comments = []repository.ArticleComment{}
+		comments = []repository.ListArticleCommentsWithAdminRow{}
 	}
 
-	// Build replies map
-	repliesMap := make(map[int32][]repository.ArticleComment)
+	// Build replies map with admin info
+	repliesMap := make(map[int32][]repository.ListCommentRepliesWithAdminRow)
 	for _, comment := range comments {
-		replies, _ := h.queries.ListCommentReplies(ctx, pgtype.Int4{Int32: comment.CommentID, Valid: true})
+		replies, _ := h.queries.ListCommentRepliesWithAdmin(ctx, pgtype.Int4{Int32: comment.CommentID, Valid: true})
 		repliesMap[comment.CommentID] = replies
 	}
 
@@ -168,7 +171,7 @@ func (h *Handler) HandleBlogArticle(c echo.Context) error {
 		meta.OGImage = baseURL + path.Join(config.IMAGES_PATH, coverImage.FileName)
 	}
 
-	return Render(c, http.StatusOK, view.BlogArticlePage(meta, article, faqs, coverImage, comments, repliesMap, recaptchaSiteKey))
+	return Render(c, http.StatusOK, view.BlogArticlePage(meta, article, faqs, coverImage, comments, repliesMap, recaptchaSiteKey, adminSession))
 }
 
 // HandleFAQPage muestra la página pública de preguntas frecuentes

@@ -110,6 +110,7 @@ func main() {
 	e.GET("/blog/buscar", h.HandleBlogSearch)
 	e.GET("/blog/:slug", h.HandleBlogArticle)
 	e.POST("/blog/:slug/comments", h.HandleCommentCreate)
+	e.DELETE("/blog/:slug/comments/:commentId", h.HandlePublicCommentDelete)
 
 	// FAQ route
 	e.GET("/preguntas-frecuentes", h.HandleFAQPage)
