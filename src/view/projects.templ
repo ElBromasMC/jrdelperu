@@ -79,39 +79,41 @@ templ ProjectsSection(projects []repository.Project, projectImages map[int32]rep
 		</div>
 		<!-- Swiper Initialization -->
 		<script>
-			new Swiper('.projects-swiper', {
-				slidesPerView: 1.2,
-				centeredSlides: false,
-				spaceBetween: 24,
-				grabCursor: true,
-				loop: false,
-				autoplay: {
-					delay: 3000,
-					disableOnInteraction: true,
-					pauseOnMouseEnter: true
-				},
-				breakpoints: {
-					// Mobile
-					480: {
-						slidesPerView: 1.5,
-						spaceBetween: 16
+			document.addEventListener('DOMContentLoaded', function() {
+				new Swiper('.projects-swiper', {
+					slidesPerView: 1.2,
+					centeredSlides: false,
+					spaceBetween: 24,
+					grabCursor: true,
+					loop: false,
+					autoplay: {
+						delay: 3000,
+						disableOnInteraction: true,
+						pauseOnMouseEnter: true
 					},
-					// Tablet
-					640: {
-						slidesPerView: 2.5,
-						spaceBetween: 20
-					},
-					// Desktop
-					1024: {
-						slidesPerView: 3.5,
-						spaceBetween: 24
-					},
-					// Large Desktop
-					1280: {
-						slidesPerView: 4,
-						spaceBetween: 24
+					breakpoints: {
+						// Mobile
+						480: {
+							slidesPerView: 1.5,
+							spaceBetween: 16
+						},
+						// Tablet
+						640: {
+							slidesPerView: 2.5,
+							spaceBetween: 20
+						},
+						// Desktop
+						1024: {
+							slidesPerView: 3.5,
+							spaceBetween: 24
+						},
+						// Large Desktop
+						1280: {
+							slidesPerView: 4,
+							spaceBetween: 24
+						}
 					}
-				}
+				});
 			});
 		</script>
 	</section>

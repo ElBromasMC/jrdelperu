@@ -1,3 +1,6 @@
+# Proxy file
+docker-compose.proxy.yml
+
 # Dotenv file
 .env
 

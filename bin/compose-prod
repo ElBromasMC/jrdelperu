@@ -14,7 +14,7 @@ compose_arguments=(
     -f docker-compose.prod.yml
 )
 
-if [[ "$REVERSE_PROXY" == "yes" ]]; then
+if [[ -f "${PROJECT_ROOT}/docker-compose.proxy.yml" ]]; then
     compose_arguments+=( -f docker-compose.proxy.yml )
 fi
 

@@ -6,6 +6,9 @@
 /* Import Tailwind CSS v4 */
 @import "tailwindcss";
 
+/* Import Typography plugin for prose classes */
+@plugin "@tailwindcss/typography";
+
 /* Import DaisyUI plugin */
 @plugin "daisyui" {
   themes: light --default, dark;
