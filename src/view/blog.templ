@@ -494,6 +494,36 @@ templ CommentsSection(slug string, comments []repository.ListArticleCommentsWith
 					var form = document.getElementById('comment-form');
 					var RECAPTCHA_SITE_KEY = form.dataset.recaptchaKey || '';
 					var IS_ADMIN = form.dataset.isAdmin === 'true';
+					var STORAGE_KEY = 'jrdelperu_commenter';
+
+					// Load saved commenter info for guests
+					function loadCommenterInfo() {
+						if (IS_ADMIN) return;
+						try {
+							var saved = localStorage.getItem(STORAGE_KEY);
+							if (saved) {
+								var info = JSON.parse(saved);
+								var nameField = form.querySelector('input[name="author_name"]');
+								var emailField = form.querySelector('input[name="author_email"]');
+								if (nameField && info.name) nameField.value = info.name;
+								if (emailField && info.email) emailField.value = info.email;
+							}
+						} catch (e) {}
+					}
+
+					// Save commenter info for guests
+					function saveCommenterInfo() {
+						if (IS_ADMIN) return;
+						try {
+							var nameField = form.querySelector('input[name="author_name"]');
+							var emailField = form.querySelector('input[name="author_email"]');
+							var info = {
+								name: nameField ? nameField.value : '',
+								email: emailField ? emailField.value : ''
+							};
+							localStorage.setItem(STORAGE_KEY, JSON.stringify(info));
+						} catch (e) {}
+					}
 
 					function showCommentError(message) {
 						var errorDiv = document.getElementById('comment-error');
@@ -534,11 +564,15 @@ templ CommentsSection(slug string, comments []repository.ListArticleCommentsWith
 							});
 						}).then(function(result) {
 							if (result.ok) {
+								// Save commenter info before resetting form
+								saveCommenterInfo();
 								var commentsList = document.getElementById('comments-list');
 								var emptyMsg = commentsList.querySelector('p.text-center');
 								if (emptyMsg) emptyMsg.remove();
 								commentsList.insertAdjacentHTML('afterbegin', result.text);
-								form.reset();
+								// Reset only the content field, keep name/email
+								var contentField = form.querySelector('textarea[name="content"]');
+								if (contentField) contentField.value = '';
 							} else {
 								showCommentError(result.text);
 							}
@@ -570,15 +604,55 @@ templ CommentsSection(slug string, comments []repository.ListArticleCommentsWith
 							});
 						});
 					});
+
+					// Load saved info on page load
+					loadCommenterInfo();
 				})();
 			</script>
 		</div>
 		<!-- Reply Functions -->
 		<script>
+			var REPLY_STORAGE_KEY = 'jrdelperu_commenter';
+
+			function loadReplyCommenterInfo(form) {
+				var isAdmin = form.dataset.isAdmin === 'true';
+				if (isAdmin) return;
+				try {
+					var saved = localStorage.getItem(REPLY_STORAGE_KEY);
+					if (saved) {
+						var info = JSON.parse(saved);
+						var nameField = form.querySelector('input[name="author_name"]');
+						var emailField = form.querySelector('input[name="author_email"]');
+						if (nameField && info.name) nameField.value = info.name;
+						if (emailField && info.email) emailField.value = info.email;
+					}
+				} catch (e) {}
+			}
+
+			function saveReplyCommenterInfo(form) {
+				var isAdmin = form.dataset.isAdmin === 'true';
+				if (isAdmin) return;
+				try {
+					var nameField = form.querySelector('input[name="author_name"]');
+					var emailField = form.querySelector('input[name="author_email"]');
+					var info = {
+						name: nameField ? nameField.value : '',
+						email: emailField ? emailField.value : ''
+					};
+					localStorage.setItem(REPLY_STORAGE_KEY, JSON.stringify(info));
+				} catch (e) {}
+			}
+
 			function toggleReplyForm(commentId) {
 				var formDiv = document.getElementById('reply-form-' + commentId);
 				if (formDiv) {
+					var isHidden = formDiv.classList.contains('hidden');
 					formDiv.classList.toggle('hidden');
+					// Load saved info when opening the form
+					if (isHidden) {
+						var form = formDiv.querySelector('form');
+						if (form) loadReplyCommenterInfo(form);
+					}
 				}
 			}
 
@@ -603,9 +677,13 @@ templ CommentsSection(slug string, comments []repository.ListArticleCommentsWith
 					});
 				}).then(function(result) {
 					if (result.ok) {
+						// Save commenter info before resetting
+						saveReplyCommenterInfo(form);
 						var repliesDiv = document.getElementById('replies-' + parentId);
 						repliesDiv.insertAdjacentHTML('beforeend', result.text);
-						form.reset();
+						// Reset only content, keep name/email
+						var contentField = form.querySelector('textarea[name="content"]');
+						if (contentField) contentField.value = '';
 						toggleReplyForm(parentId);
 					} else {
 						alert(result.text);
