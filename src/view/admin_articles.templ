@@ -179,8 +179,12 @@ templ AdminArticleRow(article repository.ListAllArticlesRow, imagesMap map[int32
 // AdminArticleFormPage muestra el formulario para crear/editar un artículo
 templ AdminArticleFormPage(username string, article *repository.GetArticleRow, images []repository.StaticFile, isEdit bool) {
 	@AdminBase(getArticleFormTitle(isEdit) + " - Admin") {
+		<!-- Preload Quill resources -->
+		<link rel="preload" href="/static/css/quill.snow.css" as="style"/>
+		<link rel="preload" href="/static/js/quill.min.js" as="script"/>
+		<link rel="preload" href="/static/js/quill.imageCompressor.min.js" as="script"/>
 		<!-- Quill CSS -->
-		<link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet"/>
+		<link href="/static/css/quill.snow.css" rel="stylesheet"/>
 		<style>
 			.ql-editor {
 				min-height: 300px;
@@ -366,9 +370,9 @@ templ AdminArticleFormPage(username string, article *repository.GetArticleRow, i
 		<!-- Image Upload Modal -->
 		@ImageUploadModal()
 		<!-- Quill JS -->
-		<script src="https://cdn.quilljs.com/1.3.7/quill.min.js"></script>
+		<script src="/static/js/quill.min.js"></script>
 		<!-- Quill Image Compress - optimizes and uploads images to server -->
-		<script src="https://cdn.jsdelivr.net/npm/quill-image-compress@1.2.32/dist/quill.imageCompressor.min.js"></script>
+		<script src="/static/js/quill.imageCompressor.min.js"></script>
 		<script>
 			// Register image compress module
 			Quill.register('modules/imageCompress', imageCompressor);
