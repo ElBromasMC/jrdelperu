@@ -428,7 +428,7 @@ templ Footer() {
 						</ul>
 					</div>
 					<!-- Map -->
-					<div class="flex justify-center items-center">
+					<div class="flex flex-col justify-center items-center gap-4">
 						<iframe
 							class="w-full aspect-square max-w-72"
 							src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3905.825990645811!2d-76.9755228!3d-11.777299699999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105d9237779507b%3A0x90f4574d7d5e7d6a!2sSan%20Francisco%20Etapa%2010!5e0!3m2!1ses-419!2spe!4v1740676060539!5m2!1ses-419!2spe"
@@ -437,6 +437,14 @@ templ Footer() {
 							loading="lazy"
 							referrerpolicy="no-referrer-when-downgrade"
 						></iframe>
+						<a href="/book" class="block w-full max-w-72 transition hover:opacity-90">
+							<img
+								src="/static/img/libro-de-reclamaciones.jpg"
+								alt="Libro de Reclamaciones"
+								loading="lazy"
+								class="w-full rounded-md"
+							/>
+						</a>
 					</div>
 					<div class="hidden absolute inset-x-0 -top-8 border-t-2 border-white sm:block lg:hidden"></div>
 				</div>
@@ -444,13 +452,7 @@ templ Footer() {
 		</div>
 		<!-- Barra inferior: enlaces legales -->
 		<div class="border-t border-white/30">
-			<div class="flex flex-col gap-4 items-center justify-between px-4 py-6 max-w-7xl mx-auto text-center sm:flex-row sm:text-left">
-				<a class="flex items-center gap-2 font-semibold uppercase hover:text-black" href="/book">
-					<svg class="w-6 h-6 flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
-						<path fill-rule="evenodd" d="M6 2a2 2 0 0 0-2 2v15a3 3 0 0 0 3 3h12a1 1 0 1 0 0-2h-1v-2h1a1 1 0 0 0 1-1V4a2 2 0 0 0-2-2H6Zm10 16H7a1 1 0 1 0 0 2h9v-2Z" clip-rule="evenodd"></path>
-					</svg>
-					Libro de Reclamaciones
-				</a>
+			<div class="flex flex-col gap-4 items-center justify-center px-4 py-6 max-w-7xl mx-auto text-center">
 				<a class="flex items-center gap-2 font-semibold uppercase hover:text-black" href="#">
 					<svg class="w-6 h-6 flex-shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
 						<path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm13.707-1.293a1 1 0 0 0-1.414-1.414L11 12.586l-1.293-1.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4Z" clip-rule="evenodd"></path>
