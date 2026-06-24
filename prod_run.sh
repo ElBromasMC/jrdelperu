@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-[ -f "${PWD}/.env" ] && source "${PWD}/.env"
+[ -f "${PWD}/.env" ] && . "${PWD}/.env"
 
 : ${PROJECT_NAME=$(basename "$PWD")}
 : ${PODMAN_NAME=${PROJECT_NAME}_prod}

@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-[ -f "${PWD}/.env" ] && source "${PWD}/.env"
+[ -f "${PWD}/.env" ] && . "${PWD}/.env"
 
 ./prod_run.sh \
     --network postgres-network \
