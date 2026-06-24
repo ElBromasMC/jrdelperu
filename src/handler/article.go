@@ -79,7 +79,7 @@ func (h *Handler) HandleArticleCreate(c echo.Context) error {
 	}
 
 	// Create article
-	_, err := h.queries.CreateArticle(ctx, repository.CreateArticleParams{
+	article, err := h.queries.CreateArticle(ctx, repository.CreateArticleParams{
 		Slug:         slug,
 		Title:        title,
 		Summary:      summary,
@@ -90,6 +90,12 @@ func (h *Handler) HandleArticleCreate(c echo.Context) error {
 
 	if err != nil {
 		return c.String(http.StatusInternalServerError, fmt.Sprintf("Error al crear artículo: %v", err))
+	}
+
+	// Publish article
+	err = h.queries.PublishArticle(ctx, int32(article.ArticleID))
+	if err != nil {
+		return c.String(http.StatusInternalServerError, fmt.Sprintf("Error al publicar artículo: %v", err))
 	}
 
 	// Redirect to articles list

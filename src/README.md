@@ -10,6 +10,7 @@ Sistema web para gestión de productos de vidrio, aluminio y uPVC con panel admi
 - **Frontend**: HTMX 2.x + Tailwind CSS v4 + DaisyUI
 - **Optimización de Imágenes**: h2non/bimg (libvips) con conversión automática a WebP
 - **Email**: wneessen/go-mail
+- **PDF**: johnfercher/maroto v2 (genera el Libro de Reclamaciones en PDF)
 - **Build**: Makefile (orquesta Templ, Tailwind, esbuild, sqlc)
 
 ## Dependencias del Sistema
@@ -88,6 +89,28 @@ Almacena todos los mensajes enviados por usuarios.
 | message        | text         | Mensaje completo               |
 | is_read        | boolean      | Marca de leído/no leído        |
 | created_at     | timestamptz  | Fecha de envío                 |
+
+#### 2b. **complaints** - Libro de Reclamaciones Virtual
+Almacena las reclamaciones y quejas enviadas desde `/book` (Código de Protección y Defensa del Consumidor). Las observaciones de la empresa solo se editan desde el panel de administración.
+
+| Campo            | Tipo         | Descripción                                  |
+|------------------|--------------|----------------------------------------------|
+| complaint_id     | int (PK)     | ID autogenerado                              |
+| full_name        | varchar(255) | Nombre completo del consumidor               |
+| document_number  | varchar(50)  | DNI / CE                                      |
+| address          | varchar(500) | Dirección (opcional)                         |
+| phone            | varchar(50)  | Teléfono (opcional)                          |
+| email            | varchar(255) | Correo electrónico (opcional)                |
+| good_type        | varchar(20)  | `producto` o `servicio`                       |
+| good_description | text         | Descripción del bien contratado              |
+| claim_type       | varchar(20)  | `reclamo` o `queja`                           |
+| detail           | text         | Detalle de la reclamación                    |
+| request          | text         | Pedido del consumidor                        |
+| company_notes    | text         | Observaciones de la empresa (uso interno)    |
+| registered_at    | date         | Fecha de registro declarada por el consumidor|
+| is_resolved      | boolean      | Marca de resuelto/pendiente                  |
+| created_at       | timestamptz  | Fecha de recepción                           |
+| updated_at       | timestamptz  | Última actualización                         |
 
 #### 3. **static_files** - Archivos estáticos (imágenes, PDFs)
 Almacena referencias a archivos subidos.
@@ -350,7 +373,17 @@ imageURL := path.Join(config.IMAGES_PATH, fileName)
   - Ejemplo: `password123`
   - IMPORTANTE: Usar una contraseña segura en producción
 
-### Para Email (Formulario de Contacto)
+### Para Email (Notificaciones)
+
+Usadas por el servicio de correo (`service/email.go`, basado en `wneessen/go-mail`).
+Actualmente envían las notificaciones del Libro de Reclamaciones: una a la empresa
+(`SMTP_TO_EMAIL`) y una confirmación al consumidor que dejó su correo. Ambos correos
+adjuntan la reclamación en PDF, generada con maroto (`service/pdf.go`). Si no se
+configuran, el envío se omite silenciosamente (el registro igual se guarda).
+
+> El PDF usa las fuentes UTF-8 embebidas en `assets/static/fonts/` (DejaVu Sans
+> regular y negrita) para renderizar correctamente tildes y la ñ. No requiere
+> fuentes del sistema.
 
 - **SMTP_HOST**: Servidor SMTP (ej: `smtp.gmail.com`)
 - **SMTP_PORT**: Puerto SMTP (ej: `587` para STARTTLS, `465` para SSL/TLS)
@@ -358,7 +391,7 @@ imageURL := path.Join(config.IMAGES_PATH, fileName)
 - **SMTP_PASSWORD**: Contraseña o app password
 - **SMTP_FROM_EMAIL**: Email del remitente
 - **SMTP_FROM_NAME**: Nombre del remitente
-- **SMTP_TO_EMAIL**: Email destinatario para mensajes del formulario
+- **SMTP_TO_EMAIL**: Email destinatario para notificaciones internas
 
 ### Para Google reCAPTCHA (opcional)
 

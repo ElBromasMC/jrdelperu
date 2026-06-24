@@ -13,6 +13,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -57,8 +58,23 @@ func main() {
 	recaptchaSecretKey := os.Getenv("RECAPTCHA_SECRET_KEY")
 	recaptchaService := service.NewRecaptchaService(recaptchaSiteKey, recaptchaSecretKey)
 
+	// Initialize email service
+	smtpPort, _ := strconv.Atoi(os.Getenv("SMTP_PORT"))
+	emailService := service.NewEmailService(
+		os.Getenv("SMTP_HOST"),
+		smtpPort,
+		os.Getenv("SMTP_USERNAME"),
+		os.Getenv("SMTP_PASSWORD"),
+		os.Getenv("SMTP_FROM_EMAIL"),
+		os.Getenv("SMTP_FROM_NAME"),
+		os.Getenv("SMTP_TO_EMAIL"),
+	)
+
+	// Initialize PDF service
+	pdfService := service.NewPDFService(assets.Assets)
+
 	// Initialize handlers
-	h := handler.New(authService, fileService, recaptchaService, queries)
+	h := handler.New(authService, fileService, recaptchaService, emailService, pdfService, queries)
 
 	// Middleware
 	e.Pre(middleware.RemoveTrailingSlashWithConfig(middleware.TrailingSlashConfig{
@@ -114,6 +130,10 @@ func main() {
 
 	// FAQ route
 	e.GET("/preguntas-frecuentes", h.HandleFAQPage)
+
+	// Libro de Reclamaciones
+	e.GET("/book", h.HandleLibroReclamacionesShow)
+	e.POST("/book", h.HandleLibroReclamacionesSubmit)
 
 	// Admin routes (public)
 	e.GET("/admin/login", h.HandleAdminLoginShow)
@@ -203,6 +223,12 @@ func main() {
 	admin.PUT("/faqs/:id", h.HandleGlobalFAQUpdate)
 	admin.DELETE("/faqs/:id", h.HandleGlobalFAQDelete)
 	admin.POST("/faqs/:id/toggle-visibility", h.HandleGlobalFAQToggleVisibility)
+
+	// Libro de Reclamaciones management
+	admin.GET("/complaints", h.HandleComplaintsIndex)
+	admin.GET("/complaints/search", h.HandleComplaintsSearch)
+	admin.PUT("/complaints/:id", h.HandleComplaintUpdate)
+	admin.DELETE("/complaints/:id", h.HandleComplaintDelete)
 
 	// Start server
 	log.Println("Starting server on :8080")

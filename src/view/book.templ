@@ -1,0 +1,286 @@
+package view
+
+import "alc/model"
+
+// LibroReclamaciones muestra el formulario público del Libro de Reclamaciones Virtual.
+templ LibroReclamaciones(form model.ComplaintForm, recaptchaSiteKey string) {
+	@BasePage("Libro de Reclamaciones") {
+		<main class="bg-chalky min-h-[calc(100dvh-8rem)] lg:min-h-[calc(100dvh-9.5rem)]">
+			<div class="px-4 py-12 max-w-4xl mx-auto">
+				if form.Success {
+					@bookSuccess()
+				} else {
+					<form
+						id="complaint-form"
+						method="post"
+						action="/book"
+						class="bg-white border border-gray-300 shadow-lg rounded-lg overflow-hidden"
+						autocomplete="off"
+						data-recaptcha-key={ recaptchaSiteKey }
+					>
+						<input type="hidden" name="g-recaptcha-response" id="g-recaptcha-response"/>
+						<!-- Encabezado -->
+						<div class="flex items-center gap-4 px-6 pt-6 pb-2">
+							<img class="w-20 h-20 object-contain" src="/static/img/logo.webp" alt="JR del Perú"/>
+							<div class="flex-1 text-center">
+								<h1 class="font-header font-bold text-3xl text-navy tracking-tight lg:text-4xl">LIBRO DE RECLAMACIONES</h1>
+								<div class="flex items-center justify-center gap-3 mt-1">
+									<span class="flex-1 max-w-24 h-px bg-navy/40"></span>
+									<span class="font-header font-semibold text-sm text-livid tracking-[0.4em]">VIRTUAL</span>
+									<span class="flex-1 max-w-24 h-px bg-navy/40"></span>
+								</div>
+							</div>
+						</div>
+						<!-- Datos de la empresa -->
+						<div class="mx-6 mt-2 bg-navy text-white text-center rounded py-2 px-4">
+							<p class="font-header font-bold text-lg">CORPORACIÓN JR DEL PERÚ S.A.C.</p>
+							<p class="text-sm tracking-wide">RUC: 20604874221</p>
+						</div>
+						<p class="px-6 mt-4 text-sm text-livid text-center leading-relaxed">
+							De conformidad con lo establecido en el Código de Protección y Defensa del Consumidor,
+							ponemos a disposición de nuestros clientes el presente Libro de Reclamaciones Virtual.
+						</p>
+						if form.Error != "" {
+							<div class="mx-6 mt-4 px-4 py-3 bg-apple/10 border border-apple text-apple rounded text-sm">
+								{ form.Error }
+							</div>
+						}
+						<div class="p-6 space-y-6">
+							<!-- 1. Datos del consumidor -->
+							@bookSection("1", "DATOS DEL CONSUMIDOR RECLAMANTE") {
+								<div class="space-y-4">
+									@bookField("Nombre Completo:", "full_name", "text", form.FullName, true)
+									@bookField("DNI / CE:", "document_number", "text", form.DocumentNumber, true)
+									@bookField("Dirección:", "address", "text", form.Address, false)
+									<div class="grid gap-4 sm:grid-cols-2">
+										@bookField("Teléfono:", "phone", "tel", form.Phone, false)
+										@bookField("Correo Electrónico:", "email", "email", form.Email, false)
+									</div>
+								</div>
+							}
+							<!-- 2. Identificación del bien contratado -->
+							@bookSection("2", "IDENTIFICACIÓN DEL BIEN CONTRATADO") {
+								<div class="space-y-4">
+									<div class="flex flex-wrap items-center gap-6">
+										<span class="text-sm font-semibold text-navy">Tipo:</span>
+										@bookRadio("good_type", "producto", "Producto", form.GoodType == "producto")
+										@bookRadio("good_type", "servicio", "Servicio", form.GoodType == "servicio")
+									</div>
+									@bookField("Descripción del Producto o Servicio:", "good_description", "text", form.GoodDescription, true)
+								</div>
+							}
+							<!-- 3. Datos de la reclamación -->
+							@bookSection("3", "DATOS DE LA RECLAMACIÓN") {
+								<div class="space-y-4">
+									<div class="flex flex-wrap items-center gap-6">
+										<span class="text-sm font-semibold text-navy">Tipo:</span>
+										@bookRadio("claim_type", "reclamo", "Reclamo", form.ClaimType == "reclamo")
+										@bookRadio("claim_type", "queja", "Queja", form.ClaimType == "queja")
+									</div>
+									<div class="grid gap-4 sm:grid-cols-2">
+										@bookInfoCard("RECLAMO:", "Disconformidad relacionada con los productos o servicios brindados por la empresa.")
+										@bookInfoCard("QUEJA:", "Malestar o descontento respecto a la atención recibida por parte de la empresa.")
+									</div>
+								</div>
+							}
+							<!-- 4. Detalle de la reclamación -->
+							@bookSection("4", "DETALLE DE LA RECLAMACIÓN") {
+								<label class="block text-sm text-navy mb-2">Describa de manera clara los hechos que motivan su reclamo o queja:</label>
+								<textarea
+									class="w-full px-3 py-2 border border-gray-300 rounded resize-none focus:outline-none focus:border-navy"
+									name="detail"
+									rows="5"
+									required
+								>{ form.Detail }</textarea>
+							}
+							<!-- 5. Pedido del consumidor -->
+							@bookSection("5", "PEDIDO DEL CONSUMIDOR") {
+								<label class="block text-sm text-navy mb-2">Indique la solución que espera recibir:</label>
+								<textarea
+									class="w-full px-3 py-2 border border-gray-300 rounded resize-none focus:outline-none focus:border-navy"
+									name="request"
+									rows="3"
+									required
+								>{ form.Request }</textarea>
+							}
+							<!-- 6. Observaciones de la empresa (uso interno, deshabilitado) -->
+							@bookSectionExtra("6", "OBSERVACIONES DE LA EMPRESA", "(Espacio reservado para uso interno)") {
+								<textarea
+									class="w-full px-3 py-2 border border-gray-300 rounded resize-none bg-gray-100 text-gray-400 cursor-not-allowed"
+									rows="3"
+									placeholder="Este campo es completado por la empresa."
+									disabled
+								></textarea>
+							}
+							<!-- Fecha y firma -->
+							<div class="grid gap-8 sm:grid-cols-2 pt-2">
+								<div class="flex items-center gap-3 px-4 py-3 bg-gray-50 border border-gray-200 rounded">
+									<svg class="w-9 h-9 text-navy shrink-0" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+										<path fill-rule="evenodd" d="M5 5a1 1 0 0 0-1 1v1h16V6a1 1 0 0 0-1-1H5ZM4 19V9h16v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Zm7-3a1 1 0 0 1 1-1h.01a1 1 0 1 1 0 2H12a1 1 0 0 1-1-1Z" clip-rule="evenodd"></path>
+									</svg>
+									<label class="flex-1">
+										<div class="text-sm font-semibold text-navy mb-1">FECHA DE REGISTRO:</div>
+										<input
+											class="w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:border-navy"
+											type="date"
+											name="registered_at"
+											value={ form.RegisteredAt }
+											required
+										/>
+									</label>
+								</div>
+								<div class="flex flex-col justify-end text-center">
+									<div class="border-t border-gray-400 pt-2 mt-8">
+										<div class="text-sm font-semibold text-navy">FIRMA DEL CONSUMIDOR</div>
+										<div class="text-xs text-livid">(Opcional)</div>
+									</div>
+								</div>
+							</div>
+							<div class="flex justify-center pt-2">
+								<button
+									class="px-8 py-3 font-semibold text-white bg-navy rounded hover:bg-navy/90 transition"
+									type="submit"
+								>
+									Enviar Reclamación
+								</button>
+							</div>
+						</div>
+						<!-- Notas legales -->
+						<div class="bg-navy text-white px-6 py-5 grid gap-4 sm:grid-cols-2">
+							<div class="flex items-start gap-3">
+								<svg class="w-6 h-6 shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+									<path fill-rule="evenodd" d="M12 2c-.791 0-1.55.314-2.11.874l-.893.893a.985.985 0 0 1-.696.288H7.04A2.984 2.984 0 0 0 4.055 7.04v1.262a.986.986 0 0 1-.288.696l-.893.893a2.984 2.984 0 0 0 0 4.22l.893.893a.985.985 0 0 1 .288.696v1.262a2.984 2.984 0 0 0 2.984 2.984h1.262c.261 0 .512.104.696.288l.893.893a2.984 2.984 0 0 0 4.22 0l.893-.893a.985.985 0 0 1 .696-.288h1.262a2.984 2.984 0 0 0 2.984-2.984V15.7c0-.261.104-.512.288-.696l.893-.893a2.984 2.984 0 0 0 0-4.22l-.893-.893a.985.985 0 0 1-.288-.696V7.04a2.984 2.984 0 0 0-2.984-2.984h-1.262a.985.985 0 0 1-.696-.288l-.893-.893A2.984 2.984 0 0 0 12 2Zm3.683 7.73a1 1 0 1 0-1.414-1.413l-4.253 4.253-1.277-1.277a1 1 0 0 0-1.415 1.414l1.985 1.984a1 1 0 0 0 1.414 0l4.96-4.96Z" clip-rule="evenodd"></path>
+								</svg>
+								<p class="text-xs leading-relaxed">
+									La formulación del reclamo o queja no impide acudir a otras vías de solución de
+									controversias ni constituye una denuncia ante la autoridad competente.
+								</p>
+							</div>
+							<div class="flex items-start gap-3">
+								<svg class="w-6 h-6 shrink-0 mt-0.5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+									<path fill-rule="evenodd" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 5a1 1 0 1 0-2 0v5a1 1 0 0 0 .293.707l3 3a1 1 0 0 0 1.414-1.414L13 11.586V7Z" clip-rule="evenodd"></path>
+								</svg>
+								<p class="text-xs leading-relaxed">
+									La empresa dará respuesta dentro del plazo establecido por la normativa vigente.
+								</p>
+							</div>
+						</div>
+					</form>
+					if recaptchaSiteKey != "" {
+						<script src={ "https://www.google.com/recaptcha/api.js?render=" + recaptchaSiteKey }></script>
+					}
+					<script>
+						(function() {
+							var form = document.getElementById('complaint-form');
+							if (!form) return;
+							var SITE_KEY = form.dataset.recaptchaKey || '';
+
+							form.addEventListener('submit', function(e) {
+								// Sin reCAPTCHA configurado: envío normal.
+								if (!SITE_KEY) return;
+								// Token ya obtenido: permitir el envío real.
+								if (form.dataset.recaptchaDone === 'true') return;
+
+								e.preventDefault();
+								if (!form.reportValidity()) return;
+
+								grecaptcha.ready(function() {
+									grecaptcha.execute(SITE_KEY, { action: 'libro_reclamaciones' }).then(function(token) {
+										document.getElementById('g-recaptcha-response').value = token;
+										form.dataset.recaptchaDone = 'true';
+										form.submit();
+									}).catch(function() {
+										// Ante un fallo de reCAPTCHA, permitir el intento de envío.
+										form.dataset.recaptchaDone = 'true';
+										form.submit();
+									});
+								});
+							});
+						})();
+					</script>
+				}
+			</div>
+		</main>
+	}
+}
+
+// bookSuccess muestra la confirmación tras registrar una reclamación.
+templ bookSuccess() {
+	<div class="bg-white border border-gray-300 shadow-lg rounded-lg p-10 text-center space-y-4">
+		<svg class="w-16 h-16 mx-auto text-green-600" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+			<path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm13.707-1.293a1 1 0 0 0-1.414-1.414L11 12.586l-1.293-1.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4Z" clip-rule="evenodd"></path>
+		</svg>
+		<h1 class="font-header font-bold text-2xl text-navy">¡Reclamación registrada!</h1>
+		<p class="text-livid max-w-lg mx-auto">
+			Hemos recibido su reclamo o queja correctamente. La empresa dará respuesta dentro del
+			plazo establecido por la normativa vigente.
+		</p>
+		<a href="/" class="inline-block mt-2 px-6 py-3 bg-navy text-white rounded hover:bg-navy/90 transition">
+			Volver al inicio
+		</a>
+	</div>
+}
+
+// bookSection es un bloque numerado del formulario con título.
+templ bookSection(number string, title string) {
+	<section class="border border-gray-300 rounded-lg overflow-hidden">
+		<div class="flex items-stretch bg-navy text-white">
+			<div class="flex items-center justify-center w-10 bg-apple font-bold">{ number }</div>
+			<h2 class="flex items-center px-4 py-2 font-header font-semibold text-sm tracking-wide">{ title }</h2>
+		</div>
+		<div class="p-4">
+			{ children... }
+		</div>
+	</section>
+}
+
+// bookSectionExtra es como bookSection pero con una anotación junto al título.
+templ bookSectionExtra(number string, title string, note string) {
+	<section class="border border-gray-300 rounded-lg overflow-hidden">
+		<div class="flex items-stretch bg-navy text-white">
+			<div class="flex items-center justify-center w-10 bg-apple font-bold">{ number }</div>
+			<h2 class="flex items-center gap-2 px-4 py-2 font-header font-semibold text-sm tracking-wide">
+				{ title }
+				<span class="font-sans font-normal text-xs text-white/70">{ note }</span>
+			</h2>
+		</div>
+		<div class="p-4">
+			{ children... }
+		</div>
+	</section>
+}
+
+// bookField es un campo de texto con etiqueta en línea sobre un borde inferior.
+templ bookField(label string, name string, inputType string, value string, required bool) {
+	<label class="flex items-baseline gap-2">
+		<span class="text-sm font-semibold text-navy whitespace-nowrap">{ label }</span>
+		<input
+			class="flex-1 min-w-0 border-b border-gray-400 focus:outline-none focus:border-navy py-0.5"
+			type={ inputType }
+			name={ name }
+			value={ value }
+			required?={ required }
+		/>
+	</label>
+}
+
+// bookRadio es una opción exclusiva con apariencia de casilla.
+templ bookRadio(name string, value string, label string, checked bool) {
+	<label class="flex items-center gap-2 cursor-pointer">
+		<input class="w-4 h-4 accent-navy" type="radio" name={ name } value={ value } checked?={ checked } required/>
+		<span class="text-sm text-livid">{ label }</span>
+	</label>
+}
+
+// bookInfoCard muestra una nota informativa (Reclamo / Queja).
+templ bookInfoCard(title string, description string) {
+	<div class="flex items-start gap-3 p-3 bg-gray-50 border border-gray-200 rounded">
+		<svg class="w-6 h-6 text-navy shrink-0" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+			<path fill-rule="evenodd" d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm9.008-3.018a1.502 1.502 0 0 1 2.522 1.159v.024a1.44 1.44 0 0 1-1.493 1.418 1 1 0 0 0-1.037.999V14a1 1 0 1 0 2 0v-.539a3.44 3.44 0 0 0 2.529-3.256 3.502 3.502 0 0 0-7-.255 1 1 0 0 0 2 .076c.014-.398.187-.774.48-1.044Zm.982 7.026a1 1 0 1 0 0 2H12a1 1 0 1 0 0-2h-.01Z" clip-rule="evenodd"></path>
+		</svg>
+		<div>
+			<span class="text-sm font-bold text-navy">{ title }</span>
+			<p class="text-xs text-livid leading-relaxed">{ description }</p>
+		</div>
+	</div>
+}

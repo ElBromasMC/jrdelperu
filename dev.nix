@@ -31,6 +31,7 @@ buildBaseImage {
         pkgs.vips.dev
         pkgs.glib.dev
         pkgs.air
+        pkgs.poppler-utils
         pkgsUnstable.claude-code
     ];
     extraConfigEnv = [
