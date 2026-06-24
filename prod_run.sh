@@ -7,7 +7,7 @@ set -eu
 : ${PODMAN_NAME=${PROJECT_NAME}_prod}
 : ${IMAGE_NAME=${PROJECT_NAME}_prod:latest}
 
-podman run -d \
+docker run -d \
     --name "${PODMAN_NAME}" \
     --restart unless-stopped \
     -v "${PODMAN_NAME}_jrdelperu-images:/srv/app/uploads" \
