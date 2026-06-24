@@ -11,20 +11,6 @@
 - Tailwind CSS: CSS framework
 - wneessen/go-mail: Library for sending mails with Go 
 
-# Objectives
-
-- Allow admins to dynamically upload text, images, pdfs that will be displayed
-  in the view pages.
-- Allow admins to do insert, update, delete operations.
-- Allow the optional creation of sample data to test the webpage in
-  development. (Use `config/sample.go` to get some sample data, we must delete it
-  once we have a way to create the sample data directly in the database and
-  for images use `assets/static/img/placeholder.webp` as the fallback.
-- Implement the functionality of the simple Contact Form using the
-  wneessen/go-mail library and Google Captcha. Any needed information like smtp
-  server, credentials, sender email, receiver, etc. must be defined using
-  environment variables.
-
 # Important information
 
 - The system will be used in Peru. The language must be Spanish.
@@ -83,4 +69,3 @@ We use the following basic template for our projects (key files)
 ├── tailwind.config.cjs
 ...
 ```
-

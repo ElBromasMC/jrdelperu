@@ -325,7 +325,7 @@ imageURL := path.Join(config.IMAGES_PATH, fileName)
 
 ### Requeridas
 
-- **ENV**: Modo de ejecución
+- **APP_ENV**: Modo de ejecución
   - `development` - Modo desarrollo con hot reload
   - `production` - Modo producción con assets minificados
 
@@ -369,7 +369,7 @@ imageURL := path.Join(config.IMAGES_PATH, fileName)
 
 ```bash
 # Aplicación
-ENV="development"
+APP_ENV="development"
 REL="1"
 SESSION_SECRET="mi-clave-super-secreta-de-32-chars-o-mas"
 
@@ -403,16 +403,16 @@ RECAPTCHA_SECRET_KEY="tu-secret-key"
 ### Desarrollo
 ```bash
 # Build en modo desarrollo (con hot reload)
-CGO_ENABLED=1 ENV=development make build/server
+CGO_ENABLED=1 APP_ENV=development make build/server
 
 # Live reload (watch mode)
-CGO_ENABLED=1 ENV=development make live
+CGO_ENABLED=1 APP_ENV=development make live
 ```
 
 ### Producción
 ```bash
 # Build optimizado para producción
-CGO_ENABLED=1 ENV=production make build/server
+CGO_ENABLED=1 APP_ENV=production make build/server
 ```
 
 ### Limpieza
@@ -471,7 +471,7 @@ Esto cargará:
 
 Una vez cargados los datos:
 
-1. Inicia el servidor: `ENV=development ./build/server`
+1. Inicia el servidor: `APP_ENV=development ./build/server`
 2. Accede a: `http://localhost:8080/admin/login`
 3. Inicia sesión con el usuario admin creado
 4. Gestiona categorías, items y características desde el panel

@@ -1,4 +1,4 @@
-FROM docker.io/golang:1.25-alpine AS base
+FROM docker.io/golang:1.26-alpine AS base
 
 # Install run-time and compile-time system dependencies
 USER root

@@ -20,7 +20,9 @@ REL="1"
 SESSION_SECRET="your-secret-key-at-least-32-characters-long"
 
 # Env for the database
+POSTGRES_USER="postgres"
 POSTGRES_PASSWORD="LlaveSecreta01"
+POSTGRES_DB="jrdelperu"
 
 # Email
 SMTP_HOST="smtp.gmail.com"
@@ -39,6 +41,12 @@ RECAPTCHA_SECRET_KEY="tu-secret-key"
 ADMIN_USERNAME="admin"
 ADMIN_EMAIL="admin@jrdelperu.com"
 ADMIN_PASSWORD="123456"
+
+### DEVELOPMENT only
+
+NIX_STORE=""
+DEV_CMD=""
+SSH_PUBKEY=""
 ```
 
 ## Live reload (development)

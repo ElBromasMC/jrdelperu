@@ -18,7 +18,7 @@ import (
 
 func main() {
 	e := echo.New()
-	if os.Getenv("ENV") == "development" {
+	if os.Getenv("APP_ENV") == "development" {
 		e.Debug = true
 	}
 

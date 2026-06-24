@@ -1,8 +1,5 @@
 # Variable for the environment mode 'production' or 'development'
-ENV ?= production
-
-GOBIN ?= $(shell go env GOPATH)/bin
-NODEBIN ?= ./node_modules/.bin
+APP_ENV ?= production
 
 TMP_DIR := ./tmp
 BUILD_DIR := ./build
@@ -27,7 +24,7 @@ $(TMP_DIR)/%: $(BUILD_DIR)/% $(MAINJS_OUT) $(TAILWINDCSS_OUT)
 	touch "$@"
 
 # The final build step
-ifeq ($(ENV),development)
+ifeq ($(APP_ENV),development)
 $(BUILD_DIR)/%: $(GO_FILES) $(TEMPL_GO_FILES) $(SQLC_SENTINEL)
 	go build -tags=dev -o "$@" "$(CMD_DIR)/$*"
 else
@@ -37,7 +34,7 @@ endif
 
 # Build step for templ source
 %_templ.go: %.templ
-	"$(GOBIN)/templ" generate -f "$<"
+	templ generate -f "$<"
 
 # Build step for sqlc source
 $(SQLC_SENTINEL): $(SQL_FILES) sqlc.yml
@@ -46,31 +43,31 @@ $(SQLC_SENTINEL): $(SQL_FILES) sqlc.yml
 
 # Build step for main.js
 $(MAINJS_OUT): $(JS_FILES)
-ifeq ($(ENV),development)
-	"$(NODEBIN)/esbuild" "$(JS_DIR)/main.js" --outfile="$@" --bundle
+ifeq ($(APP_ENV),development)
+	esbuild "$(JS_DIR)/main.js" --outfile="$@" --bundle
 else
-	"$(NODEBIN)/esbuild" "$(JS_DIR)/main.js" --outfile="$@" --bundle --minify
+	esbuild "$(JS_DIR)/main.js" --outfile="$@" --bundle --minify
 endif
 
 # Build step for tailwind.css (Tailwind v4)
 $(TAILWINDCSS_OUT): $(TEMPL_FILES) tailwind.css
-ifeq ($(ENV),development)
-	npx --yes @tailwindcss/cli -i tailwind.css -o "$@"
+ifeq ($(APP_ENV),development)
+	tailwindcss -i tailwind.css -o "$@"
 else
-	npx --yes @tailwindcss/cli -i tailwind.css -o "$@" --minify
+	tailwindcss -i tailwind.css -o "$@" --minify
 endif
 	touch "$@"
 
 # Live reload (Tailwind v4 with fast rebuild)
 .PHONY: live
 live:
-ifeq ($(ENV),development)
+ifeq ($(APP_ENV),development)
 	mkdir -p "$(TMP_DIR)"
-	npx --yes @tailwindcss/cli -i tailwind.css -o "$(TAILWINDCSS_OUT)" --watch &> "$(TMP_DIR)/$(TAILWINDCSS_LOG)" &
+	tailwindcss -i tailwind.css -o "$(TAILWINDCSS_OUT)" --watch &> "$(TMP_DIR)/$(TAILWINDCSS_LOG)" &
 	node ./scripts/live-reload.cjs &
-	"$(GOBIN)/air"
+	air
 else
-	@echo "Must run with ENV=development"
+	@echo "Must run with APP_ENV=development"
 endif
 
 .PHONY: clean

@@ -39,7 +39,7 @@ templ AdminBase(title string) {
 			<link rel="preload" href="/static/js/htmx.min.js" as="script"/>
 			<!-- HTMX - defer to not block parsing -->
 			<script src="/static/js/htmx.min.js" defer></script>
-			if os.Getenv("ENV") == "development" {
+			if os.Getenv("APP_ENV") == "development" {
 				<!-- Live reload -->
 				<script src="/static/js/live-reload.js"></script>
 				<script src={ fmt.Sprintf("/static/js/main.js?v=%s", time.Now().Format("20060102150405")) } defer></script>
